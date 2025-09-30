@@ -9,39 +9,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Install SSH Key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: 'placeholder'
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: "placeholder"
 
-    - name: SSH Deploy Command
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /data/project/dev
+      - name: SSH Deploy Command
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 65022 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /data/project/dev/api-helpdesk
 
-          git pull origin dev
+            git pull origin dev
 
-          composer install --no-interaction --prefer-dist --optimize-autoloader
-          cp .env.example .env
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            cp .env.example .env
 
-          php artisan key:generate
-          php artisan storage:link
+            php artisan key:generate
+            php artisan storage:link
 
-          php artisan migrate --force
+            php artisan migrate --force
 
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan view:clear
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan view:clear
 
-          php artisan config:cache
-          php artisan view:cache
+            php artisan config:cache
+            php artisan view:cache
 
-          sudo chown -R www-data:www-data /data/project/dev
-          sudo chmod -R 775 /data/project/dev/storage /data/project/dev/bootstrap/cache
+            sudo chown -R www-data:www-data /data/project/dev
+            sudo chmod -R 775 /data/project/dev/storage /data/project/dev/bootstrap/cache
 
-          echo "Deployment Selesai!"
-        EOF
+            echo "Deployment Selesai!"
+          EOF

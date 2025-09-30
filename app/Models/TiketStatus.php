@@ -3,10 +3,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Priority extends Model
+class TiketStatus extends Model
 {
+    protected $table = 'tiket_status';
+
     protected $fillable = [
-        'nama_prioritas',
+        'nama_status',
     ];
 
     public function tikets()

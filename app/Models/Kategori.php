@@ -3,10 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Priority extends Model
+class Kategori extends Model
 {
     protected $fillable = [
-        'nama_prioritas',
+        'nama_kategori',
+        'deskripsi',
     ];
 
     public function tikets()

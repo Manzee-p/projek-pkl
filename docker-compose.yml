@@ -16,7 +16,7 @@ services:
         environment:
             APP_ENV: local
             APP_DEBUG: ${APP_DEBUG:-true}
-            APP_URL: api-helpdesk-dev.ifven.id
+            APP_URL: api-helpdesk-dev.ifven-dev.id
 
             DB_CONNECTION: pgsql
             DB_HOST: db

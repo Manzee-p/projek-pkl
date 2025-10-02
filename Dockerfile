@@ -11,6 +11,7 @@ RUN apk update && apk add \
     libpq \
     build-base \
     imagemagick \
+    oniguruma-dev \
     && docker-php-ext-install pdo pdo_pgsql pgsql dom xml mbstring zip exif pcntl \
     && apk del build-base
 

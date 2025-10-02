@@ -1,4 +1,5 @@
-name: CI/CD Api-helpdesk
+name: Deploy api-helpdesk docker
+
 on:
   push:
     branches:
@@ -9,39 +10,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code from branch dev
         uses: actions/checkout@v4
 
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
+      - name: Set up SSH Private Key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: "placeholder"
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: SSH Deploy Command
-        run: |
-          ssh -o StrictHostKeyChecking=no -p 65022 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /data/project/dev/api-helpdesk
+      - name: SSH Deploy api-helpdesk
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          # Variabel rahasia dari GitHub Secrets
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          port: 65022
+
+          script: |
+            PROJECT_DIR="/data/project/dev/api-helpdesk"
+
+            echo "=> Memulai Deployment  di $PROJECT_DIR"
+
+            cd $PROJECT_DIR
 
             git pull origin dev
+            echo "-> Git pull sukses"
 
-            composer install --no-interaction --prefer-dist --optimize-autoloader
-            cp .env.example .env
+            docker compose down
+            docker compose build --no-cache
+            echo "-> Docker Image telah di-build ulang"
 
-            php artisan key:generate
-            php artisan storage:link
+            docker compose up -d
+            echo "-> Container Nginx, App, dan DB berjalan"
 
-            php artisan migrate --force
 
-            php artisan cache:clear
-            php artisan config:clear
-            php artisan view:clear
+            docker compose exec -T app composer install --no-dev --optimize-autoloader
+            echo "-> Composer install sukses"
 
-            php artisan config:cache
-            php artisan view:cache
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan cache:clear
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan view:cache
+            echo "-> Migrasi dan Cache Laravel sukses"
 
-            sudo chown -R www-data:www-data /data/project/dev
-            sudo chmod -R 775 /data/project/dev/storage /data/project/dev/bootstrap/cache
+
+            sudo chown -R deploy:deploy .
+            sudo chmod -R 775 storage bootstrap/cache
+            echo "-> Izin file telah diatur"
 
             echo "Deployment Selesai!"
-          EOF

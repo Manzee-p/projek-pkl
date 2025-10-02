@@ -60,8 +60,8 @@ jobs:
             echo "-> Migrasi dan Cache Laravel sukses"
 
 
-            sudo chown -R deploy:deploy .
-            sudo chmod -R 775 storage bootstrap/cache
+            chown -R deploy:deploy .
+            chmod -R 775 storage bootstrap/cache
             echo "-> Izin file telah diatur"
 
             echo "Deployment Selesai!"

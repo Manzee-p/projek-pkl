@@ -38,6 +38,8 @@ jobs:
             git pull origin dev
             echo "-> Git pull sukses"
 
+            cp .env.example .envß
+
             docker-compose down
             docker-compose build --no-cache
             echo "-> Docker Image telah di-build ulang"
@@ -49,6 +51,8 @@ jobs:
             docker-compose exec -T app composer install --no-dev --optimize-autoloader
             echo "-> Composer install sukses"
 
+            docker-compose exec -T app php artisan key:generate
+            docker-compose exec -T app php artisan storage:link
             docker-compose exec -T app php artisan migrate --force
             docker-compose exec -T app php artisan cache:clear
             docker-compose exec -T app php artisan config:cache
@@ -56,8 +60,8 @@ jobs:
             echo "-> Migrasi dan Cache Laravel sukses"
 
 
-            sudo chown -R deploy:deploy .
-            sudo chmod -R 775 storage bootstrap/cache
+            chown -R deploy:deploy .
+            chmod -R 775 storage bootstrap/cache
             echo "-> Izin file telah diatur"
 
             echo "Deployment Selesai!"

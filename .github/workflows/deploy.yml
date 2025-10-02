@@ -38,21 +38,21 @@ jobs:
             git pull origin dev
             echo "-> Git pull sukses"
 
-            docker compose down
-            docker compose build --no-cache
+            docker-compose down
+            docker-compose build --no-cache
             echo "-> Docker Image telah di-build ulang"
 
-            docker compose up -d
+            docker-compose up -d
             echo "-> Container Nginx, App, dan DB berjalan"
 
 
-            docker compose exec -T app composer install --no-dev --optimize-autoloader
+            docker-compose exec -T app composer install --no-dev --optimize-autoloader
             echo "-> Composer install sukses"
 
-            docker compose exec -T app php artisan migrate --force
-            docker compose exec -T app php artisan cache:clear
-            docker compose exec -T app php artisan config:cache
-            docker compose exec -T app php artisan view:cache
+            docker-compose exec -T app php artisan migrate --force
+            docker-compose exec -T app php artisan cache:clear
+            docker-compose exec -T app php artisan config:cache
+            docker-compose exec -T app php artisan view:cache
             echo "-> Migrasi dan Cache Laravel sukses"
 
 

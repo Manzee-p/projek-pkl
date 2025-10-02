@@ -40,7 +40,7 @@ jobs:
 
             cp .env.example .env
 
-            docker-compose down
+            docker-compose down || true
             docker-compose build --no-cache
             echo "-> Docker Image telah di-build ulang"
 

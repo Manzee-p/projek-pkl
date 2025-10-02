@@ -34,6 +34,8 @@ jobs:
             echo "=> Memulai Deployment  di $PROJECT_DIR"
 
             cd $PROJECT_DIR
+            git config --global --add safe.directory "$PROJECT_DIR"
+            docker-compose exec app git config --global --add safe.directory /var/www/html || true
 
             git pull origin dev
             echo "-> Git pull sukses"
@@ -46,6 +48,10 @@ jobs:
 
             docker-compose up -d
             echo "-> Container Nginx, App, dan DB berjalan"
+
+            docker-compose exec -u root app chown -R 1000:1000 .
+            docker-compose exec app chmod -R 777 storage bootstrap/cache
+            echo "-> Izin file storage/cache diatur untuk Laravel"
 
 
             docker-compose exec -T app composer install --no-dev --optimize-autoloader
@@ -60,8 +66,8 @@ jobs:
             echo "-> Migrasi dan Cache Laravel sukses"
 
 
-            docker-compose exec -u root app chown -R 1000:1000 .
+            chown -R deploy:deploy .
             docker-compose exec app chmod -R 775 storage bootstrap/cache
-            echo "-> Izin file telah diatur"
+            echo "-> Izin file telah diatur ke user deploy"
 
             echo "Deployment Selesai!"

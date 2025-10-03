@@ -27,7 +27,7 @@ jobs:
           port: 22
           script: |
             PROJECT_DIR="/data/project/dev/api-helpdesk"
-            SRC_DIR="$PROJECT_DIR/src"
+            SRC_DIR="$PROJECT_DIR"
 
             echo "==> Deployment mulai di $PROJECT_DIR"
 
@@ -39,7 +39,7 @@ jobs:
             echo "-> Git pull sukses"
 
             # pastikan file env ada
-            cp .env.example .env || true
+            cp .env.example .env
 
             # rebuild docker
             cd $PROJECT_DIR

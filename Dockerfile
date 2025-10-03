@@ -22,7 +22,7 @@ RUN groupadd -g ${GID} deploy \
 USER deploy
 
 
-COPY --chown=deploy:deploy ./src ./
+COPY --chown=www-data:www-data . ./
 
 
 RUN composer install --no-dev --optimize-autoloader

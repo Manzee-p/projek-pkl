@@ -43,17 +43,17 @@ jobs:
 
             # rebuild docker
             cd $PROJECT_DIR
-            docker-compose down || true
-            docker-compose build --no-cache
-            docker-compose up -d
+            docker compose down || true
+            docker compose build --no-cache
+            docker compose up -d
             echo "-> Docker container berjalan"
 
-            docker-compose exec -T app composer install --no-dev --optimize-autoloader
-            docker-compose exec -T app php artisan key:generate
-            docker-compose exec -T app php artisan storage:link
-            docker-compose exec -T app php artisan migrate --force
-            docker-compose exec -T app php artisan cache:clear
-            docker-compose exec -T app php artisan config:cache
-            docker-compose exec -T app php artisan view:cache
+            docker compose exec -T app composer install --no-dev --optimize-autoloader
+            docker compose exec -T app php artisan key:generate
+            docker compose exec -T app php artisan storage:link
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan cache:clear
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan view:cache
 
             echo "==> Deployment selesai 🎉"

@@ -28,7 +28,8 @@ COPY --chown=www-data:www-data . ./
 RUN composer install --no-dev --optimize-autoloader
 
 
-RUN mkdir -p storage bootstrap/cache \
-    && chmod -R ug+rwX storage bootstrap/cache
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 CMD ["php-fpm"]

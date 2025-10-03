@@ -24,7 +24,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 65022
+          port: 22
           script: |
             PROJECT_DIR="/data/project/dev/api-helpdesk"
             SRC_DIR="$PROJECT_DIR/src"

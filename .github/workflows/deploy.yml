@@ -1,4 +1,4 @@
-name: Deploy api-helpdesk docker
+name: api-helpdek-dev
 
 on:
   push:
@@ -10,62 +10,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code from branch dev
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up SSH Private Key
+      - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: SSH Deploy api-helpdesk
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-
           port: 65022
-
           script: |
             PROJECT_DIR="/data/project/dev/api-helpdesk"
+            SRC_DIR="$PROJECT_DIR/src"
 
-            echo "=> Memulai Deployment  di $PROJECT_DIR"
+            echo "==> Deployment mulai di $PROJECT_DIR"
 
-            cd $PROJECT_DIR
-            git config --global --add safe.directory "$PROJECT_DIR"
-            docker-compose exec app git config --global --add safe.directory /var/www/html || true
+
+            cd $SRC_DIR
+
 
             git pull origin dev
             echo "-> Git pull sukses"
 
-            cp .env.example .env
+            # pastikan file env ada
+            cp .env.example .env || true
 
+            # rebuild docker
+            cd $PROJECT_DIR
             docker-compose down || true
             docker-compose build --no-cache
-            echo "-> Docker Image telah di-build ulang"
-
             docker-compose up -d
-            echo "-> Container Nginx, App, dan DB berjalan"
-
-            docker-compose exec -u root app chown -R 1000:1000 .
-            docker-compose exec app chmod -R 777 storage bootstrap/cache
-            echo "-> Izin file storage/cache diatur untuk Laravel"
-
+            echo "-> Docker container berjalan"
 
             docker-compose exec -T app composer install --no-dev --optimize-autoloader
-            echo "-> Composer install sukses"
-
             docker-compose exec -T app php artisan key:generate
             docker-compose exec -T app php artisan storage:link
             docker-compose exec -T app php artisan migrate --force
             docker-compose exec -T app php artisan cache:clear
             docker-compose exec -T app php artisan config:cache
             docker-compose exec -T app php artisan view:cache
-            echo "-> Migrasi dan Cache Laravel sukses"
 
-
-            chown -R deploy:deploy .
-            echo "-> Izin file telah diatur ke user deploy"
-
-            echo "Deployment Selesai!"
+            echo "==> Deployment selesai 🎉"

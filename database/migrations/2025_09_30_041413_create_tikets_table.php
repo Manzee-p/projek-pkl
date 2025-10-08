@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tikets', function (Blueprint $table) {
@@ -25,18 +22,14 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
-            $table->foreign('event_id')->references('event_id')->on('events')->onDelete('cascade');
             $table->foreign('assigned_to')->references('user_id')->on('users')->onDelete('set null');
+            $table->foreign('event_id')->references('event_id')->on('events')->onDelete('cascade');
             $table->foreign('kategori_id')->references('kategori_id')->on('kategoris')->onDelete('cascade');
             $table->foreign('status_id')->references('status_id')->on('tiket_statuses')->onDelete('cascade');
             $table->foreign('prioritas_id')->references('prioritas_id')->on('priorities')->onDelete('cascade');
         });
-
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tikets');

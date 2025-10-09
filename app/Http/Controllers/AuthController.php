@@ -15,15 +15,24 @@ class AuthController extends Controller
             'password' => 'required|max:50',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->remember)) {
-            if (Auth::user()->role == 'customer') {
-                return redirect('/home');
-            }
-
-            return redirect('/dashboard');
+        if (! Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Email atau password salah',
+            ], 401);
         }
 
-        return back()->with('failed', 'Email atau password salah');
+        $user = Auth::user();
+
+        // Buat token untuk API
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Login berhasil',
+            'user'    => $user,
+            'token'   => $token,
+        ]);
     }
 
     public function register(Request $request)

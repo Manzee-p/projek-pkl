@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 
 // Login & Register
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,4 +26,20 @@ Route::middleware(['auth:sanctum', 'check_role:customer'])->group(function () {
 // Route untuk user role: admin
 Route::middleware(['auth:sanctum', 'check_role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+});
+
+Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
+    Route::get('/roles', [RoleController::class, 'index']);       // list semua role
+    Route::post('/roles', [RoleController::class, 'store']);      // buat role baru
+    Route::get('/roles/{id}', [RoleController::class, 'show']);   // lihat detail role
+    Route::put('/roles/{id}', [RoleController::class, 'update']); // update role
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy']); // hapus role
+});
+
+// Semua ini hanya bisa diakses Admin
+Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });

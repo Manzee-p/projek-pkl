@@ -84,9 +84,13 @@ class AuthController extends Controller
         return redirect('/home');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::logout();
-        return redirect('/login');
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Logout berhasil',
+        ]);
     }
 }

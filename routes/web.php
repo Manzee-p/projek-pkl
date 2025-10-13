@@ -30,7 +30,7 @@ Route::group(['middleware' => ['auth', 'check_role:customer']], function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth', 'check_role:admin']], function() {
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');;
 });
 
 Route::get('/logout', [AuthController::class, 'logout']);

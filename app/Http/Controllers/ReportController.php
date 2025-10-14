@@ -92,7 +92,7 @@ class ReportController extends Controller
         ]);
 
         if ($request->hasFile('lampiran')) {
-            // Hapus file lama kalau ada
+            // Hapus file lama
             if ($report->lampiran) {
                 Storage::disk('public')->delete($report->lampiran);
             }

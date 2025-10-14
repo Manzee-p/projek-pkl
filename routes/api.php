@@ -51,6 +51,10 @@ Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index']);
-    Route::post('/reports', [ReportController::class, 'store']);
+    Route::get('/reports', [ReportController::class, 'index']);   // list
+    Route::post('/reports', [ReportController::class, 'store']);  // create
+    Route::get('/reports/{id}', [ReportController::class, 'show']);    // detail
+    Route::put('/reports/{id}', [ReportController::class, 'update']);  // update
+    Route::delete('/reports/{id}', [ReportController::class, 'destroy']); // delete
 });
+

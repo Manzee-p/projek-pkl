@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Role;
@@ -15,7 +14,7 @@ class RoleController extends Controller
         return response()->json([
             'status'  => 200,
             'message' => 'Data role berhasil diambil',
-            'data'    => $roles
+            'data'    => $roles,
         ], 200);
     }
 
@@ -32,7 +31,7 @@ class RoleController extends Controller
         return response()->json([
             'status'  => 201,
             'message' => 'Role berhasil dibuat',
-            'data'    => $role
+            'data'    => $role,
         ], 201);
     }
 
@@ -42,7 +41,7 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
 
         $data = $request->validate([
-            'nama_role' => 'sometimes|string|unique:roles,nama_role,' . $role->id,
+            'nama_role' => 'sometimes|string|unique:roles,nama_role,' . $role->role_id . ',role_id',
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -51,7 +50,7 @@ class RoleController extends Controller
         return response()->json([
             'status'  => 200,
             'message' => 'Role berhasil diupdate',
-            'data'    => $role
+            'data'    => $role,
         ], 200);
     }
 
@@ -63,7 +62,7 @@ class RoleController extends Controller
 
         return response()->json([
             'status'  => 200,
-            'message' => 'Role berhasil dihapus'
+            'message' => 'Role berhasil dihapus',
         ], 200);
     }
 
@@ -75,7 +74,7 @@ class RoleController extends Controller
         return response()->json([
             'status'  => 200,
             'message' => 'Detail role berhasil diambil',
-            'data'    => $role
+            'data'    => $role,
         ], 200);
     }
 }

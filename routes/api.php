@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
+use Illuminate\Support\Facades\Request;
+
+Route::get('/cek-user', function (Request $request) {
+    return response()->json($request->user());
+})->middleware('auth:sanctum');
 
 // Login & Register
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,7 +34,7 @@ Route::middleware(['auth:sanctum', 'check_role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
-Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
+Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
     Route::get('/roles', [RoleController::class, 'index']);       // list semua role
     Route::post('/roles', [RoleController::class, 'store']);      // buat role baru
     Route::get('/roles/{id}', [RoleController::class, 'show']);   // lihat detail role
@@ -38,7 +43,7 @@ Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
 });
 
 // Semua ini hanya bisa diakses Admin
-Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
+Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);

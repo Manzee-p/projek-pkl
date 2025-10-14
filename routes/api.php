@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 Route::get('/cek-user', function (Request $request) {
     return response()->json($request->user());

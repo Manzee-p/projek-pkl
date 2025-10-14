@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Report;
@@ -14,13 +13,13 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $reports = Report::where('user_id', $request->user()->user_id)
-                         ->latest()
-                         ->get();
+            ->latest()
+            ->get();
 
         return response()->json([
-            'status' => 200,
+            'status'  => 200,
             'message' => 'Data laporan berhasil diambil',
-            'data' => $reports
+            'data'    => $reports,
         ], 200);
     }
 
@@ -30,11 +29,11 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'kategori' => 'required|string',
+            'judul'     => 'required|string|max:255',
+            'kategori'  => 'required|string',
             'prioritas' => 'required|in:rendah,sedang,tinggi,urgent',
             'deskripsi' => 'required|string',
-            'lampiran' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         $lampiranPath = null;
@@ -43,17 +42,17 @@ class ReportController extends Controller
         }
 
         $report = Report::create([
-            'user_id' => $request->user()->user_id,
-            'judul' => $validated['judul'],
-            'kategori' => $validated['kategori'],
+            'user_id'   => $request->user()->user_id,
+            'judul'     => $validated['judul'],
+            'kategori'  => $validated['kategori'],
             'prioritas' => $validated['prioritas'],
             'deskripsi' => $validated['deskripsi'],
-            'lampiran' => $lampiranPath,
+            'lampiran'  => $lampiranPath,
         ]);
 
         return response()->json([
-            'status' => 201,
-            'message' => 'Laporan berhasil dikirim',
+            'status'    => 201,
+            'message'   => 'Laporan berhasil dikirim',
             'report_id' => $report->id,
         ], 201);
     }
@@ -64,13 +63,13 @@ class ReportController extends Controller
     public function show(Request $request, $id)
     {
         $report = Report::where('id', $id)
-                        ->where('user_id', $request->user()->user_id)
-                        ->firstOrFail();
+            ->where('user_id', $request->user()->user_id)
+            ->firstOrFail();
 
         return response()->json([
-            'status' => 200,
+            'status'  => 200,
             'message' => 'Detail laporan berhasil diambil',
-            'data' => $report
+            'data'    => $report,
         ], 200);
     }
 
@@ -79,33 +78,37 @@ class ReportController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $report = Report::where('id', $id)
-                        ->where('user_id', $request->user()->user_id)
-                        ->firstOrFail();
+        $report = Report::findOrFail($id);
 
         $validated = $request->validate([
-            'judul' => 'sometimes|string|max:255',
-            'kategori' => 'sometimes|string',
-            'prioritas' => 'sometimes|in:rendah,sedang,tinggi,urgent',
-            'deskripsi' => 'sometimes|string',
-            'lampiran' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'judul'     => 'required|string|max:255',
+            'kategori'  => 'required|string',
+            'prioritas' => 'required|in:rendah,sedang,tinggi,urgent',
+            'deskripsi' => 'required|string',
+            'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
+        // Jika ada file baru, hapus file lama dan simpan baru
         if ($request->hasFile('lampiran')) {
-            // Hapus file lama kalau ada
-            if ($report->lampiran) {
-                Storage::disk('public')->delete($report->lampiran);
+            if ($report->lampiran && \Storage::disk('public')->exists($report->lampiran)) {
+                \Storage::disk('public')->delete($report->lampiran);
             }
-            $validated['lampiran'] = $request->file('lampiran')->store('reports', 'public');
+
+            $lampiranPath          = $request->file('lampiran')->store('reports', 'public');
+            $validated['lampiran'] = $lampiranPath;
+        } else {
+            // Jika tidak upload file baru, tetap pakai lampiran lama
+            $validated['lampiran'] = $report->lampiran;
         }
 
+        // Update data laporan
         $report->update($validated);
 
         return response()->json([
-            'status' => 200,
+            'status'  => 200,
             'message' => 'Laporan berhasil diupdate',
-            'data' => $report
-        ], 200);
+            'data'    => $report,
+        ]);
     }
 
     /**
@@ -114,8 +117,8 @@ class ReportController extends Controller
     public function destroy(Request $request, $id)
     {
         $report = Report::where('id', $id)
-                        ->where('user_id', $request->user()->user_id)
-                        ->firstOrFail();
+            ->where('user_id', $request->user()->user_id)
+            ->firstOrFail();
 
         // Hapus lampiran kalau ada
         if ($report->lampiran) {
@@ -125,8 +128,8 @@ class ReportController extends Controller
         $report->delete();
 
         return response()->json([
-            'status' => 200,
-            'message' => 'Laporan berhasil dihapus'
+            'status'  => 200,
+            'message' => 'Laporan berhasil dihapus',
         ], 200);
     }
 }

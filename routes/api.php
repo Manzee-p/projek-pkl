@@ -9,41 +9,37 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 
+Route::get('/sanctum/csrf-cookie', \Laravel\Sanctum\Http\Controllers\CsrfCookieController::class . '@show');
+
 Route::get('/cek-user', function (Request $request) {
     return response()->json($request->user());
 })->middleware('auth:sanctum');
 
-// Login & Register
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Google OAuth
 Route::get('/auth/google/redirect', [AuthController::class, 'google_redirect']);
 Route::get('/auth/google/callback', [AuthController::class, 'google_callback']);
 
-// Logout
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Route untuk user role: customer
 Route::middleware(['auth:sanctum', 'check_role:customer'])->group(function () {
     Route::get('/home', [HomeController::class, 'index']);
 });
 
-// Route untuk user role: admin
 Route::middleware(['auth:sanctum', 'check_role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
-Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
-    Route::get('/roles', [RoleController::class, 'index']);       // list semua role
-    Route::post('/roles', [RoleController::class, 'store']);      // buat role baru
-    Route::get('/roles/{id}', [RoleController::class, 'show']);   // lihat detail role
-    Route::put('/roles/{id}', [RoleController::class, 'update']); // update role
-    Route::delete('/roles/{id}', [RoleController::class, 'destroy']); // hapus role
+Route::middleware(['auth:sanctum', 'check_role:admin'])->group(function () {
+    Route::get('/roles', [RoleController::class, 'index']);
+    Route::post('/roles', [RoleController::class, 'store']);
+    Route::get('/roles/{id}', [RoleController::class, 'show']);
+    Route::put('/roles/{id}', [RoleController::class, 'update']);
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy']);
 });
 
-// Semua ini hanya bisa diakses Admin
-Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'check_role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
@@ -51,10 +47,9 @@ Route::middleware(['auth:sanctum','check_role:admin'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index']);   // list
-    Route::post('/reports', [ReportController::class, 'store']);  // create
-    Route::get('/reports/{id}', [ReportController::class, 'show']);    // detail
-    Route::put('/reports/{id}', [ReportController::class, 'update']);  // update
-    Route::delete('/reports/{id}', [ReportController::class, 'destroy']); // delete
+    Route::get('/reports', [ReportController::class, 'index']);
+    Route::post('/reports', [ReportController::class, 'store']);
+    Route::get('/reports/{id}', [ReportController::class, 'show']);
+    Route::put('/reports/{id}', [ReportController::class, 'update']);
+    Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 });
-

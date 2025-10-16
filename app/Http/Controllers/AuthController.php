@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -15,7 +16,7 @@ class AuthController extends Controller
             'password' => 'required|max:50',
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Email atau password salah',
@@ -23,8 +24,6 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-
-        // Buat token untuk API
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -51,8 +50,14 @@ class AuthController extends Controller
             'role'     => 'customer',
         ]);
 
-        Auth::login($user);
-        return redirect('/home');
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Registrasi berhasil',
+            'user'    => $user,
+            'token'   => $token,
+        ], 201);
     }
 
     public function google_redirect()
@@ -66,7 +71,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $googleUser->email)->first();
 
-        if (! $user) {
+        if (!$user) {
             $user = User::create([
                 'name'     => $googleUser->name,
                 'email'    => $googleUser->email,
@@ -77,20 +82,34 @@ class AuthController extends Controller
         }
 
         if ($user->status === 'banned') {
-            return redirect('/login')->with('failed', 'Akun anda telah dibekukan');
+            return response()->json(['status' => 'error', 'message' => 'Akun anda telah dibekukan'], 403);
         }
 
-        Auth::login($user);
-        return redirect('/home');
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        $html = <<<HTML
+        <script>
+            window.opener.postMessage({ token: '{$token}', user: " . json_encode($user) . " }, '*');
+            window.close();
+        </script>
+        HTML;
+
+        return response($html);
     }
 
     public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-
+{
+    if (!$request->user()) {
         return response()->json([
-            'status'  => true,
-            'message' => 'Logout berhasil',
-        ]);
+            'status' => false,
+            'message' => 'User not authenticated',
+        ], 401);
     }
+
+    $request->user()->currentAccessToken()->delete();
+    return response()->json([
+        'status' => true,
+        'message' => 'Logout berhasil',
+    ]);
+}
 }

@@ -90,8 +90,8 @@ class ReportController extends Controller
 
         // Jika ada file baru, hapus file lama dan simpan baru
         if ($request->hasFile('lampiran')) {
-            if ($report->lampiran && \Storage::disk('public')->exists($report->lampiran)) {
-                \Storage::disk('public')->delete($report->lampiran);
+            if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
+                Storage::disk('public')->delete($report->lampiran);
             }
 
             $lampiranPath          = $request->file('lampiran')->store('reports', 'public');

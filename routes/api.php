@@ -61,3 +61,12 @@ Route::get('/tikets/{id}', [TiketController::class, 'show']);
 Route::post('/tikets', [TiketController::class, 'store']);
 Route::put('/tikets/{id}', [TiketController::class, 'update']);
 Route::delete('/tikets/{id}', [TiketController::class, 'destroy']);
+
+
+Route::apiResource('/events', \App\Http\Controllers\EventController::class);
+
+Route::apiResource('/kategoris', \App\Http\Controllers\KategoriController::class);
+
+Route::apiResource('/tiket-statuses', \App\Http\Controllers\TiketStatusController::class);
+
+Route::get('/prioritas', [\App\Http\Controllers\PrioritasController::class, 'index']);

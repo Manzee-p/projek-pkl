@@ -10,19 +10,13 @@ use Carbon\Carbon;
 class TiketController extends Controller
 {
     /**
-     *
+     * Menampilkan semua tiket
      */
     public function index(Request $request)
     {
-        $query = Tiket::with([
-            'user',
-            'kategoris',
-            'priorities',
-            'status',
-            'event'
-        ]);
+        $query = Tiket::with(['user', 'kategoris', 'priorities', 'status', 'event']);
 
-        // Filter (status, kategori, prioritas, tipe pengguna)
+        // Filter
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
@@ -41,7 +35,7 @@ class TiketController extends Controller
             });
         }
 
-        // Urutkan berdasarkan prioritas dan waktu dibuat
+        // Urutkan
         $query->orderByRaw("FIELD(prioritas_id, 1, 2, 3)")
               ->orderByDesc('waktu_dibuat');
 
@@ -55,7 +49,7 @@ class TiketController extends Controller
     }
 
     /**
-     * 
+     * Menyimpan tiket baru dengan kode otomatis
      */
     public function store(Request $request)
     {
@@ -69,10 +63,14 @@ class TiketController extends Controller
             'deskripsi'     => 'nullable|string',
         ]);
 
-        // 🔢 Generate kode tiket otomatis (contoh: TCK-20251017-0005)
         $today = Carbon::now()->format('Ymd');
-        $countToday = Tiket::whereDate('created_at', Carbon::today())->count() + 1;
+        $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
         $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+
+        while (Tiket::where('kode_tiket', $kodeTiket)->exists()) {
+            $countToday++;
+            $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+        }
 
         $tiket = Tiket::create([
             'user_id'       => $request->user_id,
@@ -94,7 +92,7 @@ class TiketController extends Controller
     }
 
     /**
-     * 
+     * Menampilkan detail tiket
      */
     public function show($id)
     {
@@ -116,7 +114,7 @@ class TiketController extends Controller
     }
 
     /**
-     * 
+     * Update status/prioritas tiket
      */
     public function update(Request $request, $id)
     {
@@ -138,7 +136,7 @@ class TiketController extends Controller
     }
 
     /**
-     * ❌ Hapus tiket
+     * Hapus tiket
      */
     public function destroy($id)
     {

@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
+use App\Http\Controllers\PrioritasController;
 use Illuminate\Http\Request;
 
 Route::get('/sanctum/csrf-cookie', \Laravel\Sanctum\Http\Controllers\CsrfCookieController::class . '@show');
@@ -69,4 +70,7 @@ Route::apiResource('/kategoris', \App\Http\Controllers\KategoriController::class
 
 Route::apiResource('/tiket-statuses', \App\Http\Controllers\TiketStatusController::class);
 
-Route::get('/prioritas', [\App\Http\Controllers\PrioritasController::class, 'index']);
+Route::get('/prioritas', [PrioritasController::class, 'index']);
+Route::post('/prioritas', [PrioritasController::class, 'store']);
+Route::put('/prioritas/{id}', [PrioritasController::class, 'update']);
+Route::delete('/prioritas/{id}', [PrioritasController::class, 'destroy']);

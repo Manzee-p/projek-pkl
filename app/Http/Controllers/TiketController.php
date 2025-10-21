@@ -16,7 +16,7 @@ class TiketController extends Controller
 
         // Filter
         if ($request->filled('status_id')) {
-            $query->where('status_id', $request->status_id);
+            $query->  where('status_id', $request->status_id);
         }
 
         if ($request->filled('kategori_id')) {

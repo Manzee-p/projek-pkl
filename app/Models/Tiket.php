@@ -8,7 +8,7 @@ class Tiket extends Model
     protected $fillable = [
         'user_id',
         'kategori_id',
-        'priority_id',
+        'prioritas_id',
         'status_id',
         'event_id',
         'judul',

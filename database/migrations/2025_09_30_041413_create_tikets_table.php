@@ -14,6 +14,11 @@ return new class extends Migration
             $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('assigned_to')->nullable();
             $table->unsignedBigInteger('kategori_id');
+
+            // 🆕 Tambahan kolom baru
+            $table->string('kode_tiket')->unique();
+            $table->string('judul');
+
             $table->text('deskripsi')->nullable();
             $table->unsignedBigInteger('status_id');
             $table->unsignedBigInteger('prioritas_id');

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TiketController;
 use Illuminate\Http\Request;
 
 Route::get('/sanctum/csrf-cookie', \Laravel\Sanctum\Http\Controllers\CsrfCookieController::class . '@show');
@@ -53,3 +54,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/reports/{id}', [ReportController::class, 'update']);
     Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 });
+
+// API Ticket Management
+Route::get('/tikets', [TiketController::class, 'index']);
+Route::get('/tikets/{id}', [TiketController::class, 'show']);
+Route::post('/tikets', [TiketController::class, 'store']);
+Route::put('/tikets/{id}', [TiketController::class, 'update']);
+Route::delete('/tikets/{id}', [TiketController::class, 'destroy']);

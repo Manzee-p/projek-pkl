@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    /**
+     * 🔐 Login manual
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -25,14 +29,25 @@ class AuthController extends Controller
         $user  = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Tentukan redirect berdasarkan role
+        $redirect = match ($user->role) {
+            'admin' => '/dashboard',
+            'staff' => '/staff',
+            default => '/home',
+        };
+
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Login berhasil',
-            'user'    => $user,
-            'token'   => $token,
+            'status'   => 'success',
+            'message'  => 'Login berhasil',
+            'user'     => $user,
+            'token'    => $token,
+            'redirect' => $redirect,
         ]);
     }
 
+    /**
+     * 🧾 Registrasi user baru
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -52,13 +67,17 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Registrasi berhasil',
-            'user'    => $user,
-            'token'   => $token,
+            'status'   => 'success',
+            'message'  => 'Registrasi berhasil',
+            'user'     => $user,
+            'token'    => $token,
+            'redirect' => '/home',
         ], 201);
     }
 
+    /**
+     * 🌐 Login dengan Google
+     */
     public function google_redirect()
     {
         return Socialite::driver('google')->redirect();
@@ -70,14 +89,14 @@ class AuthController extends Controller
             // Ambil data user dari Google
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            // Cari user di database, buat baru kalau belum ada
+            // Cari atau buat user baru
             $user = User::firstOrCreate(
                 ['email' => $googleUser->email],
                 [
                     'name'     => $googleUser->name,
-                    'password' => bcrypt(\Illuminate\Support\Str::random(16)),
+                    'password' => bcrypt(Str::random(16)),
                     'status'   => 'active',
-                    'role'     => 'customer',
+                    'role'     => 'customer', // semua user Google jadi customer
                 ]
             );
 
@@ -89,15 +108,17 @@ class AuthController extends Controller
             // Buat token API
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Redirect ke frontend dengan token
-            return redirect("http://localhost:5173/login-success?token={$token}");
+            // Selalu redirect ke halaman user (/user)
+            return redirect("http://localhost:5173/login-success?token={$token}&redirect=/user");
 
         } catch (\Exception $e) {
-            // Kalau ada error redirect ke login dengan pesan error
             return redirect("http://localhost:5173/login?error=google_error");
         }
     }
 
+    /**
+     * 🚪 Logout
+     */
     public function logout(Request $request)
     {
         if (! $request->user()) {
@@ -108,6 +129,7 @@ class AuthController extends Controller
         }
 
         $request->user()->currentAccessToken()->delete();
+
         return response()->json([
             'status'  => true,
             'message' => 'Logout berhasil',

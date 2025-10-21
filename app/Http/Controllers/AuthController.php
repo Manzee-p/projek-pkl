@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -16,14 +15,14 @@ class AuthController extends Controller
             'password' => 'required|max:50',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Email atau password salah',
             ], 401);
         }
 
-        $user = Auth::user();
+        $user  = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -67,49 +66,51 @@ class AuthController extends Controller
 
     public function google_callback()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            // Ambil data user dari Google
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
-        $user = User::where('email', $googleUser->email)->first();
+            // Cari user di database, buat baru kalau belum ada
+            $user = User::firstOrCreate(
+                ['email' => $googleUser->email],
+                [
+                    'name'     => $googleUser->name,
+                    'password' => bcrypt(\Illuminate\Support\Str::random(16)),
+                    'status'   => 'active',
+                    'role'     => 'customer',
+                ]
+            );
 
-        if (!$user) {
-            $user = User::create([
-                'name'     => $googleUser->name,
-                'email'    => $googleUser->email,
-                'password' => bcrypt(\Illuminate\Support\Str::random(16)),
-                'status'   => 'active',
-                'role'     => 'customer',
-            ]);
+            // Cek status banned
+            if ($user->status === 'banned') {
+                return redirect("http://localhost:5173/login?error=account_banned");
+            }
+
+            // Buat token API
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // Redirect ke frontend dengan token
+            return redirect("http://localhost:5173/login-success?token={$token}");
+
+        } catch (\Exception $e) {
+            // Kalau ada error redirect ke login dengan pesan error
+            return redirect("http://localhost:5173/login?error=google_error");
         }
-
-        if ($user->status === 'banned') {
-            return response()->json(['status' => 'error', 'message' => 'Akun anda telah dibekukan'], 403);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        $html = <<<HTML
-        <script>
-            window.opener.postMessage({ token: '{$token}', user: " . json_encode($user) . " }, '*');
-            window.close();
-        </script>
-        HTML;
-
-        return response($html);
     }
 
     public function logout(Request $request)
-{
-    if (!$request->user()) {
-        return response()->json([
-            'status' => false,
-            'message' => 'User not authenticated',
-        ], 401);
-    }
+    {
+        if (! $request->user()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
 
-    $request->user()->currentAccessToken()->delete();
-    return response()->json([
-        'status' => true,
-        'message' => 'Logout berhasil',
-    ]);
-}
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'status'  => true,
+            'message' => 'Logout berhasil',
+        ]);
+    }
 }

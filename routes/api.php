@@ -19,8 +19,8 @@ Route::get('/cek-user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/auth/google/redirect', [AuthController::class, 'google_redirect']);
-Route::get('/auth/google/callback', [AuthController::class, 'google_callback']);
+Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect']);
+Route::get('/auth-google-callback', [AuthController::class, 'google_callback']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 

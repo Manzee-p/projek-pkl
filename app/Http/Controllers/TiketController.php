@@ -4,16 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Tiket;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class TiketController extends Controller
 {
     /**
-     *
+     * 
      */
     public function index(Request $request)
     {
+        // Query dasar tiket + relasi-relasinya
         $query = Tiket::with([
             'user',
             'kategoris',
@@ -22,29 +21,32 @@ class TiketController extends Controller
             'event'
         ]);
 
-        // Filter (status, kategori, prioritas, tipe pengguna)
-        if ($request->filled('status_id')) {
+        // Filter berdasarkan status
+        if ($request->has('status_id') && $request->status_id !== null) {
             $query->where('status_id', $request->status_id);
         }
 
-        if ($request->filled('kategori_id')) {
+        // Filter berdasarkan kategori
+        if ($request->has('kategori_id') && $request->kategori_id !== null) {
             $query->where('kategori_id', $request->kategori_id);
         }
 
-        if ($request->filled('prioritas_id')) {
+        // Filter berdasarkan prioritas
+        if ($request->has('prioritas_id') && $request->prioritas_id !== null) {
             $query->where('prioritas_id', $request->prioritas_id);
         }
 
-        if ($request->filled('tipe_pengguna')) {
+        // Filter berdasarkan tipe pengguna (User / Vendor)
+        if ($request->has('tipe_pengguna') && $request->tipe_pengguna !== null) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('tipe_pengguna', $request->tipe_pengguna);
             });
         }
 
         // Urutkan berdasarkan prioritas dan waktu dibuat
-        $query->orderByRaw("FIELD(prioritas_id, 1, 2, 3)")
-              ->orderByDesc('waktu_dibuat');
+        $query->orderByRaw("FIELD(prioritas_id, 1, 2, 3)")->orderByDesc('waktu_dibuat');
 
+        // Ambil hasil
         $tikets = $query->get();
 
         return response()->json([
@@ -52,45 +54,6 @@ class TiketController extends Controller
             'message' => 'Daftar tiket berhasil diambil',
             'data' => $tikets,
         ]);
-    }
-
-    /**
-     * 
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'user_id'       => 'required|exists:users,user_id',
-            'event_id'      => 'required|exists:events,event_id',
-            'kategori_id'   => 'required|exists:kategoris,kategori_id',
-            'status_id'     => 'required|exists:tiket_statuses,status_id',
-            'prioritas_id'  => 'required|exists:priorities,prioritas_id',
-            'judul'         => 'required|string|max:255',
-            'deskripsi'     => 'nullable|string',
-        ]);
-
-        // 🔢 Generate kode tiket otomatis (contoh: TCK-20251017-0005)
-        $today = Carbon::now()->format('Ymd');
-        $countToday = Tiket::whereDate('created_at', Carbon::today())->count() + 1;
-        $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
-
-        $tiket = Tiket::create([
-            'user_id'       => $request->user_id,
-            'event_id'      => $request->event_id,
-            'kategori_id'   => $request->kategori_id,
-            'status_id'     => $request->status_id,
-            'prioritas_id'  => $request->prioritas_id,
-            'judul'         => $request->judul,
-            'deskripsi'     => $request->deskripsi,
-            'kode_tiket'    => $kodeTiket,
-            'waktu_dibuat'  => now(),
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Tiket berhasil dibuat',
-            'data' => $tiket,
-        ], 201);
     }
 
     /**
@@ -118,6 +81,39 @@ class TiketController extends Controller
     /**
      * 
      */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'user_id'       => 'required|exists:users,user_id',
+            'event_id'      => 'required|exists:events,event_id',
+            'kategori_id'   => 'required|exists:kategoris,kategori_id',
+            'status_id'     => 'required|exists:tiket_statuses,status_id',
+            'prioritas_id'  => 'required|exists:priorities,prioritas_id',
+            'judul'         => 'required|string|max:255',
+            'deskripsi'     => 'nullable|string',
+        ]);
+
+        $tiket = Tiket::create([
+            'user_id'       => $request->user_id,
+            'event_id'      => $request->event_id,
+            'kategori_id'   => $request->kategori_id,
+            'status_id'     => $request->status_id,
+            'prioritas_id'  => $request->prioritas_id,
+            'judul'         => $request->judul,
+            'deskripsi'     => $request->deskripsi,
+            'waktu_dibuat'  => now(),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Tiket berhasil dibuat',
+            'data' => $tiket,
+        ], 201);
+    }
+
+    /**
+     * 
+     */
     public function update(Request $request, $id)
     {
         $tiket = Tiket::findOrFail($id);
@@ -138,7 +134,7 @@ class TiketController extends Controller
     }
 
     /**
-     * ❌ Hapus tiket
+     * 
      */
     public function destroy($id)
     {

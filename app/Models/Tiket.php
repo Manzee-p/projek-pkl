@@ -5,6 +5,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tiket extends Model
 {
+    protected $table      = 'tikets';
+    protected $primaryKey = 'tiket_id';
+    public $incrementing  = true;
+
     protected $fillable = [
         'user_id',
         'kategori_id',
@@ -13,6 +17,10 @@ class Tiket extends Model
         'event_id',
         'judul',
         'deskripsi',
+        'kode_tiket', // tambahkan ini
+        'waktu_dibuat',
+        'assigned_to',
+        'waktu_selesai',
     ];
 
     public function user()
@@ -22,12 +30,12 @@ class Tiket extends Model
 
     public function kategoris()
     {
-        return $this->belongsTo(Kategori::class, 'kategoris_id');
+        return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 
     public function priorities()
     {
-        return $this->belongsTo(Priority::class, 'priorities_id');
+        return $this->belongsTo(Priority::class, 'prioritas_id');
     }
 
     public function status()

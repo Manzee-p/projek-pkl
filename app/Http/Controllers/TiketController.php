@@ -16,7 +16,7 @@ class TiketController extends Controller
 
         // Filter
         if ($request->filled('status_id')) {
-            $query->  where('status_id', $request->status_id);
+            $query->where('status_id', $request->status_id);
         }
 
         if ($request->filled('kategori_id')) {
@@ -51,6 +51,7 @@ class TiketController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'user_id'      => 'required|exists:users,user_id',
             'event_id'     => 'required|exists:events,event_id',
@@ -61,6 +62,7 @@ class TiketController extends Controller
             'deskripsi'    => 'nullable|string',
         ]);
 
+        // Generate kode tiket unik
         $today      = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
         $kodeTiket  = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
@@ -70,6 +72,7 @@ class TiketController extends Controller
             $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
         }
 
+        // Simpan tiket
         $tiket = Tiket::create([
             'user_id'      => $request->user_id,
             'event_id'     => $request->event_id,
@@ -78,7 +81,7 @@ class TiketController extends Controller
             'prioritas_id' => $request->prioritas_id,
             'judul'        => $request->judul,
             'deskripsi'    => $request->deskripsi,
-            'kode_tiket'   => $kodeTiket,
+            'kode_tiket'   => $kodeTiket, // gunakan kode tiket yang sudah digenerate
             'waktu_dibuat' => now(),
         ]);
 

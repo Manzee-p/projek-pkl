@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Kategori;
@@ -65,7 +64,15 @@ class KategoriController extends Controller
 
     public function destroy($id)
     {
-        $kategori = Kategori::findOrFail($id);
+        $kategori = Kategori::find($id);
+
+        if (! $kategori) {
+            return response()->json([
+                'status'  => 404,
+                'message' => 'Kategori tidak ditemukan',
+            ], 404);
+        }
+
         $kategori->delete();
 
         return response()->json([
@@ -73,4 +80,5 @@ class KategoriController extends Controller
             'message' => 'Kategori berhasil dihapus',
         ]);
     }
+
 }

@@ -33,9 +33,15 @@ class TiketController extends Controller
             });
         }
 
-        // Urutkan
-        $query->orderByRaw("FIELD(prioritas_id, 1, 2, 3)")
-            ->orderByDesc('waktu_dibuat');
+        // ✅ Perbaikan bagian ini — PostgreSQL tidak mendukung FIELD()
+        $query->orderByRaw("
+            CASE
+                WHEN prioritas_id = 1 THEN 1
+                WHEN prioritas_id = 2 THEN 2
+                WHEN prioritas_id = 3 THEN 3
+                ELSE 4
+            END
+        ")->orderByDesc('waktu_dibuat');
 
         $tikets = $query->get();
 
@@ -51,7 +57,6 @@ class TiketController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'user_id'      => 'required|exists:users,user_id',
             'event_id'     => 'required|exists:events,event_id',
@@ -62,7 +67,6 @@ class TiketController extends Controller
             'deskripsi'    => 'nullable|string',
         ]);
 
-        // Generate kode tiket unik
         $today      = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
         $kodeTiket  = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
@@ -72,7 +76,6 @@ class TiketController extends Controller
             $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
         }
 
-        // Simpan tiket
         $tiket = Tiket::create([
             'user_id'      => $request->user_id,
             'event_id'     => $request->event_id,
@@ -81,7 +84,7 @@ class TiketController extends Controller
             'prioritas_id' => $request->prioritas_id,
             'judul'        => $request->judul,
             'deskripsi'    => $request->deskripsi,
-            'kode_tiket'   => $kodeTiket, // gunakan kode tiket yang sudah digenerate
+            'kode_tiket'   => $kodeTiket,
             'waktu_dibuat' => now(),
         ]);
 

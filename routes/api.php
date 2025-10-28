@@ -1,15 +1,14 @@
 <?php
-
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\TiketController;
 use App\Http\Controllers\PrioritasController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TiketController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/sanctum/csrf-cookie', \Laravel\Sanctum\Http\Controllers\CsrfCookieController::class . '@show');
 
@@ -19,10 +18,8 @@ Route::get('/cek-user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect']);
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback']);
-
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'check_role:customer'])->group(function () {
@@ -65,12 +62,12 @@ Route::delete('/tikets/{id}', [TiketController::class, 'destroy']);
 
 
 Route::apiResource('/events', \App\Http\Controllers\EventController::class);
-
 Route::apiResource('/kategoris', \App\Http\Controllers\KategoriController::class);
-
 Route::apiResource('/tiket-statuses', \App\Http\Controllers\TiketStatusController::class);
 
 Route::get('/prioritas', [PrioritasController::class, 'index']);
 Route::post('/prioritas', [PrioritasController::class, 'store']);
 Route::put('/prioritas/{id}', [PrioritasController::class, 'update']);
 Route::delete('/prioritas/{id}', [PrioritasController::class, 'destroy']);
+
+

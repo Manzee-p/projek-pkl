@@ -1,60 +1,54 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Tiket extends Model
 {
-    protected $table      = 'tikets';
-    protected $primaryKey = 'tiket_id';
-    public $incrementing  = true;
+    use HasFactory;
 
+    protected $primaryKey = 'tiket_id';
     protected $fillable = [
-        'user_id',
-        'kategori_id',
-        'prioritas_id',
-        'status_id',
-        'event_id',
+        'kode_tiket',
         'judul',
         'deskripsi',
-        'kode_tiket', // tambahkan ini
-        'waktu_dibuat',
+        'user_id',
+        'event_id',
+        'kategori_id',
+        'status_id',
+        'prioritas_id',
         'assigned_to',
-        'waktu_selesai',
+        'waktu_dibuat',
+        'waktu_selesai'
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    public $timestamps = false;
 
-    public function kategoris()
+    // === RELASI ===
+    public function kategori()
     {
-        return $this->belongsTo(Kategori::class, 'kategori_id');
-    }
-
-    public function priorities()
-    {
-        return $this->belongsTo(Priority::class, 'prioritas_id');
+        return $this->belongsTo(Kategori::class, 'kategori_id', 'kategori_id');
     }
 
     public function status()
     {
-        return $this->belongsTo(TiketStatus::class, 'status_id');
+        return $this->belongsTo(TiketStatus::class, 'status_id', 'status_id');
+    }
+
+    public function prioritas()
+    {
+        return $this->belongsTo(Prioritas::class, 'prioritas_id', 'prioritas_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function event()
     {
-        return $this->belongsTo(Event::class, 'event_id');
-    }
-
-    public function feedbacks()
-    {
-        return $this->hasMany(Feedback::class);
-    }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
+        return $this->belongsTo(Event::class, 'event_id', 'event_id');
     }
 }

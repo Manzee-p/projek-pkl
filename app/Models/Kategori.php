@@ -1,22 +1,21 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
 {
+    use HasFactory;
 
-    protected $table      = 'kategoris';
-    protected $primaryKey = 'kategori_id'; // ganti sesuai kolom di DB
-    public $incrementing  = true;
-
+    protected $table = 'kategoris';
+    protected $primaryKey = 'kategori_id';
+    
     protected $fillable = [
         'nama_kategori',
-        'deskripsi',
+        'deskripsi'
     ];
 
-    public function tikets()
-    {
-        return $this->hasMany(Tiket::class);
-    }
+    public $timestamps = true;
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Priority;
+use App\Models\Prioritas;
 use Illuminate\Support\Facades\Validator;
 
 class PrioritasController extends Controller
@@ -11,7 +11,7 @@ class PrioritasController extends Controller
     // Ambil semua data prioritas
     public function index()
     {
-        $data = Priority::all();
+        $data = Prioritas::all();
 
         return response()->json([
             'status' => 200,
@@ -35,7 +35,7 @@ class PrioritasController extends Controller
             ]);
         }
 
-        $prioritas = Priority::create([
+        $prioritas = Prioritas::create([
             'nama_prioritas' => $request->nama_prioritas,
         ]);
 
@@ -49,7 +49,7 @@ class PrioritasController extends Controller
     // Update prioritas
     public function update(Request $request, $id)
     {
-        $prioritas = Priority::find($id);
+        $prioritas = Prioritas::find($id);
 
         if (!$prioritas) {
             return response()->json([
@@ -84,7 +84,7 @@ class PrioritasController extends Controller
     // Hapus prioritas
     public function destroy($id)
     {
-        $prioritas = Priority::find($id);
+        $prioritas = Prioritas::find($id);
 
         if (!$prioritas) {
             return response()->json([

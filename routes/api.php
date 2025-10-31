@@ -53,13 +53,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 });
 
-// API Ticket Management
+// API Ticket Management - FIXED: gunakan {tiket_id} sebagai parameter
 Route::get('/tikets', [TiketController::class, 'index']);
-Route::get('/tikets/{id}', [TiketController::class, 'show']);
 Route::post('/tikets', [TiketController::class, 'store']);
-Route::put('/tikets/{id}', [TiketController::class, 'update']);
-Route::delete('/tikets/{id}', [TiketController::class, 'destroy']);
-
+Route::get('/tikets/{tiket_id}', [TiketController::class, 'show']);
+Route::put('/tikets/{tiket_id}', [TiketController::class, 'update']);
+Route::delete('/tikets/{tiket_id}', [TiketController::class, 'destroy']);
 
 Route::apiResource('/events', \App\Http\Controllers\EventController::class);
 Route::apiResource('/kategoris', \App\Http\Controllers\KategoriController::class);
@@ -69,5 +68,3 @@ Route::get('/prioritas', [PrioritasController::class, 'index']);
 Route::post('/prioritas', [PrioritasController::class, 'store']);
 Route::put('/prioritas/{id}', [PrioritasController::class, 'update']);
 Route::delete('/prioritas/{id}', [PrioritasController::class, 'destroy']);
-
-

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Tiket;
@@ -8,13 +9,14 @@ use Illuminate\Http\Request;
 class TiketController extends Controller
 {
     /**
-     * Menampilkan semua tiket
+     * Menampilkan semua tiket dengan filter opsional
      */
     public function index(Request $request)
     {
-        $query = Tiket::with(['user', 'kategoris', 'priorities', 'status', 'event']);
+        // ✅ PERBAIKI: kategoris → kategori
+        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event']);
 
-        // Filter
+        // Filter opsional
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
@@ -33,7 +35,6 @@ class TiketController extends Controller
             });
         }
 
-        // ✅ Perbaikan bagian ini — PostgreSQL tidak mendukung FIELD()
         $query->orderByRaw("
             CASE
                 WHEN prioritas_id = 1 THEN 1
@@ -53,7 +54,7 @@ class TiketController extends Controller
     }
 
     /**
-     * Menyimpan tiket baru dengan kode otomatis
+     * Menyimpan tiket baru
      */
     public function store(Request $request)
     {
@@ -67,9 +68,9 @@ class TiketController extends Controller
             'deskripsi'    => 'nullable|string',
         ]);
 
-        $today      = Carbon::now()->format('Ymd');
+        $today = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
-        $kodeTiket  = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+        $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
 
         while (Tiket::where('kode_tiket', $kodeTiket)->exists()) {
             $countToday++;
@@ -88,6 +89,9 @@ class TiketController extends Controller
             'waktu_dibuat' => now(),
         ]);
 
+        // ✅ PERBAIKI: kategoris → kategori
+        $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event']);
+
         return response()->json([
             'status'  => true,
             'message' => 'Tiket berhasil dibuat',
@@ -98,58 +102,116 @@ class TiketController extends Controller
     /**
      * Menampilkan detail tiket
      */
-    public function show($id)
+    public function show($tiket_id)
     {
-        $tiket = Tiket::with([
-            'user',
-            'kategoris',
-            'priorities',
-            'status',
-            'event',
-            'feedbacks',
-            'notifications',
-        ])->findOrFail($id);
+        try {
+            // ✅ PERBAIKI: kategoris → kategori
+            $tiket = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
+                ->where('tiket_id', $tiket_id)
+                ->firstOrFail();
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Detail tiket berhasil diambil',
-            'data'    => $tiket,
-        ]);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Detail tiket berhasil diambil',
+                'data'    => $tiket,
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Tiket tidak ditemukan',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal mengambil detail tiket: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Update status/prioritas tiket
+     * Mengupdate tiket
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $tiket_id)
     {
-        $tiket = Tiket::findOrFail($id);
+        try {
+            $tiket = Tiket::where('tiket_id', $tiket_id)->firstOrFail();
 
-        $tiket->update($request->only([
-            'status_id',
-            'prioritas_id',
-            'kategori_id',
-            'assigned_to',
-            'waktu_selesai',
-        ]));
+            $validated = $request->validate([
+                'status_id'     => 'nullable|exists:tiket_statuses,status_id',
+                'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
+                'assigned_to'   => 'nullable|string|max:255',
+                'waktu_selesai' => 'nullable|date',
+            ]);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Tiket berhasil diperbarui',
-            'data'    => $tiket,
-        ]);
+            if (!empty($validated['waktu_selesai'])) {
+                try {
+                    $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Format waktu_selesai tidak valid.',
+                    ], 422);
+                }
+            }
+
+            foreach ($validated as $key => $value) {
+                if (!is_null($value)) {
+                    $tiket->$key = $value;
+                }
+            }
+
+            $tiket->save();
+
+            // ✅ PERBAIKI: kategoris → kategori
+            $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event']);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Tiket berhasil diperbarui.',
+                'data'    => $tiket,
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Tiket tidak ditemukan',
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Validasi gagal.',
+                'errors'  => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Hapus tiket
+     * Menghapus tiket
      */
-    public function destroy($id)
+    public function destroy($tiket_id)
     {
-        $tiket = Tiket::findOrFail($id);
-        $tiket->delete();
+        try {
+            $tiket = Tiket::where('tiket_id', $tiket_id)->firstOrFail();
+            $tiket->delete();
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Tiket berhasil dihapus',
-        ]);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Tiket berhasil dihapus',
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Tiket tidak ditemukan',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menghapus tiket: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

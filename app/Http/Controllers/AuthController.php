@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -10,7 +11,7 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthController extends Controller
 {
     /**
-     * 🔐 Login manual
+     * 🔐 Login Manual
      */
     public function login(Request $request)
     {
@@ -19,34 +20,23 @@ class AuthController extends Controller
             'password' => 'required|max:50',
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Email atau password salah',
-            ], 401);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return back()->withErrors(['login' => 'Email atau password salah']);
         }
 
-        $user  = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $user = Auth::user();
 
-        // Tentukan redirect berdasarkan role
-        $redirect = match ($user->role) {
-            'admin' => '/dashboard',
-            'staff' => '/staff',
-            default => '/home',
-        };
+        // ✅ Jika admin → home
+        if ($user->role === 'admin') {
+            return redirect('/home');
+        }
 
-        return response()->json([
-            'status'   => 'success',
-            'message'  => 'Login berhasil',
-            'user'     => $user,
-            'token'    => $token,
-            'redirect' => $redirect,
-        ]);
+        // ✅ Jika user customer → home juga
+        return redirect('/home');
     }
 
     /**
-     * 🧾 Registrasi user baru
+     * 🧾 Registrasi manual
      */
     public function register(Request $request)
     {
@@ -64,19 +54,13 @@ class AuthController extends Controller
             'role'     => 'customer',
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
 
-        return response()->json([
-            'status'   => 'success',
-            'message'  => 'Registrasi berhasil',
-            'user'     => $user,
-            'token'    => $token,
-            'redirect' => '/home',
-        ], 201);
+        return redirect('/home');
     }
 
     /**
-     * 🌐 Login dengan Google
+     * 🌐 Login Google
      */
     public function google_redirect()
     {
@@ -86,33 +70,25 @@ class AuthController extends Controller
     public function google_callback()
     {
         try {
-            // Ambil data user dari Google
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            // Cari atau buat user baru
             $user = User::firstOrCreate(
                 ['email' => $googleUser->email],
                 [
                     'name'     => $googleUser->name,
                     'password' => bcrypt(Str::random(16)),
                     'status'   => 'active',
-                    'role'     => 'customer', // semua user Google jadi customer
+                    'role'     => 'customer',
                 ]
             );
 
-            // Cek status banned
-            if ($user->status === 'banned') {
-                return redirect("http://localhost:5173/login?error=account_banned");
-            }
+            Auth::login($user);
 
-            // Buat token API
-            $token = $user->createToken('auth_token')->plainTextToken;
-
-            // Selalu redirect ke halaman user (/user)
-            return redirect("http://localhost:5173/login-success?token={$token}&redirect=/user");
+            // ✅ User Google masuk ke welcome.blade.php
+            return redirect('/');
 
         } catch (\Exception $e) {
-            return redirect("http://localhost:5173/login?error=google_error");
+            return redirect('/login')->withErrors(['google' => 'Google login gagal']);
         }
     }
 
@@ -121,18 +97,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        if (! $request->user()) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'User not authenticated',
-            ], 401);
-        }
-
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Logout berhasil',
-        ]);
+        Auth::logout();
+        return redirect('/login');
     }
 }

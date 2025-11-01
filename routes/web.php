@@ -1,35 +1,33 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
-
-// route login manual (opsional, karena Auth::routes() sudah buat otomatis)
+// ✅ Login manual
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// ✅ Register manual
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+// ✅ Google login
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect']);
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback']);
 
-Route::group(['middleware' => ['auth', 'check_role:customer']], function () {
-    Route::get('/home', [HomeController::class, 'index']);
+// ✅ Akses user biasa
+Route::middleware('auth')->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-
-Route::group(['middleware' => ['auth', 'check_role:admin']], function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-});
-
-// Hapus route GET /logout di sini

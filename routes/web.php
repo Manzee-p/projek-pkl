@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PrioritasController;
-use App\Http\Controllers\TiketStatusController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
+use App\Http\Controllers\TiketStatusController;
+use Illuminate\Support\Facades\Route;
 
 
 // ============================
@@ -98,8 +99,11 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'admin.status.destroy',
             ]);
 
-            Route::resource('tiket', TiketController::class)->names([
-                'index'   => 'admin.tiket.index',
+
+            // ✅ Admin Tiket Routes
+            Route::get('/tiket', [TiketController::class, 'adminIndex'])->name('admin.tiket.index');
+            
+            Route::resource('tiket', TiketController::class)->except(['index'])->names([
                 'create'  => 'admin.tiket.create',
                 'store'   => 'admin.tiket.store',
                 'show'    => 'admin.tiket.show',
@@ -107,7 +111,12 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'admin.tiket.update',
                 'destroy' => 'admin.tiket.destroy',
             ]);
-
+        Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
+        Route::get('report/create', [ReportController::class, 'create'])->name('admin.report.create');
+        Route::post('report', [ReportController::class, 'store'])->name('admin.report.store');
+        Route::get('report/{id}/edit', [ReportController::class, 'edit'])->name('admin.report.edit');
+        Route::put('report/{id}', [ReportController::class, 'update'])->name('admin.report.update');
+        Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
     });
 
     // ============================
@@ -120,15 +129,15 @@ Route::middleware('auth')->group(function () {
 
         // Form buat tiket
         Route::get('/create', function () {
-            $events = \App\Models\Event::all();
+            $events    = \App\Models\Event::all();
             $kategoris = \App\Models\Kategori::all();
             $prioritas = \App\Models\Prioritas::all();
-            $statuses = \App\Models\TiketStatus::all();
-            $tikets = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
+            $statuses  = \App\Models\TiketStatus::all();
+            $tikets    = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
 
             return view('tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'tikets'));
         })->name('tiket.create');
-        
+
         // Simpan tiket
         Route::post('/', [TiketController::class, 'store'])->name('tiket.store');
 

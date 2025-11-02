@@ -1,73 +1,86 @@
 @extends('layouts.admin.master')
-
 @section('content')
-<div class="pagetitle">
-    <h1>Edit Tiket</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.tiket.index') }}">Tiket</a></li>
-            <li class="breadcrumb-item active">Edit</li>
-        </ol>
-    </nav>
-</div>
 
-<section class="section">
+<div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
-        <div class="card-body pt-3">
-            <h5 class="card-title">Form Edit Tiket</h5>
+        <div class="card-body">
+            <h4 class="card-title">Edit Tiket</h4>
 
-            <form action="{{ route('admin.tiket.update', $tiket->tiket_id) }}" method="POST">
+            <form action="{{ route('admin.tiket.update', $tiket) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">Judul</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="judul" class="form-control" value="{{ old('judul', $tiket->judul) }}" required>
-                    </div>
+                <div class="form-group">
+                    <label>Kode Tiket</label>
+                    <input type="text" class="form-control" value="{{ $tiket->kode_tiket }}" disabled>
                 </div>
 
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">Deskripsi</label>
-                    <div class="col-sm-10">
-                        <textarea name="deskripsi" class="form-control" rows="4">{{ old('deskripsi', $tiket->deskripsi) }}</textarea>
-                    </div>
+                <div class="form-group">
+                    <label>Nama User</label>
+                    <select name="user_id" class="form-control">
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}" {{ $tiket->user_id == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">Status</label>
-                    <div class="col-sm-10">
-                        <select name="status_id" class="form-select">
-                            @foreach($statuses as $status)
-                                <option value="{{ $status->status_id }}" {{ $tiket->status_id == $status->status_id ? 'selected' : '' }}>
-                                    {{ $status->nama_status }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label>Event</label>
+                    <select name="event_id" class="form-control">
+                        @foreach ($events as $event)
+                            <option value="{{ $event->id }}" {{ $tiket->event_id == $event->id ? 'selected' : '' }}>
+                                {{ $event->nama_event }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">Prioritas</label>
-                    <div class="col-sm-10">
-                        <select name="prioritas_id" class="form-select">
-                            @foreach($prioritas as $p)
-                                <option value="{{ $p->prioritas_id }}" {{ $tiket->prioritas_id == $p->prioritas_id ? 'selected' : '' }}>
-                                    {{ $p->nama_prioritas }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select name="kategori_id" class="form-control">
+                        @foreach ($kategoris as $kat)
+                            <option value="{{ $kat->id }}" {{ $tiket->kategori_id == $kat->id ? 'selected' : '' }}>
+                                {{ $kat->nama_kategori }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="text-end">
-                    <a href="{{ route('admin.tiket.index') }}" class="btn btn-secondary">Batal</a>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                <div class="form-group">
+                    <label>Prioritas</label>
+                    <select name="prioritas_id" class="form-control">
+                        @foreach ($prioritas as $prio)
+                            <option value="{{ $prio->id }}" {{ $tiket->prioritas_id == $prio->id ? 'selected' : '' }}>
+                                {{ $prio->nama_prioritas }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status_id" class="form-control">
+                        @foreach ($statuses as $st)
+                            <option value="{{ $st->id }}" {{ $tiket->status_id == $st->id ? 'selected' : '' }}>
+                                {{ $st->nama_status }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea name="deskripsi" class="form-control" rows="4">{{ $tiket->deskripsi }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm mt-2">Update Tiket</button>
+                <a href="{{ route('admin.tiket.index') }}" class="btn btn-secondary btn-sm mt-2">Kembali</a>
 
             </form>
         </div>
     </div>
-</section>
+</div>
+
 @endsection

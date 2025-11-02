@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Report;
@@ -7,25 +8,23 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    /**
-     * List semua laporan user (hanya milik user login)
-     */
+    // ================== DAFTAR LAPORAN (TABEL) ==================
     public function index(Request $request)
     {
         $reports = Report::where('user_id', $request->user()->user_id)
-            ->latest()
-            ->get();
+                         ->latest()
+                         ->paginate(10);
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Data laporan berhasil diambil',
-            'data'    => $reports,
-        ], 200);
+        return view('admin.report.index', compact('reports'));
     }
 
-    /**
-     * Buat laporan baru
-     */
+    // ================== FORM BUAT BARU ==================
+    public function create()
+    {
+        return view('admin.report.create');
+    }
+
+    // ================== SIMPAN LAPORAN ==================
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,10 +37,11 @@ class ReportController extends Controller
 
         $lampiranPath = null;
         if ($request->hasFile('lampiran')) {
-            $lampiranPath = $request->file('lampiran')->store('reports', 'public');
+            $lampiranPath = $request->file('lampiran')
+                                    ->store('reports', 'public');
         }
 
-        $report = Report::create([
+        Report::create([
             'user_id'   => $request->user()->user_id,
             'judul'     => $validated['judul'],
             'kategori'  => $validated['kategori'],
@@ -50,35 +50,26 @@ class ReportController extends Controller
             'lampiran'  => $lampiranPath,
         ]);
 
-        return response()->json([
-            'status'    => 201,
-            'message'   => 'Laporan berhasil dikirim',
-            'report_id' => $report->id,
-        ], 201);
+        return redirect('/admin/report')
+                ->with('success', 'Laporan berhasil dikirim!');
     }
 
-    /**
-     * Lihat detail laporan
-     */
-    public function show(Request $request, $id)
+    // ================== FORM EDIT ==================
+    public function edit($id)
     {
         $report = Report::where('id', $id)
-            ->where('user_id', $request->user()->user_id)
-            ->firstOrFail();
+                        ->where('user_id', auth()->user()->user_id)
+                        ->firstOrFail();
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Detail laporan berhasil diambil',
-            'data'    => $report,
-        ], 200);
+        return view('admin.report.edit', compact('report'));
     }
 
-    /**
-     * Update laporan (hanya user yang punya laporan)
-     */
+    // ================== UPDATE LAPORAN ==================
     public function update(Request $request, $id)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::where('id', $id)
+                        ->where('user_id', $request->user()->user_id)
+                        ->firstOrFail();
 
         $validated = $request->validate([
             'judul'     => 'required|string|max:255',
@@ -88,49 +79,38 @@ class ReportController extends Controller
             'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        // Jika ada file baru, hapus file lama dan simpan baru
+        // Hapus lampiran lama kalau upload baru
         if ($request->hasFile('lampiran')) {
-            // Hapus file lama
             if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
                 Storage::disk('public')->delete($report->lampiran);
             }
-
-            $lampiranPath          = $request->file('lampiran')->store('reports', 'public');
-            $validated['lampiran'] = $lampiranPath;
+            $validated['lampiran'] = $request->file('lampiran')
+                                             ->store('reports', 'public');
         } else {
-            // Jika tidak upload file baru, tetap pakai lampiran lama
             $validated['lampiran'] = $report->lampiran;
         }
 
-        // Update data laporan
         $report->update($validated);
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Laporan berhasil diupdate',
-            'data'    => $report,
-        ]);
+        return redirect('/admin/report')
+                ->with('success', 'Laporan berhasil diupdate!');
     }
 
-    /**
-     * Hapus laporan (hanya user yang punya laporan)
-     */
-    public function destroy(Request $request, $id)
+    // ================== HAPUS LAPORAN ==================
+    public function destroy($id)
     {
         $report = Report::where('id', $id)
-            ->where('user_id', $request->user()->user_id)
-            ->firstOrFail();
+                        ->where('user_id', auth()->user()->user_id)
+                        ->firstOrFail();
 
-        // Hapus lampiran kalau ada
+        // Hapus file
         if ($report->lampiran) {
             Storage::disk('public')->delete($report->lampiran);
         }
 
         $report->delete();
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Laporan berhasil dihapus',
-        ], 200);
-    }       
+        return redirect('/admin/report')
+                ->with('success', 'Laporan berhasil dihapus!');
+    }
 }

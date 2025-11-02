@@ -85,7 +85,7 @@ class AuthController extends Controller
             Auth::login($user);
 
             // ✅ User Google masuk ke welcome.blade.php
-            return redirect('/welcome');
+            return redirect('/');
 
         } catch (\Exception $e) {
             return redirect('/login')->withErrors(['google' => 'Google login gagal']);

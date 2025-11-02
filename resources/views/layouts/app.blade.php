@@ -18,7 +18,6 @@
 </head>
 <body>
     <div id="app">
-        @include('layouts.sidebar')
 
         <div id="main">
             <header class="mb-3">

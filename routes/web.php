@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,8 +24,10 @@ Route::get('/register', function () {
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 // ✅ Google login
-Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect']);
-Route::get('/auth-google-callback', [AuthController::class, 'google_callback']);
+Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
+Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
+
+Route::resource('kategori', KategoriController::class);
 
 // ✅ Akses user biasa
 Route::middleware('auth')->group(function () {

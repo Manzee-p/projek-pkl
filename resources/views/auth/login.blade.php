@@ -1,69 +1,108 @@
-@extends('layouts.app')
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="row h-100">
-    <div class="col-lg-5 col-12 d-flex align-items-center justify-content-center">
-        <div id="auth-left" style="width: 100%; max-width: 400px;">
-            <div class="auth-logo text-center mb-4">
-                <a href="/"><img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo" width="120"></a>
-            </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Majestic Admin</title>
+  <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/vendors/base/vendor.bundle.base.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+</head>
 
-            <h1 class="auth-title text-center">Log in</h1>
-            <p class="auth-subtitle mb-5 text-center">Masuk dengan akun Anda yang terdaftar.</p>
+<body>
+  <div class="container-scroller">
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+      <div class="content-wrapper d-flex align-items-stretch auth auth-img-bg">
+        <div class="row flex-grow">
+          <div class="col-lg-6 d-flex align-items-center justify-content-center">
+            <div class="auth-form-transparent text-left p-3">
 
-            {{-- ✅ Form Login Laravel --}}
-            <form method="POST" action="{{ route('login.post') }}">
+              <div class="brand-logo text-center mb-4">
+                <img src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+              </div>
+
+              <h4>Selamat Datang!</h4>
+              <h6 class="font-weight-light">Silakan login untuk melanjutkan</h6>
+
+              <!-- Pesan error -->
+              @if ($errors->any())
+                  <div class="alert alert-danger">
+                      {{ $errors->first() }}
+                  </div>
+              @endif
+
+              <form class="pt-3" method="POST" action="{{ route('login.post') }}">
                 @csrf
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input type="email" name="email" class="form-control form-control-xl" placeholder="Email" required>
-                    <div class="form-control-icon">
-                        <i class="bi bi-envelope"></i>
+
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend bg-transparent">
+                      <span class="input-group-text bg-transparent border-right-0">
+                        <i class="mdi mdi-email-outline text-primary"></i>
+                      </span>
                     </div>
+                    <input type="email" name="email" class="form-control form-control-lg border-left-0"
+                      placeholder="Masukkan email" required>
+                  </div>
                 </div>
 
-                <div class="form-group position-relative has-icon-left mb-4">
-                    <input type="password" name="password" class="form-control form-control-xl" placeholder="Password" required>
-                    <div class="form-control-icon">
-                        <i class="bi bi-shield-lock"></i>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend bg-transparent">
+                      <span class="input-group-text bg-transparent border-right-0">
+                        <i class="mdi mdi-lock-outline text-primary"></i>
+                      </span>
                     </div>
+                    <input type="password" name="password" class="form-control form-control-lg border-left-0"
+                      placeholder="Masukkan password" required>
+                  </div>
                 </div>
 
-                <div class="form-check form-check-lg d-flex align-items-end mb-4">
-                    <input class="form-check-input me-2" type="checkbox" id="flexCheckDefault">
-                    <label class="form-check-label text-gray-600" for="flexCheckDefault">
-                        Keep me logged in
+                <div class="my-2 d-flex justify-content-between align-items-center">
+                  <div class="form-check">
+                    <label class="form-check-label text-muted">
+                      <input type="checkbox" class="form-check-input">
+                      Ingat saya
                     </label>
+                  </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg mt-3 w-100">Log in</button>
-            </form>
+                <div class="my-3">
+                  <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">
+                    LOGIN
+                  </button>
+                </div>
 
-            {{-- ✅ Divider --}}
-            <div class="text-center text-muted my-3">atau</div>
+                <div class="mb-2 d-flex">
+                  <a href="{{ route('google.redirect') }}" class="btn btn-google auth-form-btn flex-grow">
+                    <i class="mdi mdi-google mr-2"></i> Login dengan Google
+                  </a>
+                </div>
 
-            {{-- ✅ Tombol Login Google --}}
-            <div class="d-grid">
-                <a href="{{ url('/auth-google-redirect') }}" class="btn btn-danger btn-block btn-lg shadow-lg w-100">
-                    <i class="bi bi-google me-2"></i> Login dengan Google
-                </a>
+                <div class="text-center mt-4 font-weight-light">
+                  Belum punya akun?
+                  <a href="{{ route('register') }}" class="text-primary">Daftar sekarang</a>
+                </div>
+              </form>
             </div>
-
-            {{-- ✅ Link bawah --}}
-            <div class="text-center mt-5 text-lg fs-6">
-                <p class="text-gray-600">
-                    Don't have an account?
-                    <a href="{{ route('register') }}" class="font-bold">Sign up</a>.
-                </p>
-                <p>
-                    <a class="font-bold" href="#">Forgot password?</a>.
-                </p>
-            </div>
+          </div>
+          <div class="col-lg-6 login-half-bg d-flex flex-row">
+            <p class="text-white font-weight-medium text-center flex-grow align-self-end">
+              Copyright &copy; {{ date('Y') }} All rights reserved.
+            </p>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="col-lg-7 d-none d-lg-block">
-        <div id="auth-right"></div>
-    </div>
-</div>
-
-@endsection
+  <script src="{{ asset('assets/vendors/base/vendor.bundle.base.js') }}"></script>
+  <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
+  <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
+  <script src="{{ asset('assets/js/template.js') }}"></script>
+</body>
+</html>

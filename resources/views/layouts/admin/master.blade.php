@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="{{ asset('assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
+   @stack('style')
 </head>
 <body>
   <div class="container-scroller">
@@ -24,7 +25,8 @@
       <!-- SIDEBAR -->
       @include('layouts.admin.sidebar')
       <!-- END SIDEBAR -->
-      
+
+      @yield('content')
     <!-- page-body-wrapper ends -->
   </div>
   <!-- container-scroller -->
@@ -45,5 +47,6 @@
   <script src="{{ asset('assets/js/data-table.js') }}"></script>
   <script src="{{ asset('assets/js/jquery.dataTables.js') }}"></script>
   <script src="{{ asset('assets/js/dataTables.bootstrap4.js') }}"></script>
+  @stack('scripts')
 </body>
 </html>

@@ -57,9 +57,6 @@ Route::middleware('auth')->group(function () {
     // ✅ CRUD Prioritas
     Route::resource('prioritas', PrioritasController::class);
 
-    // ✅ CRUD Tiket
-    Route::resource('tiket', TiketController::class);
-
 
     // ✅ CRUD Status Tiket
     Route::resource('admin/status', TiketStatusController::class)
@@ -100,6 +97,17 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'admin.status.update',
                 'destroy' => 'admin.status.destroy',
             ]);
+
+            Route::resource('tiket', TiketController::class)->names([
+                'index'   => 'admin.tiket.index',
+                'create'  => 'admin.tiket.create',
+                'store'   => 'admin.tiket.store',
+                'show'    => 'admin.tiket.show',
+                'edit'    => 'admin.tiket.edit',
+                'update'  => 'admin.tiket.update',
+                'destroy' => 'admin.tiket.destroy',
+            ]);
+
     });
 
     // ============================

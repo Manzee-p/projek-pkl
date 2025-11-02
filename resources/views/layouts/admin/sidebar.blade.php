@@ -12,6 +12,8 @@
           <li class="nav-item"><a class="nav-link" href="{{ route('admin.status.index') }}">Status</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ route('prioritas.index') }}">Prioritas</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ route('event.index') }}">Event</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ route('tiket.index') }}">Tiket</a></li>
+
         </ul>
       </div>
     </li>

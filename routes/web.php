@@ -6,6 +6,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PrioritasController;
 use App\Http\Controllers\TiketStatusController;
+use App\Http\Controllers\TiketController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -43,7 +45,11 @@ Route::middleware('auth')->group(function () {
     
     // ✅ CRUD Prioritas
     Route::resource('prioritas', PrioritasController::class);
-    
+
+    // ✅ CRUD Tiket
+    Route::resource('tiket', TiketController::class);
+
+
     // ✅ CRUD Status Tiket
     Route::resource('admin/status', TiketStatusController::class)
          ->except(['show'])
@@ -55,4 +61,5 @@ Route::middleware('auth')->group(function () {
              'update'  => 'admin.status.update',
              'destroy' => 'admin.status.destroy',
          ]);
+    
 });

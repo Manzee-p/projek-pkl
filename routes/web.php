@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\TiketStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,3 +35,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+Route::resource('admin/status', TiketStatusController::class)
+     ->except(['show'])
+     ->names([
+         'index'   => 'admin.status.index',
+         'create'  => 'admin.status.create',
+         'store'   => 'admin.status.store',
+         'edit'    => 'admin.status.edit',
+         'update'  => 'admin.status.update',
+         'destroy' => 'admin.status.destroy',
+     ]);

@@ -10,11 +10,13 @@ class TiketController extends Controller
 {
     /**
      * Menampilkan semua tiket dengan filter opsional
+     * Untuk web view (bukan API)
      */
     public function index(Request $request)
     {
-        // ✅ PERBAIKI: kategoris → kategori
-        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event']);
+        // Query tiket milik user yang login
+        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
+            ->where('user_id', auth()->id()); // Hanya tiket user yang login
 
         // Filter opsional
         if ($request->filled('status_id')) {
@@ -29,12 +31,7 @@ class TiketController extends Controller
             $query->where('prioritas_id', $request->prioritas_id);
         }
 
-        if ($request->filled('tipe_pengguna')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('tipe_pengguna', $request->tipe_pengguna);
-            });
-        }
-
+        // Sorting: Prioritas → Waktu terbaru
         $query->orderByRaw("
             CASE
                 WHEN prioritas_id = 1 THEN 1
@@ -46,11 +43,13 @@ class TiketController extends Controller
 
         $tikets = $query->get();
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Daftar tiket berhasil diambil',
-            'data'    => $tikets,
-        ]);
+        // Data untuk dropdown filter
+        $statuses = \App\Models\TiketStatus::all();
+        $kategoris = \App\Models\Kategori::all();
+        $prioritas = \App\Models\Prioritas::all();
+
+        // Return view untuk web
+        return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas'));
     }
 
     /**
@@ -68,10 +67,12 @@ class TiketController extends Controller
             'deskripsi'    => 'nullable|string',
         ]);
 
+        // Generate kode tiket otomatis
         $today = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
         $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
 
+        // Pastikan kode tiket unique
         while (Tiket::where('kode_tiket', $kodeTiket)->exists()) {
             $countToday++;
             $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
@@ -89,14 +90,10 @@ class TiketController extends Controller
             'waktu_dibuat' => now(),
         ]);
 
-        // ✅ PERBAIKI: kategoris → kategori
         $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event']);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Tiket berhasil dibuat',
-            'data'    => $tiket,
-        ], 201);
+        // Redirect ke halaman index dengan success message
+        return redirect()->route('tiket.index')->with('success', 'Tiket berhasil dibuat dengan kode: ' . $kodeTiket);
     }
 
     /**
@@ -105,26 +102,17 @@ class TiketController extends Controller
     public function show($tiket_id)
     {
         try {
-            // ✅ PERBAIKI: kategoris → kategori
             $tiket = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
                 ->where('tiket_id', $tiket_id)
+                ->where('user_id', auth()->id()) // Hanya bisa lihat tiket sendiri
                 ->firstOrFail();
 
-            return response()->json([
-                'status'  => true,
-                'message' => 'Detail tiket berhasil diambil',
-                'data'    => $tiket,
-            ]);
+            // Return view untuk web
+            return view('tiket.show', compact('tiket'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Tiket tidak ditemukan',
-            ], 404);
+            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan atau Anda tidak memiliki akses');
         } catch (\Exception $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Gagal mengambil detail tiket: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->route('tiket.index')->with('error', 'Gagal mengambil detail tiket: ' . $e->getMessage());
         }
     }
 
@@ -134,7 +122,9 @@ class TiketController extends Controller
     public function update(Request $request, $tiket_id)
     {
         try {
-            $tiket = Tiket::where('tiket_id', $tiket_id)->firstOrFail();
+            $tiket = Tiket::where('tiket_id', $tiket_id)
+                ->where('user_id', auth()->id()) // Hanya bisa update tiket sendiri
+                ->firstOrFail();
 
             $validated = $request->validate([
                 'status_id'     => 'nullable|exists:tiket_statuses,status_id',
@@ -147,10 +137,7 @@ class TiketController extends Controller
                 try {
                     $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
                 } catch (\Exception $e) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Format waktu_selesai tidak valid.',
-                    ], 422);
+                    return redirect()->back()->with('error', 'Format waktu_selesai tidak valid.');
                 }
             }
 
@@ -161,31 +148,15 @@ class TiketController extends Controller
             }
 
             $tiket->save();
-
-            // ✅ PERBAIKI: kategoris → kategori
             $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event']);
 
-            return response()->json([
-                'status'  => true,
-                'message' => 'Tiket berhasil diperbarui.',
-                'data'    => $tiket,
-            ]);
+            return redirect()->route('tiket.show', $tiket->tiket_id)->with('success', 'Tiket berhasil diperbarui.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Tiket tidak ditemukan',
-            ], 404);
+            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Validasi gagal.',
-                'errors'  => $e->errors(),
-            ], 422);
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -195,23 +166,17 @@ class TiketController extends Controller
     public function destroy($tiket_id)
     {
         try {
-            $tiket = Tiket::where('tiket_id', $tiket_id)->firstOrFail();
+            $tiket = Tiket::where('tiket_id', $tiket_id)
+                ->where('user_id', auth()->id()) // Hanya bisa hapus tiket sendiri
+                ->firstOrFail();
+            
             $tiket->delete();
 
-            return response()->json([
-                'status'  => true,
-                'message' => 'Tiket berhasil dihapus',
-            ]);
+            return redirect()->route('tiket.index')->with('success', 'Tiket berhasil dihapus');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Tiket tidak ditemukan',
-            ], 404);
+            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
         } catch (\Exception $e) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Gagal menghapus tiket: ' . $e->getMessage(),
-            ], 500);
+            return redirect()->route('tiket.index')->with('error', 'Gagal menghapus tiket: ' . $e->getMessage());
         }
     }
 }

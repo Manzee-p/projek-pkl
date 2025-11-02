@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'check_role' => \App\Http\Middleware\CheckRole::class,
+            'isAdmin' => \App\Http\Middleware\IsAdmin::class,
         ]);
 
         $middleware->prependToGroup('api', [

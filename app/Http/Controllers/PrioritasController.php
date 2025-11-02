@@ -11,13 +11,15 @@ class PrioritasController extends Controller
     // Ambil semua data prioritas
     public function index()
     {
-        $data = Prioritas::all();
+        $prioritas = Prioritas::all();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Data prioritas tiket berhasil diambil',
-            'data' => $data,
-        ]);
+        return view('admin.prioritas.index', compact('prioritas'));
+    }
+
+    // Form tambah prioritas
+    public function create()
+    {
+        return view('admin.prioritas.create');
     }
 
     // Tambah prioritas baru
@@ -28,76 +30,65 @@ class PrioritasController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
-            ]);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $prioritas = Prioritas::create([
+        Prioritas::create([
             'nama_prioritas' => $request->nama_prioritas,
         ]);
 
-        return response()->json([
-            'status' => 201,
-            'message' => 'Prioritas baru berhasil ditambahkan',
-            'data' => $prioritas,
-        ]);
+        return redirect()->route('prioritas.index')
+            ->with('success', 'Prioritas baru berhasil ditambahkan');
+    }
+
+    // Detail prioritas
+    public function show($id)
+    {
+        $prioritas = Prioritas::findOrFail($id);
+
+        return view('admin.prioritas.show', compact('prioritas'));
+    }
+
+    // Form edit prioritas
+    public function edit($id)
+    {
+        $prioritas = Prioritas::findOrFail($id);
+
+        return view('admin.prioritas.edit', compact('prioritas'));
     }
 
     // Update prioritas
     public function update(Request $request, $id)
     {
-        $prioritas = Prioritas::find($id);
-
-        if (!$prioritas) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Prioritas tidak ditemukan',
-            ]);
-        }
+        $prioritas = Prioritas::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'nama_prioritas' => 'required|string|max:50|unique:priorities,nama_prioritas,' . $id . ',prioritas_id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 422,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors(),
-            ]);
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $prioritas->update([
             'nama_prioritas' => $request->nama_prioritas,
         ]);
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Prioritas berhasil diperbarui',
-            'data' => $prioritas,
-        ]);
+        return redirect()->route('prioritas.index')
+            ->with('success', 'Prioritas berhasil diperbarui');
     }
 
     // Hapus prioritas
     public function destroy($id)
     {
-        $prioritas = Prioritas::find($id);
-
-        if (!$prioritas) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Prioritas tidak ditemukan',
-            ]);
-        }
-
+        $prioritas = Prioritas::findOrFail($id);
         $prioritas->delete();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Prioritas berhasil dihapus',
-        ]);
+        return redirect()->route('prioritas.index')
+            ->with('success', 'Prioritas berhasil dihapus');
     }
 }

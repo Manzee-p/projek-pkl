@@ -10,12 +10,13 @@ class EventController extends Controller
     public function index()
     {
         $events = Event::latest()->get();
+        
+        return view('admin.event.index', compact('events'));
+    }
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Data event berhasil diambil',
-            'data'    => $events,
-        ]);
+    public function create()
+    {
+        return view('admin.event.create');
     }
 
     public function store(Request $request)
@@ -28,24 +29,24 @@ class EventController extends Controller
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
-        $event = Event::create($validated);
+        Event::create($validated);
 
-        return response()->json([
-            'status'  => 201,
-            'message' => 'Event berhasil dibuat',
-            'data'    => $event,
-        ]);
+        return redirect()->route('event.index')
+            ->with('success', 'Event berhasil dibuat');
     }
 
     public function show($id)
     {
         $event = Event::findOrFail($id);
+        
+        return view('admin.event.show', compact('event'));
+    }
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Detail event berhasil diambil',
-            'data'    => $event,
-        ]);
+    public function edit($id)
+    {
+        $event = Event::findOrFail($id);
+        
+        return view('admin.event.edit', compact('event'));
     }
 
     public function update(Request $request, $id)
@@ -62,11 +63,8 @@ class EventController extends Controller
 
         $event->update($validated);
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Event berhasil diperbarui',
-            'data'    => $event,
-        ]);
+        return redirect()->route('event.index')
+            ->with('success', 'Event berhasil diperbarui');
     }
 
     public function destroy($id)
@@ -74,9 +72,7 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
         $event->delete();
 
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Event berhasil dihapus',
-        ]);
+        return redirect()->route('event.index')
+            ->with('success', 'Event berhasil dihapus');
     }
 }

@@ -1,24 +1,19 @@
 <?php
 
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Foundation\Configuration\Middleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+namespace App\Http\Middleware;
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
-        health: '/up',
-    )
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->statefulApi();  
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-        $middleware->alias([
-            'check_role' => \App\Http\Middleware\CheckRole::class,
-        ]);
-    })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+class CheckRole
+{
+    public function handle(Request $request, Closure $next, ...$roles): Response
+    {
+        if (auth()->check() && in_array(auth()->user()->role, $roles)) {
+            return $next($request);
+        }
+
+        abort(403, 'Akses ditolak.');
+    }
+}

@@ -9,9 +9,8 @@
             </a>
 
             {{-- Toggle button for mobile --}}
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -33,6 +32,12 @@
                     <li class="nav-item mx-2">
                         <a class="nav-link text-dark fw-semibold" href="#contact">Contact</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="page-scroll {{ request()->routeIs('tiket.*') ? 'active' : '' }}"
+                            href="{{ route('tiket.index') }}" style="display: flex; align-items: center; gap: 5px;">
+                            <i class="lni lni-ticket"></i> Tiket Saya
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -49,8 +54,7 @@
                             height="40" class="rounded-circle me-2" />
                         <span class="fw-semibold text-dark">{{ Auth::user()->name }}</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm"
-                        aria-labelledby="profileDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
                         <li>
                             <a class="dropdown-item" href="#">
                                 <i class="mdi mdi-settings text-primary me-2"></i>Settings

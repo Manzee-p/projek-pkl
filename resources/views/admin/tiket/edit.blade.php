@@ -19,7 +19,7 @@
                     <label>Nama User</label>
                     <select name="user_id" class="form-control">
                         @foreach ($users as $user)
-                            <option value="{{ $user->id }}" {{ $tiket->user_id == $user->id ? 'selected' : '' }}>
+                            <option value="{{ $user->user_id }}" {{ $tiket->user_id == $user->user_id ? 'selected' : '' }}>
                                 {{ $user->name }}
                             </option>
                         @endforeach
@@ -30,7 +30,7 @@
                     <label>Event</label>
                     <select name="event_id" class="form-control">
                         @foreach ($events as $event)
-                            <option value="{{ $event->id }}" {{ $tiket->event_id == $event->id ? 'selected' : '' }}>
+                            <option value="{{ $event->event_id }}" {{ $tiket->event_id == $event->event_id ? 'selected' : '' }}>
                                 {{ $event->nama_event }}
                             </option>
                         @endforeach
@@ -41,7 +41,7 @@
                     <label>Kategori</label>
                     <select name="kategori_id" class="form-control">
                         @foreach ($kategoris as $kat)
-                            <option value="{{ $kat->id }}" {{ $tiket->kategori_id == $kat->id ? 'selected' : '' }}>
+                            <option value="{{ $kat->kategori_id }}" {{ $tiket->kategori_id == $kat->kategori_id ? 'selected' : '' }}>
                                 {{ $kat->nama_kategori }}
                             </option>
                         @endforeach
@@ -52,7 +52,7 @@
                     <label>Prioritas</label>
                     <select name="prioritas_id" class="form-control">
                         @foreach ($prioritas as $prio)
-                            <option value="{{ $prio->id }}" {{ $tiket->prioritas_id == $prio->id ? 'selected' : '' }}>
+                            <option value="{{ $prio->prioritas_id }}" {{ $tiket->prioritas_id == $prio->prioritas_id ? 'selected' : '' }}>
                                 {{ $prio->nama_prioritas }}
                             </option>
                         @endforeach
@@ -63,7 +63,7 @@
                     <label>Status</label>
                     <select name="status_id" class="form-control">
                         @foreach ($statuses as $st)
-                            <option value="{{ $st->id }}" {{ $tiket->status_id == $st->id ? 'selected' : '' }}>
+                            <option value="{{ $st->status_id }}" {{ $tiket->status_id == $st->status_id ? 'selected' : '' }}>
                                 {{ $st->nama_status }}
                             </option>
                         @endforeach

@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PrioritasController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\TiketStatusController;
 use Illuminate\Support\Facades\Route;
@@ -71,12 +72,13 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'admin.status.destroy',
             ]);
 
-        Route::get('/', [ReportController::class, 'index'])->name('index');
-        Route::get('/create', fn() => view('admin.report.create'))->name('create');
-        Route::post('/', [ReportController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', fn($id) => view('admin.report.edit', ['report' => \App\Models\Report::findOrFail($id)]))->name('edit');
-        Route::put('/{id}', [ReportController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ReportController::class, 'destroy'])->name('destroy');
+        Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
+        Route::get('report/create', [ReportController::class, 'create'])->name('admin.report.create');
+        Route::post('report', [ReportController::class, 'store'])->name('admin.report.store');
+        Route::get('report/{id}/edit', [ReportController::class, 'edit'])->name('admin.report.edit');
+        Route::put('report/{id}', [ReportController::class, 'update'])->name('admin.report.update');
+        Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
+
     });
 
     // ============================

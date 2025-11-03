@@ -155,7 +155,7 @@ class TiketController extends Controller
     /**
      * Mengupdate tiket
      */
-    public function update(Request $request, $tiket_id)
+  public function update(Request $request, $tiket_id)
 {
     try {
         // Ambil tiket
@@ -212,6 +212,8 @@ class TiketController extends Controller
         return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
     }
 }
+
+
 
     /**
      * Menghapus tiket

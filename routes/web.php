@@ -30,29 +30,33 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
 
-// ✅ Akses user biasa
 Route::middleware('auth')->group(function () {
+
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
-    // ✅ CRUD Kategori
-    Route::resource('kategori', KategoriController::class);
-    
-    // ✅ CRUD Event
-    Route::resource('event', EventController::class);
-    
-    // ✅ CRUD Prioritas
-    Route::resource('prioritas', PrioritasController::class);
-    
-    // ✅ CRUD Status Tiket
-    Route::resource('admin/status', TiketStatusController::class)
-         ->except(['show'])
-         ->names([
-             'index'   => 'admin.status.index',
-             'create'  => 'admin.status.create',
-             'store'   => 'admin.status.store',
-             'edit'    => 'admin.status.edit',
-             'update'  => 'admin.status.update',
-             'destroy' => 'admin.status.destroy',
-         ]);
+
+    // 🔒 Semua route di bawah hanya bisa diakses oleh admin
+    Route::prefix('admin')->middleware('isAdmin')->group(function () {
+
+        // ✅ CRUD Kategori
+        Route::resource('kategori', KategoriController::class);
+
+        // ✅ CRUD Event
+        Route::resource('event', EventController::class);
+
+        // ✅ CRUD Prioritas
+        Route::resource('prioritas', PrioritasController::class);
+
+        // ✅ CRUD Status Tiket
+        Route::resource('status', TiketStatusController::class)
+            ->except(['show'])
+            ->names([
+                'index'   => 'admin.status.index',
+                'create'  => 'admin.status.create',
+                'store'   => 'admin.status.store',
+                'edit'    => 'admin.status.edit',
+                'update'  => 'admin.status.update',
+                'destroy' => 'admin.status.destroy',
+            ]);
+    });
 });

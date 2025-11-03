@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PrioritasController;
-use App\Http\Controllers\TiketStatusController;
 use App\Http\Controllers\TiketController;
+use App\Http\Controllers\TiketStatusController;
+use Illuminate\Support\Facades\Route;
 
 // ============================
 // 🔹 Halaman Awal (Welcome)
@@ -70,6 +70,13 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'admin.status.update',
                 'destroy' => 'admin.status.destroy',
             ]);
+
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/create', fn() => view('admin.report.create'))->name('create');
+        Route::post('/', [ReportController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', fn($id) => view('admin.report.edit', ['report' => \App\Models\Report::findOrFail($id)]))->name('edit');
+        Route::put('/{id}', [ReportController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ReportController::class, 'destroy'])->name('destroy');
     });
 
     // ============================
@@ -82,15 +89,15 @@ Route::middleware('auth')->group(function () {
 
         // Form buat tiket
         Route::get('/create', function () {
-            $events = \App\Models\Event::all();
+            $events    = \App\Models\Event::all();
             $kategoris = \App\Models\Kategori::all();
             $prioritas = \App\Models\Prioritas::all();
-            $statuses = \App\Models\TiketStatus::all();
-            $tikets = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
+            $statuses  = \App\Models\TiketStatus::all();
+            $tikets    = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
 
             return view('tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'tikets'));
         })->name('tiket.create');
-        
+
         // Simpan tiket
         Route::post('/', [TiketController::class, 'store'])->name('tiket.store');
 

@@ -9,25 +9,27 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\TiketStatusController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-
-// ============================
-// 🔹 Halaman Awal (Welcome)
-// ============================
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// ============================
-// 🔹 Auth (Login & Register)
-// ============================
 Route::get('/login', function () {
+    // Jika sudah login, redirect ke home
+    if ((Auth::check())) {
+        return redirect()->route('home');
+    }
     return view('auth.login');
 })->name('login');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/register', function () {
+    // Jika sudah login, redirect ke home
+    if ((Auth::check())) {
+        return redirect()->route('home');
+    }
     return view('auth.register');
 })->name('register');
 
@@ -37,9 +39,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
 
-// ============================
-// 🔒 Hanya untuk User yang Login
-// ============================
+
+// Protected routes - butuh login
 Route::middleware('auth')->group(function () {
 
     // Halaman Home
@@ -48,35 +49,6 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    
-    // ✅ CRUD Kategori
-    Route::resource('kategori', KategoriController::class);
-    
-    // ✅ CRUD Event
-    Route::resource('event', EventController::class);
-    
-    // ✅ CRUD Prioritas
-    Route::resource('prioritas', PrioritasController::class);
-
-
-    // ✅ CRUD Status Tiket
-    Route::resource('admin/status', TiketStatusController::class)
-         ->except(['show'])
-         ->names([
-             'index'   => 'admin.status.index',
-             'create'  => 'admin.status.create',
-             'store'   => 'admin.status.store',
-             'edit'    => 'admin.status.edit',
-             'update'  => 'admin.status.update',
-             'destroy' => 'admin.status.destroy',
-         ]);
-    
-});
-
-
-    // ============================
-    // 🔒 Hanya untuk Admin
-    // ============================
     Route::prefix('admin')->middleware('isAdmin')->group(function () {
         // CRUD Kategori
         Route::resource('kategori', KategoriController::class);
@@ -119,9 +91,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
     });
 
-    // ============================
-    // 🎫 Tiket Routes (User)
-    // ============================
+    // Tiket routes - untuk user yang sudah login
     Route::prefix('tiket')->group(function () {
 
         // Daftar tiket
@@ -144,11 +114,14 @@ Route::middleware('auth')->group(function () {
         // Detail tiket
         Route::get('/{tiket_id}', [TiketController::class, 'show'])->name('tiket.show');
 
+        // Form edit tiket
+        Route::get('/{tiket_id}/edit', [TiketController::class, 'edit'])->name('tiket.edit');
+
         // Update tiket
         Route::put('/{tiket_id}', [TiketController::class, 'update'])->name('tiket.update');
 
         // Hapus tiket
         Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])->name('tiket.destroy');
     });
-
-
+    
+});

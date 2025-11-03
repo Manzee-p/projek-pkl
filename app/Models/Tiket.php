@@ -20,7 +20,7 @@ class Tiket extends Model
         'status_id',
         'prioritas_id',
         'assigned_to',
-        'waktu_dibuat',
+        'waktu_dibuat' => 'datetime',
         'waktu_selesai'
     ];
 

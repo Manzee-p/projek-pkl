@@ -61,7 +61,7 @@
                             <p class="mb-30 wow fadeInUp" data-wow-delay=".4s">
                                 Satu pintu untuk seluruh tiket client & vendor, dilengkapi SLA otomatis dan dashboard real-time.
                             </p>
-                            <a href="#0" class B="button button-lg radius-50 wow fadeInUp" data-wow-delay=".6s">
+                            <a href="{{ route('tiket.create') }}" class B="button button-lg radius-50 wow fadeInUp" data-wow-delay=".6s">
                                 Buat Tiket Baru <i class="lni lni-plus"></i>
                             </a>
                         </div>

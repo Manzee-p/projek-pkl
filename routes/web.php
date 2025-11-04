@@ -49,39 +49,6 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-<<<<<<< HEAD
-    
-    // ✅ CRUD Kategori
-    Route::resource('kategori', KategoriController::class);
-    
-    // ✅ CRUD Event
-    Route::resource('event', EventController::class);
-    
-    // ✅ CRUD Prioritas
-    Route::resource('prioritas', PrioritasController::class);
-
-
-    // ✅ CRUD Status Tiket
-    Route::resource('admin/status', TiketStatusController::class)
-         ->except(['show'])
-         ->names([
-             'index'   => 'admin.status.index',
-             'create'  => 'admin.status.create',
-             'store'   => 'admin.status.store',
-             'edit'    => 'admin.status.edit',
-             'update'  => 'admin.status.update',
-             'destroy' => 'admin.status.destroy',
-         ]);
-    
-});
-
-
-    // ============================
-    // 🔒 Hanya untuk Admin
-    // ============================
-=======
-    // Admin routes - butuh role admin
->>>>>>> 2ee2e094e905665394545b939146001be3a6a68d
     Route::prefix('admin')->middleware('isAdmin')->group(function () {
         // CRUD Kategori
         Route::resource('kategori', KategoriController::class);
@@ -156,9 +123,5 @@ Route::middleware('auth')->group(function () {
         // Hapus tiket
         Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])->name('tiket.destroy');
     });
-<<<<<<< HEAD
-
-
-=======
+    
 });
->>>>>>> 2ee2e094e905665394545b939146001be3a6a68d

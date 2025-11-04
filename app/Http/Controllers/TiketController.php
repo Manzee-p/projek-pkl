@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Tiket;
@@ -44,7 +43,7 @@ class TiketController extends Controller
         $tikets = $query->get();
 
         // Data untuk dropdown filter
-        $statuses = \App\Models\TiketStatus::all();
+        $statuses  = \App\Models\TiketStatus::all();
         $kategoris = \App\Models\Kategori::all();
         $prioritas = \App\Models\Prioritas::all();
 
@@ -52,7 +51,7 @@ class TiketController extends Controller
         return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas'));
     }
 
-   public function adminIndex()
+    public function adminIndex()
     {
         $tikets = Tiket::with(['status', 'kategori', 'event', 'prioritas', 'user'])->get();
         return view('admin.tiket.index', compact('tikets'));
@@ -61,15 +60,14 @@ class TiketController extends Controller
     public function create()
     {
         // Ambil data untuk dropdown di form admin
-        $events = \App\Models\Event::all();
+        $events    = \App\Models\Event::all();
         $kategoris = \App\Models\Kategori::all();
         $prioritas = \App\Models\Prioritas::all();
-        $statuses = \App\Models\TiketStatus::all();
-        $users = \App\Models\User::all(); // Admin bisa pilih user pembuat tiket
+        $statuses  = \App\Models\TiketStatus::all();
+        $users     = \App\Models\User::all(); // Admin bisa pilih user pembuat tiket
 
         return view('admin.tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'users'));
     }
-
 
     /**
      * Menyimpan tiket baru
@@ -87,9 +85,9 @@ class TiketController extends Controller
         ]);
 
         // Generate kode tiket otomatis
-        $today = Carbon::now()->format('Ymd');
+        $today      = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
-        $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
+        $kodeTiket  = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
 
         // Pastikan kode tiket unique
         while (Tiket::where('kode_tiket', $kodeTiket)->exists()) {
@@ -112,7 +110,7 @@ class TiketController extends Controller
         $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event']);
 
         // Redirect ke halaman index dengan success message
-       // Redirect ke halaman index dengan success message
+        // Redirect ke halaman index dengan success message
         if (auth()->user()->role == 'admin') {
             return redirect()->route('admin.tiket.index')
                 ->with('success', 'Tiket berhasil dibuat dengan kode: ' . $kodeTiket);
@@ -132,86 +130,90 @@ class TiketController extends Controller
             ->where('tiket_id', $id)
             ->firstOrFail();
 
-        return view('admin.tiket.show', compact('tiket'));
+        // Cek role user
+        if (auth()->user()->role == 'admin') {
+            // Arahkan ke tampilan admin
+            return view('admin.tiket.show', compact('tiket'));
+        } else {
+            // Arahkan ke tampilan user
+            return view('tiket.show', compact('tiket'));
+        }
     }
 
-
     public function edit($tiket_id)
-{
-    $tiket = Tiket::with(['user', 'event', 'kategori', 'prioritas', 'status'])
-        ->where('tiket_id', $tiket_id)
-        ->firstOrFail();
+    {
+        $tiket = Tiket::with(['user', 'event', 'kategori', 'prioritas', 'status'])
+            ->where('tiket_id', $tiket_id)
+            ->firstOrFail();
 
-    $users = \App\Models\User::all();
-    $events = \App\Models\Event::all();
-    $kategoris = \App\Models\Kategori::all();
-    $prioritas = \App\Models\Prioritas::all();
-    $statuses = \App\Models\TiketStatus::all();
+        $users     = \App\Models\User::all();
+        $events    = \App\Models\Event::all();
+        $kategoris = \App\Models\Kategori::all();
+        $prioritas = \App\Models\Prioritas::all();
+        $statuses  = \App\Models\TiketStatus::all();
 
-    return view('admin.tiket.edit', compact('tiket', 'users', 'events', 'kategoris', 'prioritas', 'statuses'));
-}
-
+        return view('admin.tiket.edit', compact('tiket', 'users', 'events', 'kategoris', 'prioritas', 'statuses'));
+    }
 
     /**
      * Mengupdate tiket
      */
     public function update(Request $request, $tiket_id)
-{
-    try {
-        // Ambil tiket
-        $query = Tiket::where('tiket_id', $tiket_id);
+    {
+        try {
+            // Ambil tiket
+            $query = Tiket::where('tiket_id', $tiket_id);
 
-        // Kalau bukan admin, hanya boleh update tiket miliknya
-        if (auth()->user()->role !== 'admin') {
-            $query->where('user_id', auth()->id());
-        }
-
-        $tiket = $query->firstOrFail();
-
-        // Validasi
-        $validated = $request->validate([
-            'user_id'       => 'nullable|exists:users,id',
-            'event_id'      => 'nullable|exists:events,id',
-            'kategori_id'   => 'nullable|exists:kategoris,id',
-            'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
-            'status_id'     => 'nullable|exists:tiket_statuses,status_id',
-            'deskripsi'     => 'nullable|string|max:500',
-            'assigned_to'   => 'nullable|string|max:255',
-            'waktu_selesai' => 'nullable|date',
-        ]);
-
-
-        // Format waktu_selesai
-        if (!empty($validated['waktu_selesai'])) {
-            $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
-        }
-
-        // Update field
-        foreach ($validated as $key => $value) {
-            if (!is_null($value)) {
-                $tiket->$key = $value;
+            // Kalau bukan admin, hanya boleh update tiket miliknya
+            if (auth()->user()->role !== 'admin') {
+                $query->where('user_id', auth()->id());
             }
-        }
 
-        $tiket->save();
+            $tiket = $query->firstOrFail();
 
-        // Redirect berdasarkan role
-        if (auth()->user()->role === 'admin') {
-            return redirect()->route('admin.tiket.index')
+            // Validasi
+            $validated = $request->validate([
+                'user_id'       => 'nullable|exists:users,id',
+                'event_id'      => 'nullable|exists:events,id',
+                'kategori_id'   => 'nullable|exists:kategoris,id',
+                'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
+                'status_id'     => 'nullable|exists:tiket_statuses,status_id',
+                'deskripsi'     => 'nullable|string|max:500',
+                'assigned_to'   => 'nullable|string|max:255',
+                'waktu_selesai' => 'nullable|date',
+            ]);
+
+            // Format waktu_selesai
+            if (! empty($validated['waktu_selesai'])) {
+                $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
+            }
+
+            // Update field
+            foreach ($validated as $key => $value) {
+                if (! is_null($value)) {
+                    $tiket->$key = $value;
+                }
+            }
+
+            $tiket->save();
+
+            // Redirect berdasarkan role
+            if (auth()->user()->role === 'admin') {
+                return redirect()->route('admin.tiket.index')
+                    ->with('success', 'Tiket berhasil diperbarui.');
+            }
+
+            return redirect()->route('tiket.show', $tiket->tiket_id)
                 ->with('success', 'Tiket berhasil diperbarui.');
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        return redirect()->route('tiket.show', $tiket->tiket_id)
-            ->with('success', 'Tiket berhasil diperbarui.');
-
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return redirect()->back()->withErrors($e->errors())->withInput();
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
     }
-}
 
     /**
      * Menghapus tiket
@@ -222,7 +224,7 @@ class TiketController extends Controller
             $tiket = Tiket::where('tiket_id', $tiket_id)
                 ->where('user_id', auth()->id()) // Hanya bisa hapus tiket sendiri
                 ->firstOrFail();
-            
+
             $tiket->delete();
 
             return redirect()->route('tiket.index')->with('success', 'Tiket berhasil dihapus');

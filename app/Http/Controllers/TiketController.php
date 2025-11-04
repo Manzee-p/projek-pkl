@@ -157,31 +157,7 @@ class TiketController extends Controller
 
     /**
      * Menampilkan form edit tiket
-     */
-    public function edit($tiket_id)
-    {
-        try {
-            $tiket = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
-                ->where('tiket_id', $tiket_id)
-                ->where('user_id', auth()->id()) // Hanya bisa edit tiket sendiri
-                ->firstOrFail();
 
-            // Data untuk dropdown
-            $events = \App\Models\Event::all();
-            $kategoris = \App\Models\Kategori::all();
-            $prioritas = \App\Models\Prioritas::all();
-            $statuses = \App\Models\TiketStatus::all();
-
-            // Return view untuk edit
-            return view('tiket.edit', compact('tiket', 'events', 'kategoris', 'prioritas', 'statuses'));
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan atau Anda tidak memiliki akses');
-        } catch (\Exception $e) {
-            return redirect()->route('tiket.index')->with('error', 'Gagal mengambil data tiket: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Mengupdate tiket
      */
     public function update(Request $request, $tiket_id)
@@ -199,21 +175,12 @@ class TiketController extends Controller
 
             // Validasi
             $validated = $request->validate([
-<<<<<<< HEAD
-                'user_id'       => 'nullable|exists:users,id',
-                'event_id'      => 'nullable|exists:events,id',
-                'kategori_id'   => 'nullable|exists:kategoris,id',
-                'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
-                'status_id'     => 'nullable|exists:tiket_statuses,status_id',
-                'deskripsi'     => 'nullable|string|max:500',
-=======
                 'event_id'      => 'nullable|exists:events,event_id',
                 'kategori_id'   => 'nullable|exists:kategoris,kategori_id',
                 'status_id'     => 'nullable|exists:tiket_statuses,status_id',
                 'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
                 'judul'         => 'nullable|string|max:255',
                 'deskripsi'     => 'nullable|string',
->>>>>>> 2ee2e094e905665394545b939146001be3a6a68d
                 'assigned_to'   => 'nullable|string|max:255',
                 'waktu_selesai' => 'nullable|date',
             ]);

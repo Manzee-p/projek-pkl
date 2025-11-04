@@ -1,5 +1,19 @@
 @extends('layouts.admin.master')
 @section('content')
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Yeay! 🎉',
+            text: '{{ session('success') }}',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+    });
+</script>
+@endif
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">

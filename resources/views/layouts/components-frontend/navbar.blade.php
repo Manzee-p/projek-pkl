@@ -75,4 +75,35 @@
         </nav>
     </div>
 </header>
-<!-- ========================= header-6 end ========================= --> 
+<!-- ========================= header-6 end ========================= -->
+
+<style>
+  .header-action .dropdown-menu {
+    min-width: 200px;
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  .header-action .dropdown-item {
+    border-radius: 8px;
+    padding: 10px 15px;
+    transition: all 0.3s;
+  }
+  .header-action .dropdown-item:hover {
+    background: #EBF4FF;
+    color: #0052CC;
+  }
+  .header-action .dropdown-item i {
+    margin-right: 8px;
+    width: 20px;
+  }
+  .page-scroll.active {
+    color: #0052CC !important;
+    font-weight: 600;
+  }
+  .navbar-nav .nav-item .page-scroll {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+</style>

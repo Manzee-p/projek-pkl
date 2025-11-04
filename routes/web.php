@@ -1,31 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PrioritasController;
-use App\Http\Controllers\TiketStatusController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
+use App\Http\Controllers\TiketStatusController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-// ============================
-// 🔹 Halaman Awal (Welcome)
-// ============================
+// Public routes
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// ============================
-// 🔹 Auth (Login & Register)
-// ============================
 Route::get('/login', function () {
+    // Jika sudah login, redirect ke home
+    if ((Auth::check())) {
+        return redirect()->route('home');
+    }
     return view('auth.login');
 })->name('login');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/register', function () {
+    // Jika sudah login, redirect ke home
+    if ((Auth::check())) {
+        return redirect()->route('home');
+    }
     return view('auth.register');
 })->name('register');
 
@@ -35,9 +40,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
 
-// ============================
-// 🔒 Hanya untuk User yang Login
-// ============================
+
+// Protected routes - butuh login
 Route::middleware('auth')->group(function () {
 
     // Halaman Home
@@ -46,9 +50,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ============================
-    // 🔒 Hanya untuk Admin
-    // ============================
+    // Admin routes - butuh role admin
     Route::prefix('admin')->middleware('isAdmin')->group(function () {
         // CRUD Kategori
         Route::resource('kategori', KategoriController::class);
@@ -70,11 +72,16 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'admin.status.update',
                 'destroy' => 'admin.status.destroy',
             ]);
+
+        Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
+        Route::get('report/create', [ReportController::class, 'create'])->name('admin.report.create');
+        Route::post('report', [ReportController::class, 'store'])->name('admin.report.store');
+        Route::get('report/{id}/edit', [ReportController::class, 'edit'])->name('admin.report.edit');
+        Route::put('report/{id}', [ReportController::class, 'update'])->name('admin.report.update');
+        Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
     });
 
-    // ============================
-    // 🎫 Tiket Routes (User)
-    // ============================
+    // Tiket routes - untuk user yang sudah login
     Route::prefix('tiket')->group(function () {
 
         // Daftar tiket
@@ -82,20 +89,23 @@ Route::middleware('auth')->group(function () {
 
         // Form buat tiket
         Route::get('/create', function () {
-            $events = \App\Models\Event::all();
+            $events    = \App\Models\Event::all();
             $kategoris = \App\Models\Kategori::all();
             $prioritas = \App\Models\Prioritas::all();
-            $statuses = \App\Models\TiketStatus::all();
-            $tikets = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
+            $statuses  = \App\Models\TiketStatus::all();
+            $tikets    = \App\Models\Tiket::with('status', 'kategori', 'event', 'prioritas')->get();
 
             return view('tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'tikets'));
         })->name('tiket.create');
-        
+
         // Simpan tiket
         Route::post('/', [TiketController::class, 'store'])->name('tiket.store');
 
         // Detail tiket
         Route::get('/{tiket_id}', [TiketController::class, 'show'])->name('tiket.show');
+
+        // Form edit tiket
+        Route::get('/{tiket_id}/edit', [TiketController::class, 'edit'])->name('tiket.edit');
 
         // Update tiket
         Route::put('/{tiket_id}', [TiketController::class, 'update'])->name('tiket.update');

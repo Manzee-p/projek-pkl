@@ -32,45 +32,66 @@
                     <li class="nav-item mx-2">
                         <a class="nav-link text-dark fw-semibold" href="#contact">Contact</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="page-scroll {{ request()->routeIs('tiket.*') ? 'active' : '' }}"
-                            href="{{ route('tiket.index') }}" style="display: flex; align-items: center; gap: 5px;">
+                    
+                    {{-- Menu untuk user yang sudah login --}}
+                    @auth
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold {{ request()->routeIs('tiket.*') ? 'text-primary' : 'text-dark' }}"
+                            href="{{ route('tiket.index') }}" 
+                            style="display: flex; align-items: center; gap: 5px;">
                             <i class="lni lni-ticket"></i> Tiket Saya
                         </a>
                     </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold {{ request()->routeIs('report.*') ? 'text-primary' : 'text-dark' }}"
+                            href="{{ route('report.index') }}" 
+                            style="display: flex; align-items: center; gap: 5px;">
+                            <i class="lni lni-files"></i> Laporan
+                        </a>
+                    </li>
+                    @endauth
                 </ul>
             </div>
 
             {{-- Right section: actions + profile --}}
             <div class="d-flex align-items-center gap-3">
-                <a href="#" class="text-dark fs-5"><i class="lni lni-cart"></i></a>
-                <a href="#" class="text-dark fs-5"><i class="lni lni-alarm"></i></a>
-
-                {{-- Profile Dropdown --}}
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
-                        id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{ asset('assets/images/faces/pp.jpg') }}" alt="Profile" width="40"
-                            height="40" class="rounded-circle me-2" />
-                        <span class="fw-semibold text-dark">{{ Auth::user()->name }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="mdi mdi-settings text-primary me-2"></i>Settings
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="mdi mdi-logout me-2"></i>Logout
-                            </a>
-                        </li>
-                    </ul>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
-                </div>
+                @auth
+                    {{-- Profile Dropdown --}}
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                            id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ asset('assets/images/faces/pp.jpg') }}" alt="Profile" width="40"
+                                height="40" class="rounded-circle me-2" />
+                            <span class="fw-semibold text-dark">{{ Auth::user()->name }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="mdi mdi-account-circle text-primary me-2"></i>Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="mdi mdi-settings text-primary me-2"></i>Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="mdi mdi-logout me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+                    </div>
+                @else
+                    {{-- Tombol Login/Register jika belum login --}}
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm px-4">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm px-4">Register</a>
+                @endauth
             </div>
         </nav>
     </div>
@@ -97,13 +118,7 @@
     margin-right: 8px;
     width: 20px;
   }
-  .page-scroll.active {
-    color: #0052CC !important;
+  .navbar-nav .nav-link.text-primary {
     font-weight: 600;
-  }
-  .navbar-nav .nav-item .page-scroll {
-    display: flex;
-    align-items: center;
-    gap: 5px;
   }
 </style>

@@ -123,5 +123,15 @@ Route::middleware('auth')->group(function () {
         // Hapus tiket
         Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])->name('tiket.destroy');
     });
+
+    // Report routes - untuk user biasa
+        Route::prefix('report')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('report.index');
+            Route::get('/create', [ReportController::class, 'create'])->name('report.create');
+            Route::post('/', [ReportController::class, 'store'])->name('report.store');
+            Route::get('/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+            Route::put('/{id}', [ReportController::class, 'update'])->name('report.update');
+            Route::delete('/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
+        });
     
 });

@@ -8,23 +8,31 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    // ================== DAFTAR LAPORAN (TABEL) ==================
+    
     public function index(Request $request)
     {
         $reports = Report::where('user_id', $request->user()->user_id)
                          ->latest()
                          ->paginate(10);
 
-        return view('admin.report.index', compact('reports'));
+        // Cek apakah admin atau user biasa
+        if ($request->user()->role === 'admin') {
+            return view('admin.report.index', compact('reports'));
+        }
+        
+        return view('report.index', compact('reports'));
     }
 
-    // ================== FORM BUAT BARU ==================
     public function create()
     {
-        return view('admin.report.create');
+        // Cek role user
+        if (auth()->user()->role === 'admin') {
+            return view('admin.report.create');
+        }
+        
+        return view('report.create');
     }
 
-    // ================== SIMPAN LAPORAN ==================
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -50,21 +58,27 @@ class ReportController extends Controller
             'lampiran'  => $lampiranPath,
         ]);
 
-        return redirect('/admin/report')
+        // Redirect berdasarkan role
+        $route = auth()->user()->role === 'admin' ? 'admin.report.index' : 'report.index';
+        
+        return redirect()->route($route)
                 ->with('success', 'Laporan berhasil dikirim!');
     }
 
-    // ================== FORM EDIT ==================
     public function edit($id)
     {
         $report = Report::where('id', $id)
                         ->where('user_id', auth()->user()->user_id)
                         ->firstOrFail();
 
-        return view('admin.report.edit', compact('report'));
+        // Cek role user
+        if (auth()->user()->role === 'admin') {
+            return view('admin.report.edit', compact('report'));
+        }
+        
+        return view('report.edit', compact('report'));
     }
 
-    // ================== UPDATE LAPORAN ==================
     public function update(Request $request, $id)
     {
         $report = Report::where('id', $id)
@@ -92,11 +106,13 @@ class ReportController extends Controller
 
         $report->update($validated);
 
-        return redirect('/admin/report')
+        // Redirect berdasarkan role
+        $route = auth()->user()->role === 'admin' ? 'admin.report.index' : 'report.index';
+        
+        return redirect()->route($route)
                 ->with('success', 'Laporan berhasil diupdate!');
     }
 
-    // ================== HAPUS LAPORAN ==================
     public function destroy($id)
     {
         $report = Report::where('id', $id)
@@ -110,7 +126,10 @@ class ReportController extends Controller
 
         $report->delete();
 
-        return redirect('/admin/report')
+        // Redirect berdasarkan role
+        $route = auth()->user()->role === 'admin' ? 'admin.report.index' : 'report.index';
+        
+        return redirect()->route($route)
                 ->with('success', 'Laporan berhasil dihapus!');
     }
 }

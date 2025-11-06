@@ -152,8 +152,15 @@ class TiketController extends Controller
         $prioritas = \App\Models\Prioritas::all();
         $statuses  = \App\Models\TiketStatus::all();
 
-        return view('admin.tiket.edit', compact('tiket', 'users', 'events', 'kategoris', 'prioritas', 'statuses'));
+        // 🔹 Cek role user
+        if (auth()->user()->role === 'admin') {
+            return view('admin.tiket.edit', compact('tiket', 'users', 'events', 'kategoris', 'prioritas', 'statuses'));
+        }
+
+        // 🔹 Kalau user biasa
+        return view('tiket.edit', compact('tiket', 'events', 'kategoris', 'prioritas', 'statuses'));
     }
+
 
     /**
      * Menampilkan form edit tiket
@@ -161,62 +168,62 @@ class TiketController extends Controller
      * Mengupdate tiket
      */
   public function update(Request $request, $tiket_id)
-{
-    try {
-        // Ambil tiket
-        $query = Tiket::where('tiket_id', $tiket_id);
+    {
+        try {
+            // Ambil tiket
+            $query = Tiket::where('tiket_id', $tiket_id);
 
 
-            // Kalau bukan admin, hanya boleh update tiket miliknya
-            if (auth()->user()->role !== 'admin') {
-                $query->where('user_id', auth()->id());
-            }
-
-            $tiket = $query->firstOrFail();
-
-            // Validasi
-            $validated = $request->validate([
-                'event_id'      => 'nullable|exists:events,event_id',
-                'kategori_id'   => 'nullable|exists:kategoris,kategori_id',
-                'status_id'     => 'nullable|exists:tiket_statuses,status_id',
-                'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
-                'judul'         => 'nullable|string|max:255',
-                'deskripsi'     => 'nullable|string',
-                'assigned_to'   => 'nullable|string|max:255',
-                'waktu_selesai' => 'nullable|date',
-            ]);
-
-            // Format waktu_selesai
-            if (! empty($validated['waktu_selesai'])) {
-                $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
-            }
-
-            // Update field
-            foreach ($validated as $key => $value) {
-                if (! is_null($value)) {
-                    $tiket->$key = $value;
+                // Kalau bukan admin, hanya boleh update tiket miliknya
+                if (auth()->user()->role !== 'admin') {
+                    $query->where('user_id', auth()->id());
                 }
-            }
 
-            $tiket->save();
+                $tiket = $query->firstOrFail();
 
-            // Redirect berdasarkan role
-            if (auth()->user()->role === 'admin') {
-                return redirect()->route('admin.tiket.index')
+                // Validasi
+                $validated = $request->validate([
+                    'event_id'      => 'nullable|exists:events,event_id',
+                    'kategori_id'   => 'nullable|exists:kategoris,kategori_id',
+                    'status_id'     => 'nullable|exists:tiket_statuses,status_id',
+                    'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
+                    'judul'         => 'nullable|string|max:255',
+                    'deskripsi'     => 'nullable|string',
+                    'assigned_to'   => 'nullable|string|max:255',
+                    'waktu_selesai' => 'nullable|date',
+                ]);
+
+                // Format waktu_selesai
+                if (! empty($validated['waktu_selesai'])) {
+                    $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
+                }
+
+                // Update field
+                foreach ($validated as $key => $value) {
+                    if (! is_null($value)) {
+                        $tiket->$key = $value;
+                    }
+                }
+
+                $tiket->save();
+
+                // Redirect berdasarkan role
+                if (auth()->user()->role === 'admin') {
+                    return redirect()->route('admin.tiket.index')
+                        ->with('success', 'Tiket berhasil diperbarui.');
+                }
+
+                return redirect()->route('tiket.show', $tiket->tiket_id)
                     ->with('success', 'Tiket berhasil diperbarui.');
+
+            } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return redirect()->back()->withErrors($e->errors())->withInput();
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
             }
-
-            return redirect()->route('tiket.show', $tiket->tiket_id)
-                ->with('success', 'Tiket berhasil diperbarui.');
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    }
 
 
 

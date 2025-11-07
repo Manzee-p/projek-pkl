@@ -35,6 +35,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'user_id', 'user_id');
+    }
+
     // Relasi ke tiket
     public function tikets()
     {

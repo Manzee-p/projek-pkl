@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
         Route::get('report/create', [ReportController::class, 'create'])->name('admin.report.create');
         Route::post('report', [ReportController::class, 'store'])->name('admin.report.store');
+        Route::get('report/{id}', [ReportController::class, 'show'])->name('admin.report.show');
         Route::get('report/{id}/edit', [ReportController::class, 'edit'])->name('admin.report.edit');
         Route::put('report/{id}', [ReportController::class, 'update'])->name('admin.report.update');
         Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
@@ -129,6 +130,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ReportController::class, 'index'])->name('report.index');
             Route::get('/create', [ReportController::class, 'create'])->name('report.create');
             Route::post('/', [ReportController::class, 'store'])->name('report.store');
+            Route::get('/{id}', [ReportController::class, 'show'])->name('report.show');
             Route::get('/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
             Route::put('/{id}', [ReportController::class, 'update'])->name('report.update');
             Route::delete('/{id}', [ReportController::class, 'destroy'])->name('report.destroy');

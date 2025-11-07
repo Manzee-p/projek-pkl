@@ -98,6 +98,10 @@
 
                                         <td>{{ $r->created_at->format('d M Y') }}</td>
                                         <td>
+                                            <a href="{{ route('admin.report.show', $r->id) }}" 
+                                               class="btn btn-sm btn-info" title="Show">
+                                                <i class="mdi mdi-eye"></i>
+                                            </a>
                                             <a href="{{ route('admin.report.edit', $r->id) }}" 
                                                class="btn btn-sm btn-warning" title="Edit">
                                                 <i class="mdi mdi-pencil"></i>

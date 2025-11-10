@@ -7,27 +7,40 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migrasi.
      */
     public function up(): void
     {
         Schema::create('reports', function (Blueprint $table) {
-            $table->id(); // ID laporan otomatis
-            $table->unsignedBigInteger('user_id');
+            $table->id();                                          // ID laporan otomatis
+            $table->unsignedBigInteger('user_id');                 // pembuat laporan
+            $table->unsignedBigInteger('assigned_to')->nullable(); // user yang ditugaskan
             $table->string('judul');
-            $table->string('kategori'); // bug, kerusakan, keluhan, dll
-            $table->enum('prioritas', ['rendah','sedang','tinggi','urgent']);
+            $table->unsignedBigInteger('kategori_id');
+            $table->unsignedBigInteger('prioritas_id');
             $table->text('deskripsi');
             $table->string('lampiran')->nullable(); // file opsional
             $table->timestamps();
 
-            // foreign key
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            // Relasi ke tabel users (pembuat laporan)
+            $table->foreign('user_id')
+                ->references('user_id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            // Relasi ke tabel users (yang ditugaskan)
+            $table->foreign('assigned_to')
+                ->references('user_id')
+                ->on('users')
+                ->onDelete('set null');
+
+            $table->foreign('kategori_id')->references('kategori_id')->on('kategoris')->onDelete('cascade');
+            $table->foreign('prioritas_id')->references('prioritas_id')->on('priorities')->onDelete('cascade');
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Balikkan migrasi.
      */
     public function down(): void
     {

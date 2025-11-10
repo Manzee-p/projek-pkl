@@ -2,6 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\Kategori;
+use App\Models\Prioritas;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,8 +31,26 @@ class ReportController extends Controller
      */
     public function create()
     {
-        $view = auth()->user()->role === 'admin' ? 'admin.report.create' : 'report.create';
-        return view($view);
+        $user = auth()->user();
+
+        // ✅ Ambil data kategori & prioritas dari tabel
+        $kategoris = \App\Models\Kategori::all();
+        $prioritas = \App\Models\Prioritas::all();
+
+        // ✅ Ambil user dengan role teknisi & konten (jika admin)
+        $teknisis = collect();
+        $kontens  = collect();
+
+        if ($user->role === 'admin') {
+            $teknisis = \App\Models\User::where('role', 'tim_teknisi')->get();
+            $kontens  = \App\Models\User::where('role', 'tim_konten')->get();
+        }
+
+        // ✅ Tentukan view yang dipakai
+        $view = $user->role === 'admin' ? 'admin.report.create' : 'report.create';
+
+        // ✅ Kirim semua data ke view
+        return view($view, compact('kategoris', 'prioritas', 'teknisis', 'kontens'));
     }
 
     /**
@@ -38,11 +59,12 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul'     => 'required|string|max:255',
-            'kategori'  => 'required|string|max:100',
-            'prioritas' => 'required|in:rendah,sedang,tinggi,urgent',
-            'deskripsi' => 'required|string',
-            'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'judul'        => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,kategori_id',
+            'prioritas_id' => 'required|exists:priorities,prioritas_id',
+            'deskripsi'    => 'required|string',
+            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'assigned_to'  => 'nullable|exists:users,user_id',
         ]);
 
         // Simpan file lampiran jika ada
@@ -58,44 +80,63 @@ class ReportController extends Controller
         return redirect()->route($route)->with('success', 'Laporan berhasil dikirim!');
     }
 
+    /**
+     * Tampilkan detail laporan
+     */
     public function show($id)
     {
         $user  = auth()->user();
         $query = Report::query();
 
-        // Jika bukan admin, user hanya bisa melihat laporan miliknya
         if ($user->role !== 'admin') {
             $query->where('user_id', $user->user_id);
         }
 
         $report = $query->findOrFail($id);
 
-        // Tentukan view sesuai role
         $view = $user->role === 'admin' ? 'admin.report.show' : 'report.show';
         return view($view, compact('report'));
     }
 
     /**
-     * Tampilkan form edit laporan
+     * Form edit laporan
      */
     public function edit($id)
     {
         $user  = auth()->user();
         $query = Report::query();
 
-        // User biasa hanya bisa edit laporannya sendiri
+        // Non-admin hanya bisa edit laporan miliknya
         if ($user->role !== 'admin') {
             $query->where('user_id', $user->user_id);
         }
 
+        // Ambil laporan sesuai ID
         $report = $query->findOrFail($id);
 
+        // Ambil semua kategori dan prioritas untuk dropdown
+        $kategoris  = Kategori::all();
+        $priorities = Prioritas::all();
+
+        // Inisialisasi kosong agar tidak error di Blade
+        $teknisis = collect();
+        $kontens  = collect();
+
+        // Hanya admin yang punya dropdown penugasan
+        if ($user->role === 'admin') {
+            $teknisis = User::where('role', 'tim_teknisi')->get();
+            $kontens  = User::where('role', 'tim_konten')->get();
+        }
+
+        // Tentukan view berdasarkan role
         $view = $user->role === 'admin' ? 'admin.report.edit' : 'report.edit';
-        return view($view, compact('report'));
+
+        // Kirim semua data ke view
+        return view($view, compact('report', 'kategoris', 'priorities', 'teknisis', 'kontens'));
     }
 
     /**
-     * Update laporan yang ada
+     * Update laporan
      */
     public function update(Request $request, $id)
     {
@@ -109,19 +150,25 @@ class ReportController extends Controller
         $report = $query->findOrFail($id);
 
         $validated = $request->validate([
-            'judul'     => 'required|string|max:255',
-            'kategori'  => 'required|string|max:100',
-            'prioritas' => 'required|in:rendah,sedang,tinggi,urgent',
-            'deskripsi' => 'required|string',
-            'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'judul'        => 'required|string|max:255',
+            'kategori_id'  => 'required|exists:kategoris,kategori_id',
+            'prioritas_id' => 'required|exists:priorities,prioritas_id',
+            'deskripsi'    => 'required|string',
+            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'assigned_to'  => 'nullable|exists:users,user_id',
         ]);
 
-        // Jika upload file baru, hapus yang lama
+        // Upload baru
         if ($request->hasFile('lampiran')) {
             if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
                 Storage::disk('public')->delete($report->lampiran);
             }
             $validated['lampiran'] = $request->file('lampiran')->store('reports', 'public');
+        }
+
+        // Penugasan hanya oleh admin
+        if ($user->role === 'admin') {
+            $report->assigned_to = $validated['assigned_to'] ?? null;
         }
 
         $report->update($validated);
@@ -144,7 +191,6 @@ class ReportController extends Controller
 
         $report = $query->findOrFail($id);
 
-        // Hapus lampiran jika ada
         if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
             Storage::disk('public')->delete($report->lampiran);
         }

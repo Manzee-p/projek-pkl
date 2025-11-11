@@ -8,9 +8,17 @@ use App\Http\Controllers\PrioritasController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\TiketStatusController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public Routes
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
@@ -35,12 +43,14 @@ Route::get('/register', function () {
 
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// 🔹 Google Login
+// Google Login
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
 
 
-// Protected routes - butuh login
+// ========================================
+// PROTECTED ROUTES - BUTUH LOGIN
+// ========================================
 Route::middleware('auth')->group(function () {
 
     // Halaman Home
@@ -49,7 +59,22 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // ========================================
+    // 🔔 NOTIFIKASI ROUTES (Untuk Semua User)
+    // ========================================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('readAll');
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
+
+    // ========================================
+    // ADMIN ROUTES - PREFIX: /admin
+    // ========================================
     Route::prefix('admin')->middleware('isAdmin')->group(function () {
+        
         // CRUD Kategori
         Route::resource('kategori', KategoriController::class);
 
@@ -71,18 +96,23 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'admin.status.destroy',
             ]);
 
+        // Admin Tiket Routes
+        Route::get('/tiket', [TiketController::class, 'adminIndex'])->name('admin.tiket.index');
+        
+        Route::resource('tiket', TiketController::class)->except(['index'])->names([
+            'create'  => 'admin.tiket.create',
+            'store'   => 'admin.tiket.store',
+            'show'    => 'admin.tiket.show',
+            'edit'    => 'admin.tiket.edit',
+            'update'  => 'admin.tiket.update',
+            'destroy' => 'admin.tiket.destroy',
+        ]);
 
-            // ✅ Admin Tiket Routes
-            Route::get('/tiket', [TiketController::class, 'adminIndex'])->name('admin.tiket.index');
-            
-            Route::resource('tiket', TiketController::class)->except(['index'])->names([
-                'create'  => 'admin.tiket.create',
-                'store'   => 'admin.tiket.store',
-                'show'    => 'admin.tiket.show',
-                'edit'    => 'admin.tiket.edit',
-                'update'  => 'admin.tiket.update',
-                'destroy' => 'admin.tiket.destroy',
-            ]);
+        // 🔔 Actions khusus admin untuk tiket
+        Route::post('/tiket/{tiket_id}/update-status', [TiketController::class, 'updateStatus'])->name('admin.tiket.updateStatus');
+        Route::post('/tiket/{tiket_id}/reply', [TiketController::class, 'reply'])->name('admin.tiket.reply');
+
+        // Admin Report Routes
         Route::get('report', [ReportController::class, 'index'])->name('admin.report.index');
         Route::get('report/create', [ReportController::class, 'create'])->name('admin.report.create');
         Route::post('report', [ReportController::class, 'store'])->name('admin.report.store');
@@ -92,7 +122,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
     });
 
-    // Tiket routes - untuk user yang sudah login
+    // ========================================
+    // USER ROUTES - TIKET
+    // ========================================
     Route::prefix('tiket')->group(function () {
 
         // Daftar tiket
@@ -125,15 +157,21 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])->name('tiket.destroy');
     });
 
-    // Report routes - untuk user biasa
-        Route::prefix('report')->group(function () {
-            Route::get('/', [ReportController::class, 'index'])->name('report.index');
-            Route::get('/create', [ReportController::class, 'create'])->name('report.create');
-            Route::post('/', [ReportController::class, 'store'])->name('report.store');
-            Route::get('/{id}', [ReportController::class, 'show'])->name('report.show');
-            Route::get('/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
-            Route::put('/{id}', [ReportController::class, 'update'])->name('report.update');
-            Route::delete('/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
-        });
-    
+    // ========================================
+    // USER ROUTES - REPORT
+    // ========================================
+    Route::prefix('report')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('report.index');
+        Route::get('/create', [ReportController::class, 'create'])->name('report.create');
+        Route::post('/', [ReportController::class, 'store'])->name('report.store');
+        Route::get('/{id}', [ReportController::class, 'show'])->name('report.show');
+        Route::get('/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+        Route::put('/{id}', [ReportController::class, 'update'])->name('report.update');
+        Route::delete('/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
+    });
+});
+
+// Fallback route (optional)
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
 });

@@ -63,62 +63,28 @@
 
                             {{-- Kategori & Prioritas --}}
                             <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label for="kategori" class="form-label fw-semibold">
-                                        Kategori <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select @error('kategori') is-invalid @enderror" 
-                                            id="kategori" 
-                                            name="kategori" 
-                                            required>
+                                <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label>Kategori</label>
+                                    <select name="kategori_id" class="form-control" required>
                                         <option value="">-- Pilih Kategori --</option>
-                                        <option value="Teknis" {{ old('kategori') == 'Teknis' ? 'selected' : '' }}>
-                                            🔧 Teknis
-                                        </option>
-                                        <option value="Akun" {{ old('kategori') == 'Akun' ? 'selected' : '' }}>
-                                            👤 Akun
-                                        </option>
-                                        <option value="Fitur" {{ old('kategori') == 'Fitur' ? 'selected' : '' }}>
-                                            ⚙️ Fitur
-                                        </option>
-                                        <option value="Bug" {{ old('kategori') == 'Bug' ? 'selected' : '' }}>
-                                            🐛 Bug
-                                        </option>
-                                        <option value="Lainnya" {{ old('kategori') == 'Lainnya' ? 'selected' : '' }}>
-                                            📌 Lainnya
-                                        </option>
+                                        @foreach ($kategoris as $kategori)
+                                            <option value="{{ $kategori->kategori_id }}">{{ $kategori->nama_kategori }}
+                                            </option>
+                                        @endforeach
                                     </select>
-                                    @error('kategori')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="prioritas" class="form-label fw-semibold">
-                                        Prioritas <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select @error('prioritas') is-invalid @enderror" 
-                                            id="prioritas" 
-                                            name="prioritas" 
-                                            required>
+                                <div class="col-md-6 mb-3">
+                                    <label>Prioritas</label>
+                                    <select name="prioritas_id" class="form-control" required>
                                         <option value="">-- Pilih Prioritas --</option>
-                                        <option value="rendah" {{ old('prioritas') == 'rendah' ? 'selected' : '' }}>
-                                            🟢 Rendah
-                                        </option>
-                                        <option value="sedang" {{ old('prioritas') == 'sedang' ? 'selected' : '' }}>
-                                            🔵 Sedang
-                                        </option>
-                                        <option value="tinggi" {{ old('prioritas') == 'tinggi' ? 'selected' : '' }}>
-                                            🟠 Tinggi
-                                        </option>
-                                        <option value="urgent" {{ old('prioritas') == 'urgent' ? 'selected' : '' }}>
-                                            🔴 Urgent
-                                        </option>
+                                        @foreach ($prioritas as $prio)
+                                            <option value="{{ $prio->prioritas_id }}">{{ $prio->nama_prioritas }}</option>
+                                        @endforeach
                                     </select>
-                                    @error('prioritas')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
+                            </div>
                             </div>
 
                             {{-- Deskripsi --}}

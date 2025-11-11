@@ -17,6 +17,7 @@ class Report extends Model
         'prioritas_id',
         'deskripsi',
         'lampiran',
+        'assigned_to',
     ];
 
     public function user()

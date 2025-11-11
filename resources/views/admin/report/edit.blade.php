@@ -61,7 +61,7 @@
                             <label class="form-label fw-semibold">Tugaskan ke</label>
                             <select name="assigned_to" class="form-select">
                                 <option value="">-- Belum Ditugaskan --</option>
-                                <optgroup label="Tim Teknisi">
+                                <optgroup label="Tim Teknisi">  
                                     @foreach($teknisis as $t)
                                         <option value="{{ $t->user_id }}"
                                             {{ old('assigned_to', $report->assigned_to) == $t->user_id ? 'selected' : '' }}>

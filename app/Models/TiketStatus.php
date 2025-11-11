@@ -18,4 +18,8 @@ class TiketStatus extends Model
     {
         return $this->hasMany(Tiket::class);
     }
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'status_id', 'status_id');
+    }
 }

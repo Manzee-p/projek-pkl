@@ -175,3 +175,22 @@ Route::middleware('auth')->group(function () {
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
+
+// Route untuk Tim Teknisi (tanpa middleware role, cek di controller)
+Route::middleware(['auth'])->prefix('tim-teknisi')->name('tim_teknisi.')->group(function () {
+    Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
+    Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
+    Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+    Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
+});
+
+// Route untuk Tim Konten
+Route::middleware(['auth'])->prefix('tim-konten')->name('tim_konten.')->group(function () {
+    Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
+    Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
+    Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+    Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
+});
+
+
+

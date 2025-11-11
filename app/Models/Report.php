@@ -18,6 +18,7 @@ class Report extends Model
         'deskripsi',
         'lampiran',
         'assigned_to',
+        'status',
     ];
 
     public function user()

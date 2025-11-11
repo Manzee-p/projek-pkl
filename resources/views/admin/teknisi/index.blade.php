@@ -44,6 +44,7 @@
                                             <th>Kategori</th>
                                             <th>Prioritas</th>
                                             <th>Deskripsi</th>
+                                            <th>Status</th>
                                             <th>Dari</th>
                                             <th>Tanggal</th>
                                             <th width="10%">Aksi</th>
@@ -92,11 +93,26 @@
                                                     </small>
                                                 </td>
 
+                                                <td>
+    @php
+        $badge = match($r->status) {
+            'pending'  => 'bg-warning',
+            'diproses' => 'bg-info',
+            'selesai'  => 'bg-success',
+            'ditolak'  => 'bg-danger',
+            default    => 'bg-secondary'
+        };
+    @endphp
+    <span class="badge {{ $badge }} rounded-pill">{{ ucfirst($r->status) }}</span>
+</td>
+
                                                 {{-- DARI (PEMBUAT LAPORAN) --}}
                                                 <td>{{ $r->user->name ?? '-' }}</td>
 
                                                 {{-- TANGGAL --}}
                                                 <td>{{ $r->created_at->format('d M Y') }}</td>
+
+                                                
 
                                                 {{-- AKSI --}}
                                                 <td>

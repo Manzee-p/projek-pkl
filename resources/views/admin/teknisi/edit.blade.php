@@ -18,60 +18,43 @@
             @endif
 
             <div class="card-body">
-                <form method="POST" action="{{ route('tim_teknisi.report.update', $report->id) }}"
-                    enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+                <form method="POST" action="{{ route('tim_teknisi.report.update', $report->id) }}" enctype="multipart/form-data">
+    @csrf @method('PUT')
 
-                    <div class="mb-3">
-                        <label for="judul" class="form-label">Judul</label>
-                        <input type="text" id="judul" name="judul" value="{{ old('judul', $report->judul) }}"
-                            class="form-control" readonly>
-                    </div>
+    @method('PUT')
 
-                    <div class="mb-3">
-                        <label for="deskripsi" class="form-label">Deskripsi / Catatan Teknis</label>
-                        <textarea id="deskripsi" name="deskripsi" rows="4" class="form-control">{{ old('deskripsi', $report->deskripsi) }}</textarea>
-                    </div>
+    <!-- Judul (readonly) -->
+    <div class="mb-3">
+        <label>Judul</label>
+        <input type="text" name="judul" value="{{ $report->judul }}" class="form-control" readonly>
+    </div>
 
-                    <div class="mb-3">
-                        <label for="lampiran" class="form-label">Lampiran Baru (Opsional)</label>
-                        <input type="file" id="lampiran" name="lampiran" class="form-control">
-                        @if ($report->lampiran)
-                            <p class="mt-2">Lampiran lama:
-                                <a href="{{ Storage::url($report->lampiran) }}" target="_blank">Lihat file</a>
-                            </p>
-                        @endif
-                    </div>
-                    <div class="mb-3">
-                        <label for="kategori_id" class="form-label">Kategori</label>
-                        <select id="kategori_id" name="kategori_id" class="form-control" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach ($kategoris as $kategori)
-                                <option value="{{ $kategori->kategori_id }}"
-                                    {{ old('kategori_id', $report->kategori_id) == $kategori->kategori_id ? 'selected' : '' }}>
-                                    {{ $kategori->nama_kategori }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+    <!-- Deskripsi -->
+    <div class="mb-3">
+        <label>Catatan Teknis / Progress</label>
+        <textarea name="deskripsi" rows="6" class="form-control">{{ old('deskripsi', $report->deskripsi) }}</textarea>
+    </div>
 
-                    <div class="mb-3">
-                        <label for="prioritas_id" class="form-label">Prioritas</label>
-                        <select id="prioritas_id" name="prioritas_id" class="form-control" required>
-                            <option value="">-- Pilih Prioritas --</option>
-                            @foreach ($priorities as $prioritas)
-                                <option value="{{ $prioritas->prioritas_id }}"
-                                    {{ old('prioritas_id', $report->prioritas_id) == $prioritas->prioritas_id ? 'selected' : '' }}>
-                                    {{ $prioritas->nama_prioritas }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+    <!-- STATUS KHUSUS TEKNISI -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+        <select name="status" class="form-select" required>
+            <option value="diproses" {{ old('status', $report->status) == 'diproses' ? 'selected' : '' }}>Diproses</option>
+            <option value="selesai" {{ old('status', $report->status) == 'selesai' ? 'selected' : '' }}>Selesai</option>
+        </select>
+    </div>
 
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    <a href="{{ route('tim_teknisi.report.index') }}" class="btn btn-secondary">Kembali</a>
-                </form>
+    <!-- Lampiran baru -->
+    <div class="mb-3">
+        <label>Lampiran Baru</label>
+        <input type="file" name="lampiran" class="form-control">
+        @if($report->lampiran)
+            <p>Lampiran lama: <a href="{{ Storage::url($report->lampiran) }}" target="_blank">Lihat</a></p>
+        @endif
+    </div>
+
+    <button type="submit" class="btn btn-success">Simpan & Update Status</button>
+</form>
             </div>
         </div>
     </div>

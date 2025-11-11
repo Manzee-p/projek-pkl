@@ -67,23 +67,27 @@ class ReportController extends Controller
     /**
      * Simpan laporan baru
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'judul'        => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
-            'deskripsi'    => 'required|string',
-            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'assigned_to'  => 'nullable|exists:users,user_id',
-        ]);
+    // ... di dalam ReportController
 
-        if ($request->hasFile('lampiran')) {
-            $validated['lampiran'] = $request->file('lampiran')->store('reports', 'public');
-        }
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'judul'        => 'required|string|max:255',
+        'kategori_id'  => 'required|exists:kategoris,kategori_id',
+        'prioritas_id' => 'required|exists:priorities,prioritas_id',
+        'deskripsi'    => 'required|string',
+        'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'assigned_to'  => 'nullable|exists:users,user_id',
+    ]);
 
-        $validated['user_id'] = $request->user()->user_id;
-        Report::create($validated);
+    if ($request->hasFile('lampiran')) {
+        $validated['lampiran'] = $request->file('lampiran')->store('reports', 'public');
+    }
+
+    $validated['user_id'] = $request->user()->user_id;
+    $validated['status'] = 'pending'; // default
+
+    Report::create($validated);
 
         $user = auth()->user();
         if ($user->role === 'admin') {
@@ -163,82 +167,83 @@ class ReportController extends Controller
      * Update laporan
      */
     public function update(Request $request, $id)
-    {
-        $user  = $request->user();
-        $query = Report::query();
+{
+    $user  = auth()->user();
+    $report = Report::query();
 
-        // Cari report berdasarkan role
-        if ($user->role === 'admin') {
-            $report = $query->findOrFail($id);
-        } elseif (in_array($user->role, ['tim_teknisi', 'tim_konten'])) {
-            $report = $query->where('assigned_to', $user->user_id)->findOrFail($id);
-        } else {
-            $report = $query->where('user_id', $user->user_id)->findOrFail($id);
-        }
-
-        // Update berdasarkan role
-        if ($user->role === 'admin') {
-            $this->updateAsAdmin($request, $report);
-        } elseif (in_array($user->role, ['tim_teknisi', 'tim_konten'])) {
-            $this->updateAsTeam($request, $report);
-        } else {
-            $this->updateAsUser($request, $report);
-        }
-
-        return redirect()->route($this->getRedirectRoute())
-            ->with('success', 'Laporan berhasil diperbarui!');
+    if ($user->role === 'admin') {
+        $report = $report->findOrFail($id);
+    } elseif (in_array($user->role, ['tim_teknisi', 'tim_konten'])) {
+        $report = $report->where('assigned_to', $user->user_id)->findOrFail($id);
+    } else {
+        $report = $report->where('user_id', $user->user_id)->findOrFail($id);
     }
+
+    if ($user->role === 'admin') {
+        $this->updateAsAdmin($request, $report);
+    } elseif (in_array($user->role, ['tim_teknisi', 'tim_konten'])) {
+        $this->updateAsTeam($request, $report);
+    } else {
+        $this->updateAsUser($request, $report);
+    }
+
+    return redirect()->route($this->getRedirectRoute())
+        ->with('success', 'Laporan berhasil diperbarui!');
+}
 
 // Helper method untuk admin
     private function updateAsAdmin(Request $request, Report $report)
-    {
-        $validated = $request->validate([
-            'judul'        => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
-            'deskripsi'    => 'required|string',
-            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'assigned_to'  => 'nullable|exists:users,user_id',
-        ]);
+{
+    $validated = $request->validate([
+        'judul'        => 'required|string|max:255',
+        'kategori_id'  => 'required|exists:kategoris,kategori_id',
+        'prioritas_id' => 'required|exists:priorities,prioritas_id',
+        'deskripsi'    => 'required|string',
+        'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'assigned_to'  => 'nullable|exists:users,user_id',
+        'status'       => 'required|in:pending,diproses,selesai,ditolak',
+    ]);
 
-        $this->handleFileUpload($request, $report, $validated);
-        $report->update($validated);
-    }
+    $this->handleFileUpload($request, $report, $validated);
+    $report->update($validated);
+}
 
 // Helper method untuk tim teknisi/konten
     private function updateAsTeam(Request $request, Report $report)
-    {
-        $validated = $request->validate([
-            'deskripsi' => 'required|string',
-            'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
+{
+    $validated = $request->validate([
+        'deskripsi' => 'required|string',
+        'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        'status'    => 'required|in:diproses,selesai', // teknisi hanya 2 pilihan
+    ]);
 
-        $report->deskripsi = $validated['deskripsi'];
+    $report->deskripsi = $validated['deskripsi'];
+    $report->status    = $validated['status']; // update status
 
-        if ($request->hasFile('lampiran')) {
-            if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
-                Storage::disk('public')->delete($report->lampiran);
-            }
-            $report->lampiran = $request->file('lampiran')->store('reports', 'public');
+    if ($request->hasFile('lampiran')) {
+        if ($report->lampiran && Storage::disk('public')->exists($report->lampiran)) {
+            Storage::disk('public')->delete($report->lampiran);
         }
-
-        $report->save();
+        $report->lampiran = $request->file('lampiran')->store('reports', 'public');
     }
+
+    $report->save();
+}
 
 // Helper method untuk user biasa
     private function updateAsUser(Request $request, Report $report)
-    {
-        $validated = $request->validate([
-            'judul'        => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
-            'deskripsi'    => 'required|string',
-            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
+{
+    $validated = $request->validate([
+        'judul'        => 'required|string|max:255',
+        'kategori_id'  => 'required|exists:kategoris,kategori_id',
+        'prioritas_id' => 'required|exists:priorities,prioritas_id',
+        'deskripsi'    => 'required|string',
+        'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+    ]);
 
-        $this->handleFileUpload($request, $report, $validated);
-        $report->update($validated);
-    }
+    $this->handleFileUpload($request, $report, $validated);
+    $report->update($validated);
+}
 
 // Helper untuk handle upload file
     private function handleFileUpload(Request $request, Report $report, array &$validated)

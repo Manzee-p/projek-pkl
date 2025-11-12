@@ -43,14 +43,34 @@
       </li>
     @endif
 
-    {{-- ✅ Untuk TEKNISI dan TIM KONTEN --}}
+    {{-- ✅ Menu untuk TIM TEKNISI dan TIM KONTEN --}}
     @if(auth()->user()->role === 'tim_teknisi' || auth()->user()->role === 'tim_konten')
+      {{-- Menu Tiket yang Ditugaskan --}}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ route('tim.tiket.index') }}">
+          <i class="mdi mdi-ticket menu-icon"></i>
+          <span class="menu-title">Tiket Saya</span>
+          @php
+            $assignedCount = \App\Models\Tiket::where('assigned_to', auth()->id())
+                                              ->whereHas('status', function($q) {
+                                                  $q->whereIn('nama_status', ['Baru', 'Sedang Diproses']);
+                                              })
+                                              ->count();
+          @endphp
+          @if($assignedCount > 0)
+            <badge class="badge badge-danger ml-2">{{ $assignedCount }}</badge>
+          @endif
+        </a>
+      </li>
+
+      {{-- Menu Laporan yang Ditugaskan --}}
       <li class="nav-item">
         <a class="nav-link" href="{{ route('report.index') }}">
           <i class="mdi mdi-file-document-box-outline menu-icon"></i>
-          <span class="menu-title">Laporan Ditugaskan</span>
+          <span class="menu-title">Laporan Saya</span>
         </a>
       </li>
     @endif
+
   </ul>
 </nav>

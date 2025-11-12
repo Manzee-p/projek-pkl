@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +9,7 @@ class Tiket extends Model
     use HasFactory;
 
     protected $primaryKey = 'tiket_id';
+
     protected $fillable = [
         'kode_tiket',
         'judul',
@@ -20,8 +20,13 @@ class Tiket extends Model
         'status_id',
         'prioritas_id',
         'assigned_to',
-        'waktu_dibuat' => 'datetime',
-        'waktu_selesai'
+        'waktu_dibuat',
+        'waktu_selesai',
+    ];
+
+    protected $casts = [
+        'waktu_dibuat'  => 'datetime',
+        'waktu_selesai' => 'datetime',
     ];
 
     public $timestamps = false;
@@ -50,5 +55,11 @@ class Tiket extends Model
     public function event()
     {
         return $this->belongsTo(Event::class, 'event_id', 'event_id');
+    }
+
+    // 🆕 Relasi untuk tim yang ditugaskan
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to', 'user_id');
     }
 }

@@ -192,5 +192,12 @@ Route::middleware(['auth'])->prefix('tim-konten')->name('tim_konten.')->group(fu
     Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
 });
 
-
+Route::middleware(['auth'])->prefix('tim')->name('tim.')->group(function () {
+    // Tiket yang ditugaskan
+    Route::get('/tiket', [TiketController::class, 'timIndex'])->name('tiket.index');
+    Route::get('/tiket/{id}', [TiketController::class, 'timShow'])->name('tiket.show');
+    Route::get('/tiket/{id}/edit', [TiketController::class, 'timEdit'])->name('tiket.edit');
+    Route::put('/tiket/{id}', [TiketController::class, 'timUpdate'])->name('tiket.update');
+    Route::put('/tiket/{id}/update-status', [TiketController::class, 'timUpdateStatus'])->name('tiket.update-status');
+});
 

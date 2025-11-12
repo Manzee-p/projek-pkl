@@ -103,23 +103,21 @@
                                                     {{ $r->assigned_to ? $r->assignedUser->name : '-' }}
                                                 </td>
 
-
+                                                <td>
+                                                    @php
+                                                        $badge = match ($r->status) {
+                                                            'pending' => 'bg-warning',
+                                                            'diproses' => 'bg-info',
+                                                            'selesai' => 'bg-success',
+                                                            'ditolak' => 'bg-danger',
+                                                            default => 'bg-secondary',
+                                                        };
+                                                    @endphp
+                                                    <span
+                                                        class="badge {{ $badge }} rounded-pill">{{ ucfirst($r->status) }}</span>
+                                                </td>
                                                 {{-- TANGGAL --}}
                                                 <td>{{ $r->created_at->format('d M Y') }}</td>
-
-                                                <td>
-    @php
-        $badge = match($r->status) {
-            'pending'  => 'bg-warning',
-            'diproses' => 'bg-info',
-            'selesai'  => 'bg-success',
-            'ditolak'  => 'bg-danger',
-            default    => 'bg-secondary'
-        };
-    @endphp
-    <span class="badge {{ $badge }} rounded-pill">{{ ucfirst($r->status) }}</span>
-</td>
-
                                                 {{-- AKSI --}}
                                                 <td>
                                                     <a href="{{ route('admin.report.show', $r->id) }}"

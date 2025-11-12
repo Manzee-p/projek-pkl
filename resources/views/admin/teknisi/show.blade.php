@@ -10,7 +10,6 @@
         <div class="card-body">
             <p><strong>Kategori:</strong> {{ $report->kategori->nama_kategori ?? '-' }}</p>
             <p><strong>Prioritas:</strong> {{ $report->prioritas->nama_prioritas ?? '-' }}</p>
-            <p><strong>Dari:</strong> {{ $report->user->name ?? '-' }}</p>
             <p><strong>Deskripsi:</strong></p>
             <p>{{ $report->deskripsi }}</p>
 

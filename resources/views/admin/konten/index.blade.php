@@ -1,5 +1,5 @@
 @extends('layouts.admin.master')
-@section('pageTitle', 'Laporan Ditugaskan ke Tim Konten')
+@section('pageTitle', 'Laporan Ditugaskan kepada Tim Konten')
 
 @section('content')
 <div class="container-fluid">
@@ -7,18 +7,18 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Laporan Ditugaskan ke Tim Konten</h4>
+                    <h4 class="card-title">Laporan Ditugaskan kepada Tim Konten</h4>
                 </div>
 
                 <div class="card-body">
-                    {{-- SWEETALERT --}}
+                    {{-- SWEETALERT OTOMATIS --}}
                     @if (session('success'))
                         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                         <script>
                             document.addEventListener('DOMContentLoaded', () => {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Berhasil!',
+                                    title: 'Berhasil! 🎉',
                                     text: '{{ session('success') }}',
                                     timer: 2500,
                                     showConfirmButton: false
@@ -27,23 +27,24 @@
                         </script>
                     @endif
 
-                    {{-- CEK JIKA TIDAK ADA DATA --}}
+                    {{-- CEK JIKA BELUM ADA LAPORAN --}}
                     @if ($reports->count() == 0)
                         <div class="text-center py-5">
                             <img src="{{ asset('assets/images/empty.svg') }}" width="150" class="mb-3">
-                            <p class="text-muted">Belum ada laporan yang ditugaskan ke tim konten.</p>
+                            <p class="text-muted">Belum ada laporan yang ditugaskan kepada tim konten.</p>
                         </div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>#</th>
-                                        <th width="10%">Lampiran</th>
+                                        <th width="5%">#</th>
+                                        <th width="10%">Foto</th>
                                         <th>Judul</th>
                                         <th>Kategori</th>
                                         <th>Prioritas</th>
-                                        <th>Dari</th>
+                                        <th>Deskripsi</th>
+                                        <th>Status</th>
                                         <th>Tanggal</th>
                                         <th width="10%">Aksi</th>
                                     </tr>
@@ -67,19 +68,55 @@
                                                 @endif
                                             </td>
 
-                                            {{-- INFORMASI UTAMA --}}
+                                            {{-- JUDUL --}}
                                             <td><strong>{{ $r->judul }}</strong></td>
                                             <td>{{ $r->kategori->nama_kategori ?? '-' }}</td>
                                             <td>{{ $r->prioritas->nama_prioritas ?? '-' }}</td>
-                                            <td>{{ $r->user->name ?? '-' }}</td>
+
+                                            {{-- DESKRIPSI RINGKAS --}}
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ Str::limit($r->deskripsi, 80) }}
+                                                    @if (strlen($r->deskripsi) > 80)
+                                                        <a href="javascript:void(0)"
+                                                            onclick="Swal.fire({
+                                                                title: '{{ $r->judul }}',
+                                                                html: '{{ nl2br(e($r->deskripsi)) }}',
+                                                                icon: 'info'
+                                                            })">
+                                                            ... baca selengkapnya
+                                                        </a>
+                                                    @endif
+                                                </small>
+                                            </td>
+
+                                            {{-- STATUS --}}
+                                            <td>
+                                                @php
+                                                    $badge = match ($r->status) {
+                                                        'pending' => 'bg-warning',
+                                                        'diproses' => 'bg-info',
+                                                        'selesai' => 'bg-success',
+                                                        'ditolak' => 'bg-danger',
+                                                        default => 'bg-secondary',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $badge }} rounded-pill">
+                                                    {{ ucfirst($r->status) }}
+                                                </span>
+                                            </td>
+
+                                            {{-- TANGGAL --}}
                                             <td>{{ $r->created_at->format('d M Y') }}</td>
 
                                             {{-- AKSI --}}
                                             <td>
-                                                <a href="{{ route('tim_konten.report.show', $r->id) }}" class="btn btn-sm btn-info" title="Detail">
+                                                <a href="{{ route('tim_konten.report.show', $r->id) }}"
+                                                    class="btn btn-sm btn-info" title="Detail">
                                                     <i class="mdi mdi-eye"></i>
                                                 </a>
-                                                <a href="{{ route('tim_konten.report.edit', $r->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                                <a href="{{ route('tim_konten.report.edit', $r->id) }}"
+                                                    class="btn btn-sm btn-warning" title="Edit Konten">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </a>
                                             </td>
@@ -100,7 +137,6 @@
 </div>
 
 {{-- PREVIEW GAMBAR --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function previewImage(url) {
         Swal.fire({

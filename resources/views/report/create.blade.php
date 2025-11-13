@@ -74,16 +74,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label>Prioritas</label>
-                                    <select name="prioritas_id" class="form-control" required>
-                                        <option value="">-- Pilih Prioritas --</option>
-                                        @foreach ($prioritas as $prio)
-                                            <option value="{{ $prio->prioritas_id }}">{{ $prio->nama_prioritas }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
                             </div>
                             </div>
 

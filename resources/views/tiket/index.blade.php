@@ -191,8 +191,6 @@
                                 <tr>
                                     <th class="px-4 py-3 fw-semibold text-uppercase small">Kode & Judul</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Kategori</th>
-                                    <th class="py-3 fw-semibold text-uppercase small">Status</th>
-                                    <th class="py-3 fw-semibold text-uppercase small">Prioritas</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Event</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Tanggal</th>
                                     <th class="py-3 fw-semibold text-uppercase small text-center">Aksi</th>
@@ -215,39 +213,6 @@
                                         <td class="py-3">
                                             <span class="badge bg-info bg-opacity-75">
                                                 <i class="lni lni-tag"></i> {{ $tiket->kategori->nama_kategori }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3">
-                                            @php
-                                                $statusConfig = match($tiket->status->nama_status) {
-                                                    'Open' => ['class' => 'primary', 'icon' => '📥'],
-                                                    'In Progress' => ['class' => 'warning', 'icon' => '⏳'],
-                                                    'Resolved' => ['class' => 'success', 'icon' => '✅'],
-                                                    'Closed' => ['class' => 'secondary', 'icon' => '🔒'],
-                                                    default => ['class' => 'secondary', 'icon' => '📋']
-                                                };
-                                            @endphp
-                                            <span class="badge bg-{{ $statusConfig['class'] }}">
-                                                {{ $statusConfig['icon'] }} {{ $tiket->status->nama_status }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3">
-                                            @php
-                                                $prioritasName = strtolower($tiket->prioritas->nama_prioritas);
-                                                $prioritasConfig = ['class' => 'secondary', 'icon' => '⚪'];
-                                                
-                                                if(str_contains($prioritasName, 'critical') || str_contains($prioritasName, 'urgent')) {
-                                                    $prioritasConfig = ['class' => 'danger', 'icon' => '🔴'];
-                                                } elseif(str_contains($prioritasName, 'high') || str_contains($prioritasName, 'tinggi')) {
-                                                    $prioritasConfig = ['class' => 'warning', 'icon' => '🟠'];
-                                                } elseif(str_contains($prioritasName, 'medium') || str_contains($prioritasName, 'sedang')) {
-                                                    $prioritasConfig = ['class' => 'primary', 'icon' => '🔵'];
-                                                } elseif(str_contains($prioritasName, 'low') || str_contains($prioritasName, 'rendah')) {
-                                                    $prioritasConfig = ['class' => 'success', 'icon' => '🟢'];
-                                                }
-                                            @endphp
-                                            <span class="badge bg-{{ $prioritasConfig['class'] }}">
-                                                {{ $prioritasConfig['icon'] }} {{ $tiket->prioritas->nama_prioritas }}
                                             </span>
                                         </td>
                                         <td class="py-3">

@@ -67,36 +67,6 @@
                         </select>
                     </div>
 
-                    <!-- Prioritas -->
-                    <div class="col-md-6 mb-3">
-                        <label for="prioritas_id" class="form-label">
-                            Prioritas <span class="required">*</span>
-                        </label>
-                        <select name="prioritas_id" id="prioritas_id" class="form-select" required>
-                            <option value="">-- Pilih Prioritas --</option>
-                            @foreach($prioritas as $prior)
-                                <option value="{{ $prior->prioritas_id }}" {{ old('prioritas_id') == $prior->prioritas_id ? 'selected' : '' }}>
-                                    {{ $prior->nama_prioritas }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Status (default: Open/Baru) -->
-                    <div class="col-md-6 mb-3">
-                        <label for="status_id" class="form-label">
-                            Status <span class="required">*</span>
-                        </label>
-                        <select name="status_id" id="status_id" class="form-select" required>
-                            <option value="">-- Pilih Status --</option>
-                            @foreach($statuses as $status)
-                                <option value="{{ $status->status_id }}" {{ old('status_id', $statuses->first()->status_id ?? '') == $status->status_id ? 'selected' : '' }}>
-                                    {{ $status->nama_status }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <!-- Judul Tiket -->
                     <div class="col-12 mb-3">
                         <label for="judul" class="form-label">

@@ -92,33 +92,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="prioritas" class="form-label fw-semibold">
-                                        Prioritas <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select @error('prioritas') is-invalid @enderror" 
-                                            id="prioritas" 
-                                            name="prioritas" 
-                                            required>
-                                        <option value="">-- Pilih Prioritas --</option>
-                                        <option value="rendah" {{ old('prioritas', $report->prioritas) == 'rendah' ? 'selected' : '' }}>
-                                            🟢 Rendah
-                                        </option>
-                                        <option value="sedang" {{ old('prioritas', $report->prioritas) == 'sedang' ? 'selected' : '' }}>
-                                            🔵 Sedang
-                                        </option>
-                                        <option value="tinggi" {{ old('prioritas', $report->prioritas) == 'tinggi' ? 'selected' : '' }}>
-                                            🟠 Tinggi
-                                        </option>
-                                        <option value="urgent" {{ old('prioritas', $report->prioritas) == 'urgent' ? 'selected' : '' }}>
-                                            🔴 Urgent
-                                        </option>
-                                    </select>
-                                    @error('prioritas')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
                             </div>
 
                             {{-- Deskripsi --}}

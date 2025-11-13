@@ -130,62 +130,9 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-4">
-                                    <label for="prioritas_id" class="form-label fw-semibold">
-                                        Prioritas <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select @error('prioritas_id') is-invalid @enderror" 
-                                            id="prioritas_id" 
-                                            name="prioritas_id" 
-                                            required>
-                                        <option value="">-- Pilih Prioritas --</option>
-                                        @foreach($prioritas as $prior)
-                                            <option value="{{ $prior->prioritas_id }}" 
-                                                {{ old('prioritas_id', $tiket->prioritas_id) == $prior->prioritas_id ? 'selected' : '' }}>
-                                                {{ $prior->nama_prioritas }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('prioritas_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
                             </div>
 
                             {{-- Status --}}
-                            <div class="mb-4">
-                                <label for="status_id" class="form-label fw-semibold">
-                                    Status <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select @error('status_id') is-invalid @enderror" 
-                                        id="status_id" 
-                                        name="status_id" 
-                                        required>
-                                    <option value="">-- Pilih Status --</option>
-                                    @foreach($statuses as $status)
-                                        <option value="{{ $status->status_id }}" 
-                                            {{ old('status_id', $tiket->status_id) == $status->status_id ? 'selected' : '' }}>
-                                            @php
-                                                $statusIcon = match($status->nama_status) {
-                                                    'Open' => '📥',
-                                                    'In Progress' => '⏳',
-                                                    'Resolved' => '✅',
-                                                    'Closed' => '🔒',
-                                                    default => '📋'
-                                                };
-                                            @endphp
-                                            {{ $statusIcon }} {{ $status->nama_status }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('status_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">
-                                    <i class="lni lni-information"></i> 
-                                    Status tiket akan diperbarui sesuai pilihan Anda
-                                </small>
-                            </div>
 
                             {{-- Info Waktu --}}
                             <div class="alert alert-light border mb-4">

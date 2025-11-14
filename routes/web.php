@@ -199,6 +199,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/tiket/{id}', [TiketController::class, 'timUpdate'])->name('tiket.update');
         Route::put('/tiket/{id}/update-status', [TiketController::class, 'timUpdateStatus'])->name('tiket.update-status');
     });
+
+    // NOTIFICATION ROUTE (USER)
+    Route::get('/notification-user', [\App\Http\Controllers\NotificationController::class, 'index'])
+        ->name('notification-user.index');
 });
 
 // Fallback route (optional)

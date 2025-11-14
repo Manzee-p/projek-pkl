@@ -17,11 +17,9 @@ class TiketController extends Controller
 
     public function index(Request $request)
     {
-        // Query tiket milik user yang login
         $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
-            ->where('user_id', Auth::id()); // Hanya tiket user yang login
+            ->where('user_id', Auth::id());
 
-        // Filter opsional
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
@@ -34,7 +32,6 @@ class TiketController extends Controller
             $query->where('prioritas_id', $request->prioritas_id);
         }
 
-        // Sorting: Prioritas → Waktu terbaru
         $query->orderByRaw("
         CASE
             WHEN prioritas_id = 1 THEN 1
@@ -46,12 +43,10 @@ class TiketController extends Controller
 
         $tikets = $query->get();
 
-        // Data untuk dropdown filter
         $statuses  = \App\Models\TiketStatus::all();
         $kategoris = \App\Models\Kategori::all();
         $prioritas = \App\Models\Prioritas::all();
 
-        // Statistik
         $stats = [
             'total'    => Tiket::where('user_id', Auth::id())->count(),
             'selesai'  => Tiket::where('user_id', Auth::id())
@@ -65,18 +60,16 @@ class TiketController extends Controller
                 ->count(),
         ];
 
-        // 🆕 TAMBAHKAN STATISTIK PER KATEGORI
         $kategoriStats = Tiket::where('user_id', Auth::id())
             ->selectRaw('kategori_id, count(*) as total')
             ->groupBy('kategori_id')
             ->with('kategori')
             ->get();
 
-        // Return view untuk web dengan semua variabel
         return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas', 'stats', 'kategoriStats'));
     }
 
-    public function adminIndex()
+     public function adminIndex()
     {
         $tikets = Tiket::with(['status', 'kategori', 'event', 'prioritas', 'user', 'assignedTo'])->get();
         return view('admin.tiket.index', compact('tikets'));
@@ -84,49 +77,83 @@ class TiketController extends Controller
 
     public function create()
     {
-        // Ambil data untuk dropdown di form admin
+        // 🔹 Cek role - Admin vs User
+        if (Auth::user()->role === 'admin') {
+            // Admin bisa akses semua field
+            $events    = \App\Models\Event::all();
+            $kategoris = \App\Models\Kategori::all();
+            $prioritas = \App\Models\Prioritas::all();
+            $statuses  = \App\Models\TiketStatus::all();
+            $users     = \App\Models\User::all();
+            $timTeknisi = User::where('role', 'tim_teknisi')->get();
+            $timKonten  = User::where('role', 'tim_konten')->get();
+
+            return view('admin.tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'users', 'timTeknisi', 'timKonten'));
+        }
+
+        // 🔹 User biasa - hanya ambil event dan kategori
         $events    = \App\Models\Event::all();
         $kategoris = \App\Models\Kategori::all();
-        $prioritas = \App\Models\Prioritas::all();
-        $statuses  = \App\Models\TiketStatus::all();
-        $users     = \App\Models\User::all(); // Admin bisa pilih user pembuat tiket
 
-        // Ambil tim teknisi dan konten
-        $timTeknisi = User::where('role', 'tim_teknisi')->get();
-        $timKonten  = User::where('role', 'tim_konten')->get();
-
-        return view('admin.tiket.create', compact('events', 'kategoris', 'prioritas', 'statuses', 'users', 'timTeknisi', 'timKonten'));
+        return view('tiket.create', compact('events', 'kategoris'));
     }
+
 
     /**
      * Menyimpan tiket baru
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id'      => 'required|exists:users,user_id',
-            'event_id'     => 'required|exists:events,event_id',
-            'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'status_id'    => 'required|exists:tiket_statuses,status_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
-            'judul'        => 'required|string|max:255',
-            'deskripsi'    => 'nullable|string',
-            'assigned_to'  => 'nullable|exists:users,user_id',
-        ]);
+        // 🔹 Validasi berbeda untuk admin dan user
+        if (Auth::user()->role === 'admin') {
+            $request->validate([
+                'user_id'      => 'required|exists:users,user_id',
+                'event_id'     => 'required|exists:events,event_id',
+                'kategori_id'  => 'required|exists:kategoris,kategori_id',
+                'status_id'    => 'required|exists:tiket_statuses,status_id',
+                'prioritas_id' => 'required|exists:priorities,prioritas_id',
+                'judul'        => 'required|string|max:255',
+                'deskripsi'    => 'nullable|string',
+                'assigned_to'  => 'nullable|exists:users,user_id',
+            ]);
+        } else {
+            // User biasa - tidak perlu status dan prioritas
+            $request->validate([
+                'event_id'    => 'required|exists:events,event_id',
+                'kategori_id' => 'required|exists:kategoris,kategori_id',
+                'judul'       => 'required|string|max:255',
+                'deskripsi'   => 'nullable|string',
+            ]);
+        }
 
         // Generate kode tiket otomatis
         $today      = Carbon::now()->format('Ymd');
         $countToday = Tiket::whereDate('waktu_dibuat', Carbon::today())->count() + 1;
         $kodeTiket  = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
 
-        // Pastikan kode tiket unique
         while (Tiket::where('kode_tiket', $kodeTiket)->exists()) {
             $countToday++;
             $kodeTiket = 'TCK-' . $today . '-' . str_pad($countToday, 4, '0', STR_PAD_LEFT);
         }
 
+        // 🔹 Set default status dan prioritas untuk user biasa
+        if (Auth::user()->role !== 'admin') {
+            // Cari status "Baru" (sesuaikan dengan nama di database Anda)
+            $statusBaru = \App\Models\TiketStatus::where('nama_status', 'Baru')->first();
+            // Cari prioritas "Medium" atau "Low" sebagai default
+            $prioritasDefault = \App\Models\Prioritas::where('nama_prioritas', 'Medium')
+                ->orWhere('nama_prioritas', 'Low')
+                ->first();
+
+            $request->merge([
+                'user_id'      => Auth::id(),
+                'status_id'    => $statusBaru ? $statusBaru->status_id : 1, // Fallback ke ID 1
+                'prioritas_id' => $prioritasDefault ? $prioritasDefault->prioritas_id : 2, // Fallback ke ID 2
+            ]);
+        }
+
         $tiket = Tiket::create([
-            'user_id'      => $request->user_id,
+            'user_id'      => $request->user_id ?? Auth::id(),
             'event_id'     => $request->event_id,
             'kategori_id'  => $request->kategori_id,
             'status_id'    => $request->status_id,
@@ -134,14 +161,13 @@ class TiketController extends Controller
             'judul'        => $request->judul,
             'deskripsi'    => $request->deskripsi,
             'kode_tiket'   => $kodeTiket,
-            'assigned_to'  => $request->assigned_to,
+            'assigned_to'  => $request->assigned_to ?? null,
             'waktu_dibuat' => now(),
         ]);
 
         $tiket->load(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo']);
 
         // 🔔 KIRIM NOTIFIKASI KE ADMIN
-        // Hanya kirim notifikasi jika yang membuat adalah user biasa (bukan admin)
         if (Auth::user()->role !== 'admin') {
             $admins = User::where('role', 'admin')->get();
 
@@ -167,7 +193,6 @@ class TiketController extends Controller
             ]);
         }
 
-        // Redirect ke halaman index dengan success message
         if (Auth::user()->role == 'admin') {
             return redirect()->route('admin.tiket.index')
                 ->with('success', 'Tiket berhasil dibuat dengan kode: ' . $kodeTiket);
@@ -186,12 +211,9 @@ class TiketController extends Controller
             ->where('tiket_id', $id)
             ->firstOrFail();
 
-        // Cek role user
         if (Auth::user()->role == 'admin') {
-            // Arahkan ke tampilan admin
             return view('admin.tiket.show', compact('tiket'));
         } else {
-            // Arahkan ke tampilan user
             return view('tiket.show', compact('tiket'));
         }
     }
@@ -208,16 +230,13 @@ class TiketController extends Controller
         $prioritas = \App\Models\Prioritas::all();
         $statuses  = \App\Models\TiketStatus::all();
 
-        // Ambil tim teknisi dan konten untuk assignment
         $timTeknisi = User::where('role', 'tim_teknisi')->get();
         $timKonten  = User::where('role', 'tim_konten')->get();
 
-        // 🔹 Cek role user
         if (Auth::user()->role === 'admin') {
             return view('admin.tiket.edit', compact('tiket', 'users', 'events', 'kategoris', 'prioritas', 'statuses', 'timTeknisi', 'timKonten'));
         }
 
-        // 🔹 Kalau user biasa
         return view('tiket.edit', compact('tiket', 'events', 'kategoris', 'prioritas', 'statuses'));
     }
 
@@ -227,39 +246,44 @@ class TiketController extends Controller
     public function update(Request $request, $tiket_id)
     {
         try {
-            // Ambil tiket
             $query = Tiket::where('tiket_id', $tiket_id);
 
-            // Kalau bukan admin, hanya boleh update tiket miliknya
             if (Auth::user()->role !== 'admin') {
                 $query->where('user_id', Auth::id());
             }
 
             $tiket = $query->firstOrFail();
 
-            // Simpan status lama dan assigned lama untuk notifikasi
             $statusLama     = $tiket->status->nama_status ?? null;
             $statusIdLama   = $tiket->status_id;
             $assignedToLama = $tiket->assigned_to;
 
-            // Validasi
-            $validated = $request->validate([
-                'event_id'      => 'nullable|exists:events,event_id',
-                'kategori_id'   => 'nullable|exists:kategoris,kategori_id',
-                'status_id'     => 'nullable|exists:tiket_statuses,status_id',
-                'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
-                'judul'         => 'nullable|string|max:255',
-                'deskripsi'     => 'nullable|string',
-                'assigned_to'   => 'nullable|exists:users,user_id',
-                'waktu_selesai' => 'nullable|date',
-            ]);
+            // 🔹 Validasi berbeda untuk admin dan user
+            if (Auth::user()->role === 'admin') {
+                $validated = $request->validate([
+                    'event_id'      => 'nullable|exists:events,event_id',
+                    'kategori_id'   => 'nullable|exists:kategoris,kategori_id',
+                    'status_id'     => 'nullable|exists:tiket_statuses,status_id',
+                    'prioritas_id'  => 'nullable|exists:priorities,prioritas_id',
+                    'judul'         => 'nullable|string|max:255',
+                    'deskripsi'     => 'nullable|string',
+                    'assigned_to'   => 'nullable|exists:users,user_id',
+                    'waktu_selesai' => 'nullable|date',
+                ]);
+            } else {
+                // User biasa tidak bisa ubah status dan prioritas
+                $validated = $request->validate([
+                    'event_id'    => 'nullable|exists:events,event_id',
+                    'kategori_id' => 'nullable|exists:kategoris,kategori_id',
+                    'judul'       => 'nullable|string|max:255',
+                    'deskripsi'   => 'nullable|string',
+                ]);
+            }
 
-            // Format waktu_selesai
             if (! empty($validated['waktu_selesai'])) {
                 $validated['waktu_selesai'] = Carbon::parse($validated['waktu_selesai'])->format('Y-m-d H:i:s');
             }
 
-            // Update field
             foreach ($validated as $key => $value) {
                 if (! is_null($value)) {
                     $tiket->$key = $value;
@@ -268,11 +292,22 @@ class TiketController extends Controller
 
             $tiket->save();
 
-            // Reload relasi untuk mendapatkan data terbaru
+            if (Auth::user()->role === 'admin') {
+                $pesan = "Tiket {$tiket->kode_tiket} telah diperbarui. "
+                        . "Status: {$tiket->status->nama_status}, "
+                        . "Prioritas: {$tiket->prioritas->nama_prioritas}.";
+
+                Notification::create([
+                    'user_id'   => $tiket->user_id,
+                    'tiket_id'  => $tiket->tiket_id,
+                    'pesan'     => $pesan,
+                    'status_baca' => 0,
+                    'waktu_kirim' => now(),
+                ]);
+            }
+
             $tiket->load(['status', 'user', 'kategori', 'prioritas', 'event', 'assignedTo']);
 
-            // 🔔 KIRIM NOTIFIKASI JIKA STATUS BERUBAH
-            // Hanya kirim notifikasi jika yang update adalah admin dan status berubah
             if (Auth::user()->role === 'admin' &&
                 isset($validated['status_id']) &&
                 $statusIdLama != $validated['status_id']) {
@@ -286,12 +321,10 @@ class TiketController extends Controller
                 ]);
             }
 
-            // 🔔 KIRIM NOTIFIKASI JIKA ASSIGNED TO BERUBAH
             if (Auth::user()->role === 'admin' &&
                 isset($validated['assigned_to']) &&
                 $assignedToLama != $validated['assigned_to']) {
 
-                // Notifikasi ke tim yang ditugaskan baru
                 if ($validated['assigned_to']) {
                     Notification::create([
                         'user_id'  => $validated['assigned_to'],
@@ -302,7 +335,6 @@ class TiketController extends Controller
                     ]);
                 }
 
-                // Notifikasi ke pembuat tiket
                 Notification::create([
                     'user_id'  => $tiket->user_id,
                     'tiket_id' => $tiket->tiket_id,
@@ -312,7 +344,6 @@ class TiketController extends Controller
                 ]);
             }
 
-            // Redirect berdasarkan role
             if (Auth::user()->role === 'admin') {
                 return redirect()->route('admin.tiket.index')
                     ->with('success', 'Tiket berhasil diperbarui.');
@@ -337,7 +368,7 @@ class TiketController extends Controller
     {
         try {
             $tiket = Tiket::where('tiket_id', $tiket_id)
-                ->where('user_id', Auth::id()) // Hanya bisa hapus tiket sendiri
+                ->where('user_id', Auth::id())
                 ->firstOrFail();
 
             $tiket->delete();
@@ -365,9 +396,8 @@ class TiketController extends Controller
             ]);
 
             $tiket->update($validated);
-            $tiket->load(['status']); // Reload relasi
+            $tiket->load(['status']);
 
-            // 🔔 KIRIM NOTIFIKASI KE USER
             Notification::create([
                 'user_id'  => $tiket->user_id,
                 'tiket_id' => $tiket->tiket_id,
@@ -409,17 +439,6 @@ class TiketController extends Controller
                 'balasan' => 'required|string',
             ]);
 
-            // Simpan balasan ke database (sesuaikan dengan struktur tabel Anda)
-            // Misalnya jika ada tabel komentar/balasan terpisah:
-            // $tiket->balasans()->create([
-            //     'user_id' => Auth::id(),
-            //     'balasan' => $validated['balasan'],
-            // ]);
-
-            // Atau update field balasan di tiket
-            // $tiket->update(['balasan_admin' => $validated['balasan']]);
-
-            // 🔔 KIRIM NOTIFIKASI KE USER
             Notification::create([
                 'user_id'  => $tiket->user_id,
                 'tiket_id' => $tiket->tiket_id,

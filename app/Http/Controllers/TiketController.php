@@ -36,13 +36,13 @@ class TiketController extends Controller
 
         // Sorting: Prioritas → Waktu terbaru
         $query->orderByRaw("
-            CASE
-                WHEN prioritas_id = 1 THEN 1
-                WHEN prioritas_id = 2 THEN 2
-                WHEN prioritas_id = 3 THEN 3
-                ELSE 4
-            END
-        ")->orderByDesc('waktu_dibuat');
+        CASE
+            WHEN prioritas_id = 1 THEN 1
+            WHEN prioritas_id = 2 THEN 2
+            WHEN prioritas_id = 3 THEN 3
+            ELSE 4
+        END
+    ")->orderByDesc('waktu_dibuat');
 
         $tikets = $query->get();
 
@@ -51,8 +51,29 @@ class TiketController extends Controller
         $kategoris = \App\Models\Kategori::all();
         $prioritas = \App\Models\Prioritas::all();
 
-        // Return view untuk web
-        return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas'));
+        // Statistik
+        $stats = [
+            'total'    => Tiket::where('user_id', Auth::id())->count(),
+            'selesai'  => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Selesai'))
+                ->count(),
+            'ditolak'  => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Ditolak'))
+                ->count(),
+            'diproses' => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Baru', 'Sedang Diproses']))
+                ->count(),
+        ];
+
+        // 🆕 TAMBAHKAN STATISTIK PER KATEGORI
+        $kategoriStats = Tiket::where('user_id', Auth::id())
+            ->selectRaw('kategori_id, count(*) as total')
+            ->groupBy('kategori_id')
+            ->with('kategori')
+            ->get();
+
+        // Return view untuk web dengan semua variabel
+        return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas', 'stats', 'kategoriStats'));
     }
 
     public function adminIndex()
@@ -643,5 +664,101 @@ class TiketController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal update status: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Menampilkan riwayat/history tiket user
+     */
+    public function history(Request $request)
+    {
+        // Query semua tiket milik user yang login (termasuk yang sudah selesai/ditolak)
+        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo'])
+            ->where('user_id', Auth::id());
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('start_date')) {
+            $query->whereDate('waktu_dibuat', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('waktu_dibuat', '<=', $request->end_date);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status_id')) {
+            $query->where('status_id', $request->status_id);
+        }
+
+        // Filter berdasarkan kategori
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        // Filter berdasarkan prioritas
+        if ($request->filled('prioritas_id')) {
+            $query->where('prioritas_id', $request->prioritas_id);
+        }
+
+        // Search berdasarkan judul atau kode tiket
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                    ->orWhere('kode_tiket', 'like', '%' . $request->search . '%')
+                    ->orWhere('deskripsi', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Sorting: terbaru dulu
+        $query->orderByDesc('waktu_dibuat');
+
+        // Pagination
+        $tikets = $query->paginate(15);
+
+        // Data untuk dropdown filter
+        $statuses  = \App\Models\TiketStatus::all();
+        $kategoris = \App\Models\Kategori::all();
+        $prioritas = \App\Models\Prioritas::all();
+
+        // Statistik riwayat
+        $stats = [
+            'total'    => Tiket::where('user_id', Auth::id())->count(),
+            'selesai'  => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Selesai'))
+                ->count(),
+            'ditolak'  => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Ditolak'))
+                ->count(),
+            'diproses' => Tiket::where('user_id', Auth::id())
+                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Baru', 'Sedang Diproses']))
+                ->count(),
+        ];
+
+        // Statistik per kategori
+        $kategoriStats = Tiket::where('user_id', Auth::id())
+            ->selectRaw('kategori_id, count(*) as total')
+            ->groupBy('kategori_id')
+            ->with('kategori')
+            ->get();
+
+        return view('tiket.history', compact('tikets', 'statuses', 'kategoris', 'prioritas', 'stats', 'kategoriStats'));
+    }
+
+/**
+ * Export riwayat tiket ke PDF atau Excel (opsional)
+ */
+    public function exportHistory(Request $request)
+    {
+        $tikets = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
+            ->where('user_id', Auth::id())
+            ->orderByDesc('waktu_dibuat')
+            ->get();
+
+        // Implementasi export sesuai kebutuhan
+        // Bisa menggunakan package seperti Laravel Excel atau DomPDF
+
+        return response()->json([
+            'message' => 'Export feature coming soon',
+            'data'    => $tikets,
+        ]);
     }
 }

@@ -4,13 +4,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PrioritasController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\TiketStatusController;
-use App\Http\Controllers\NotificationController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,10 +47,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/auth-google-redirect', [AuthController::class, 'google_redirect'])->name('google.redirect');
 Route::get('/auth-google-callback', [AuthController::class, 'google_callback'])->name('google.callback');
 
-
-// ========================================
 // PROTECTED ROUTES - BUTUH LOGIN
-// ========================================
 Route::middleware('auth')->group(function () {
 
     // Halaman Home
@@ -59,9 +56,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ========================================
     // 🔔 NOTIFIKASI ROUTES (Untuk Semua User)
-    // ========================================
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
         Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
@@ -70,11 +65,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
 
-    // ========================================
     // ADMIN ROUTES - PREFIX: /admin
-    // ========================================
     Route::prefix('admin')->middleware('isAdmin')->group(function () {
-        
+
         // CRUD Kategori
         Route::resource('kategori', KategoriController::class);
 
@@ -98,7 +91,7 @@ Route::middleware('auth')->group(function () {
 
         // Admin Tiket Routes
         Route::get('/tiket', [TiketController::class, 'adminIndex'])->name('admin.tiket.index');
-        
+
         Route::resource('tiket', TiketController::class)->except(['index'])->names([
             'create'  => 'admin.tiket.create',
             'store'   => 'admin.tiket.store',
@@ -122,10 +115,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
     });
 
-    // ========================================
     // USER ROUTES - TIKET
-    // ========================================
     Route::prefix('tiket')->group(function () {
+
+        Route::get('/history', [TiketController::class, 'history'])->name('tiket.history');
+        Route::get('/history/export', [TiketController::class, 'exportHistory'])->name('tiket.history.export');
 
         // Daftar tiket
         Route::get('/', [TiketController::class, 'index'])->name('tiket.index');
@@ -144,23 +138,33 @@ Route::middleware('auth')->group(function () {
         // Simpan tiket
         Route::post('/', [TiketController::class, 'store'])->name('tiket.store');
 
-        // Detail tiket
-        Route::get('/{tiket_id}', [TiketController::class, 'show'])->name('tiket.show');
+        // Detail tiket (dengan constraint bahwa tiket_id harus angka)
+        Route::get('/{tiket_id}', [TiketController::class, 'show'])
+            ->where('tiket_id', '[0-9]+')
+            ->name('tiket.show');
 
         // Form edit tiket
-        Route::get('/{tiket_id}/edit', [TiketController::class, 'edit'])->name('tiket.edit');
+        Route::get('/{tiket_id}/edit', [TiketController::class, 'edit'])
+            ->where('tiket_id', '[0-9]+')
+            ->name('tiket.edit');
 
         // Update tiket
-        Route::put('/{tiket_id}', [TiketController::class, 'update'])->name('tiket.update');
+        Route::put('/{tiket_id}', [TiketController::class, 'update'])
+            ->where('tiket_id', '[0-9]+')
+            ->name('tiket.update');
 
         // Hapus tiket
-        Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])->name('tiket.destroy');
+        Route::delete('/{tiket_id}', [TiketController::class, 'destroy'])
+            ->where('tiket_id', '[0-9]+')
+            ->name('tiket.destroy');
     });
 
-    // ========================================
     // USER ROUTES - REPORT
-    // ========================================
     Route::prefix('report')->group(function () {
+
+        Route::get('/history', [ReportController::class, 'history'])->name('report.history');
+        Route::get('/history/export', [ReportController::class, 'exportHistory'])->name('report.history.export');
+
         Route::get('/', [ReportController::class, 'index'])->name('report.index');
         Route::get('/create', [ReportController::class, 'create'])->name('report.create');
         Route::post('/', [ReportController::class, 'store'])->name('report.store');
@@ -169,35 +173,35 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}', [ReportController::class, 'update'])->name('report.update');
         Route::delete('/{id}', [ReportController::class, 'destroy'])->name('report.destroy');
     });
+
+    // TIM TEKNISI ROUTES
+    Route::middleware(['auth'])->prefix('tim-teknisi')->name('tim_teknisi.')->group(function () {
+        Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
+        Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
+        Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+        Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
+    });
+
+    // TIM KONTEN ROUTES
+    Route::middleware(['auth'])->prefix('tim-konten')->name('tim_konten.')->group(function () {
+        Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
+        Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
+        Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
+        Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
+    });
+
+    // TIM (TEKNISI & KONTEN) - TIKET ROUTES
+    Route::middleware(['auth'])->prefix('tim')->name('tim.')->group(function () {
+        // Tiket yang ditugaskan
+        Route::get('/tiket', [TiketController::class, 'timIndex'])->name('tiket.index');
+        Route::get('/tiket/{id}', [TiketController::class, 'timShow'])->name('tiket.show');
+        Route::get('/tiket/{id}/edit', [TiketController::class, 'timEdit'])->name('tiket.edit');
+        Route::put('/tiket/{id}', [TiketController::class, 'timUpdate'])->name('tiket.update');
+        Route::put('/tiket/{id}/update-status', [TiketController::class, 'timUpdateStatus'])->name('tiket.update-status');
+    });
 });
 
 // Fallback route (optional)
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
-
-// Route untuk Tim Teknisi (tanpa middleware role, cek di controller)
-Route::middleware(['auth'])->prefix('tim-teknisi')->name('tim_teknisi.')->group(function () {
-    Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
-    Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
-    Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
-    Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
-});
-
-// Route untuk Tim Konten
-Route::middleware(['auth'])->prefix('tim-konten')->name('tim_konten.')->group(function () {
-    Route::get('/laporan', [ReportController::class, 'index'])->name('report.index');
-    Route::get('/laporan/{id}', [ReportController::class, 'show'])->name('report.show');
-    Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])->name('report.edit');
-    Route::put('/laporan/{id}', [ReportController::class, 'update'])->name('report.update');
-});
-
-Route::middleware(['auth'])->prefix('tim')->name('tim.')->group(function () {
-    // Tiket yang ditugaskan
-    Route::get('/tiket', [TiketController::class, 'timIndex'])->name('tiket.index');
-    Route::get('/tiket/{id}', [TiketController::class, 'timShow'])->name('tiket.show');
-    Route::get('/tiket/{id}/edit', [TiketController::class, 'timEdit'])->name('tiket.edit');
-    Route::put('/tiket/{id}', [TiketController::class, 'timUpdate'])->name('tiket.update');
-    Route::put('/tiket/{id}/update-status', [TiketController::class, 'timUpdateStatus'])->name('tiket.update-status');
-});
-

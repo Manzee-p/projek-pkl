@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Tiket - Helpdesk</title>
+    <title>Riwayat Laporan - Helpdesk</title>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -32,14 +32,12 @@
         {{-- Header Section --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="fw-bold mb-1">📋 Tiket Saya</h3>
+                <h3 class="fw-bold mb-1">📋 Riwayat Laporan Saya</h3>
+                <p class="text-muted mb-0">History semua laporan yang pernah Anda buat</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('tiket.history') }}" class="nav-link btn btn-warning">
-                    <i class="fas fa-history"></i> Riwayat Tiket
-                </a>
-                <a href="{{ route('tiket.create') }}" class="btn btn-primary">
-                    <i class="lni lni-plus"></i> Buat Tiket Baru
+                <a href="{{ route('report.index') }}" class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Laporan Aktif
                 </a>
             </div>
         </div>
@@ -69,11 +67,11 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
                                 <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                                    <i class="lni lni-inbox text-primary" style="font-size: 28px;"></i>
+                                    <i class="lni lni-files text-primary" style="font-size: 28px;"></i>
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <p class="text-muted mb-1 small">Total Tiket</p>
+                                <p class="text-muted mb-1 small">Total Laporan</p>
                                 <h3 class="fw-bold mb-0">{{ $stats['total'] }}</h3>
                             </div>
                         </div>
@@ -152,7 +150,7 @@
                                             <p class="text-muted mb-1 small">
                                                 {{ $stat->kategori->nama_kategori ?? 'N/A' }}</p>
                                             <h4 class="mb-0 fw-bold text-primary">{{ $stat->total }} <span
-                                                    class="small fw-normal text-muted">tiket</span></h4>
+                                                    class="small fw-normal text-muted">laporan</span></h4>
                                         </div>
                                     </div>
                                 @endforeach
@@ -166,14 +164,14 @@
         {{-- Filter Section --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <form method="GET" action="{{ route('tiket.history') }}">
+                <form method="GET" action="{{ route('report.history') }}">
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-semibold small">
-                                <i class="lni lni-search-alt text-primary"></i> Cari Tiket
+                                <i class="lni lni-search-alt text-primary"></i> Cari Laporan
                             </label>
-                            <input type="text" name="search" class="form-control"
-                                placeholder="Judul atau kode tiket..." value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control" placeholder="Judul laporan..."
+                                value="{{ request('search') }}">
                         </div>
 
                         <div class="col-md-2">
@@ -194,12 +192,12 @@
 
                         <div class="col-md-2">
                             <label class="form-label fw-semibold small">Status</label>
-                            <select name="status_id" class="form-select">
+                            <select name="status" class="form-select">
                                 <option value="">Semua Status</option>
                                 @foreach ($statuses as $status)
-                                    <option value="{{ $status->status_id }}"
-                                        {{ request('status_id') == $status->status_id ? 'selected' : '' }}>
-                                        {{ $status->nama_status }}
+                                    <option value="{{ $status }}"
+                                        {{ request('status') == $status ? 'selected' : '' }}>
+                                        {{ ucfirst($status) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -226,9 +224,9 @@
                         </div>
                     </div>
 
-                    @if (request()->hasAny(['search', 'start_date', 'end_date', 'status_id', 'kategori_id']))
+                    @if (request()->hasAny(['search', 'start_date', 'end_date', 'status', 'kategori_id']))
                         <div class="mt-3">
-                            <a href="{{ route('tiket.history') }}" class="btn btn-sm btn-outline-secondary">
+                            <a href="{{ route('report.history') }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="lni lni-close"></i> Reset Filter
                             </a>
                         </div>
@@ -237,39 +235,37 @@
             </div>
         </div>
 
-        {{-- Tabel Riwayat Tiket --}}
+        {{-- Tabel Riwayat Laporan --}}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-semibold">Daftar Tiket Terbaru</h5>
-                <span class="badge bg-primary">{{ $tikets->count() }} tiket</span>
+                <h5 class="mb-0 fw-semibold">Daftar Riwayat Laporan</h5>
+                <span class="badge bg-primary">{{ $reports->total() }} laporan</span>
             </div>
             <div class="card-body p-0">
-                @if ($tikets->count() > 0)
+                @if ($reports->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="px-4 py-3 fw-semibold text-uppercase small">Kode & Judul</th>
+                                    <th class="px-4 py-3 fw-semibold text-uppercase small">Judul</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Kategori</th>
+                                    <th class="py-3 fw-semibold text-uppercase small">Prioritas</th>
+                                    <th class="py-3 fw-semibold text-uppercase small">Status</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Tanggal Dibuat</th>
                                     <th class="py-3 fw-semibold text-uppercase small">Ditangani Oleh</th>
                                     <th class="py-3 fw-semibold text-uppercase small text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($tikets as $tiket)
+                                @foreach ($reports as $report)
                                     <tr>
                                         <td class="px-4 py-3">
                                             <div>
-                                                <div class="text-primary fw-semibold small mb-1">
-                                                    #{{ $tiket->kode_tiket }}
-                                                </div>
-                                                <div class="fw-semibold text-dark">{{ Str::limit($tiket->judul, 40) }}
-                                                </div>
-                                                @if ($tiket->event)
+                                                <div class="fw-semibold text-dark">
+                                                    {{ Str::limit($report->judul, 50) }}</div>
+                                                @if ($report->deskripsi)
                                                     <small class="text-muted">
-                                                        <i class="lni lni-bookmark"></i>
-                                                        {{ $tiket->event->nama_event }}
+                                                        {{ Str::limit($report->deskripsi, 60) }}
                                                     </small>
                                                 @endif
                                             </div>
@@ -277,29 +273,59 @@
                                         <td class="py-3">
                                             <span class="badge bg-info bg-opacity-75">
                                                 <i class="lni lni-tag"></i>
-                                                {{ $tiket->kategori->nama_kategori ?? 'N/A' }}
+                                                {{ $report->kategori->nama_kategori ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3">
+                                            @if ($report->prioritas)
+                                                @php
+                                                    $badgeClass = match ($report->prioritas->nama_prioritas) {
+                                                        'Urgent' => 'bg-danger',
+                                                        'High' => 'bg-warning',
+                                                        'Normal' => 'bg-primary',
+                                                        'Low' => 'bg-secondary',
+                                                        default => 'bg-secondary',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $badgeClass }}">
+                                                    {{ $report->prioritas->nama_prioritas }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3">
+                                            @php
+                                                $statusBadge = match ($report->status) {
+                                                    'selesai' => 'bg-success',
+                                                    'diproses' => 'bg-warning',
+                                                    'ditolak' => 'bg-danger',
+                                                    'pending' => 'bg-info',
+                                                    default => 'bg-secondary',
+                                                };
+                                            @endphp
+                                            <span class="badge {{ $statusBadge }}">
+                                                {{ ucfirst($report->status) }}
                                             </span>
                                         </td>
                                         <td class="py-3">
                                             <small class="text-muted d-block">
                                                 <i class="lni lni-calendar me-1"></i>
-                                                {{ \Carbon\Carbon::parse($tiket->waktu_dibuat)->format('d M Y') }}
+                                                {{ $report->created_at->format('d M Y') }}
                                             </small>
                                             <small class="text-muted">
-                                                {{ \Carbon\Carbon::parse($tiket->waktu_dibuat)->format('H:i') }}
+                                                {{ $report->created_at->format('H:i') }}
                                             </small>
                                         </td>
                                         <td class="py-3">
-                                            @if ($tiket->assignedTo)
+                                            @if ($report->assignedUser)
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-2">
                                                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                                             style="width: 32px; height: 32px; font-size: 14px;">
-                                                            {{ strtoupper(substr($tiket->assignedTo->name, 0, 1)) }}
+                                                            {{ strtoupper(substr($report->assignedUser->name, 0, 1)) }}
                                                         </div>
                                                     </div>
                                                     <small
-                                                        class="fw-semibold">{{ Str::limit($tiket->assignedTo->name, 15) }}</small>
+                                                        class="fw-semibold">{{ Str::limit($report->assignedUser->name, 15) }}</small>
                                                 </div>
                                             @else
                                                 <span class="text-muted">-</span>
@@ -307,7 +333,7 @@
                                         </td>
                                         <td class="py-3">
                                             <div class="d-flex gap-1 justify-content-center">
-                                                <a href="{{ route('tiket.show', $tiket->tiket_id) }}"
+                                                <a href="{{ route('report.show', $report->id) }}"
                                                     class="btn btn-sm btn-info" data-bs-toggle="tooltip"
                                                     title="Lihat Detail">
                                                     <i class="lni lni-eye"></i>
@@ -318,6 +344,11 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="p-4 border-top">
+                        {{ $reports->links() }}
                     </div>
                 @else
                     {{-- Empty State --}}
@@ -332,10 +363,10 @@
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
                             </svg>
                         </div>
-                        <h5 class="text-muted mb-2">Tidak ada riwayat tiket ditemukan</h5>
-                        <p class="text-muted mb-4">Belum ada tiket yang sesuai dengan filter Anda</p>
-                        @if (request()->hasAny(['search', 'start_date', 'end_date', 'status_id', 'kategori_id']))
-                            <a href="{{ route('tiket.history') }}" class="btn btn-primary">
+                        <h5 class="text-muted mb-2">Tidak ada riwayat laporan ditemukan</h5>
+                        <p class="text-muted mb-4">Belum ada laporan yang sesuai dengan filter Anda</p>
+                        @if (request()->hasAny(['search', 'start_date', 'end_date', 'status', 'kategori_id']))
+                            <a href="{{ route('report.history') }}" class="btn btn-primary">
                                 <i class="lni lni-reload"></i> Reset Filter
                             </a>
                         @endif
@@ -423,7 +454,6 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
         }
 
-        /* Animation */
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -453,7 +483,6 @@
     </style>
 
     <script>
-        // Initialize Bootstrap tooltips
         document.addEventListener('DOMContentLoaded', function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {

@@ -299,24 +299,24 @@
                       </thead>
                       <tbody>
                         @forelse($stats['recent_reports'] as $report)
-                        @if($report && $report->report_id)
+                        @if($report && $report->id)
                         <tr>
                           <td>
                             @if(Auth::user()->role == 'admin')
-                              <a href="{{ route('admin.report.show', $report->report_id) }}">
-                                #{{ $report->report_id }}
+                              <a href="{{ route('admin.report.show', $report->id) }}">
+                                #{{ $report->id }}
                               </a>
                             @elseif(Auth::user()->role == 'tim_teknisi')
-                              <a href="{{ route('admin.teknisi.show', $report->report_id) }}">
-                                #{{ $report->report_id }}
+                              <a href="{{ route('admin.teknisi.show', $report->id) }}">
+                                #{{ $report->id }}
                               </a>
                             @elseif(Auth::user()->role == 'tim_konten')
-                              <a href="{{ route('admin.konten.show', $report->report_id) }}">
-                                #{{ $report->report_id }}
+                              <a href="{{ route('admin.konten.show', $report->id) }}">
+                                #{{ $report->id }}
                               </a>
                             @else
-                              <a href="{{ route('report.show', $report->report_id) }}">
-                                #{{ $report->report_id }}
+                              <a href="{{ route('report.show', $report->id) }}">
+                                #{{ $report->id }}
                               </a>
                             @endif
                           </td>

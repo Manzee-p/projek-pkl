@@ -62,4 +62,19 @@ class Tiket extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to', 'user_id');
     }
+    /**
+     * Relasi ke Komentar
+     */
+    public function komentars()
+    {
+        return $this->hasMany(TiketKomentar::class, 'tiket_id', 'tiket_id');
+    }
+
+/**
+ * Cek apakah user sudah memberikan komentar
+ */
+    public function hasUserComment($userId)
+    {
+        return $this->komentars()->where('user_id', $userId)->exists();
+    }
 }

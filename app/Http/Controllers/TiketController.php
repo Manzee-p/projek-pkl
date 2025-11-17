@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\TiketKomentar;
 use App\Models\Tiket;
 use App\Models\User;
 use Carbon\Carbon;
@@ -69,7 +70,7 @@ class TiketController extends Controller
         return view('tiket.index', compact('tikets', 'statuses', 'kategoris', 'prioritas', 'stats', 'kategoriStats'));
     }
 
-     public function adminIndex()
+    public function adminIndex()
     {
         $tikets = Tiket::with(['status', 'kategori', 'event', 'prioritas', 'user', 'assignedTo'])->get();
         return view('admin.tiket.index', compact('tikets'));
@@ -80,11 +81,11 @@ class TiketController extends Controller
         // 🔹 Cek role - Admin vs User
         if (Auth::user()->role === 'admin') {
             // Admin bisa akses semua field
-            $events    = \App\Models\Event::all();
-            $kategoris = \App\Models\Kategori::all();
-            $prioritas = \App\Models\Prioritas::all();
-            $statuses  = \App\Models\TiketStatus::all();
-            $users     = \App\Models\User::all();
+            $events     = \App\Models\Event::all();
+            $kategoris  = \App\Models\Kategori::all();
+            $prioritas  = \App\Models\Prioritas::all();
+            $statuses   = \App\Models\TiketStatus::all();
+            $users      = \App\Models\User::all();
             $timTeknisi = User::where('role', 'tim_teknisi')->get();
             $timKonten  = User::where('role', 'tim_konten')->get();
 
@@ -97,7 +98,6 @@ class TiketController extends Controller
 
         return view('tiket.create', compact('events', 'kategoris'));
     }
-
 
     /**
      * Menyimpan tiket baru
@@ -147,7 +147,7 @@ class TiketController extends Controller
 
             $request->merge([
                 'user_id'      => Auth::id(),
-                'status_id'    => $statusBaru ? $statusBaru->status_id : 1, // Fallback ke ID 1
+                'status_id'    => $statusBaru ? $statusBaru->status_id : 1,                // Fallback ke ID 1
                 'prioritas_id' => $prioritasDefault ? $prioritasDefault->prioritas_id : 2, // Fallback ke ID 2
             ]);
         }
@@ -204,10 +204,10 @@ class TiketController extends Controller
 
     /**
      * Menampilkan detail tiket
-     */
+     */ 
     public function show($id)
     {
-        $tiket = Tiket::with(['user', 'event', 'kategori', 'prioritas', 'status', 'assignedTo'])
+        $tiket = Tiket::with(['user', 'event', 'kategori', 'prioritas', 'status', 'assignedTo', 'komentars'])
             ->where('tiket_id', $id)
             ->firstOrFail();
 
@@ -294,13 +294,13 @@ class TiketController extends Controller
 
             if (Auth::user()->role === 'admin') {
                 $pesan = "Tiket {$tiket->kode_tiket} telah diperbarui. "
-                        . "Status: {$tiket->status->nama_status}, "
-                        . "Prioritas: {$tiket->prioritas->nama_prioritas}.";
+                    . "Status: {$tiket->status->nama_status}, "
+                    . "Prioritas: {$tiket->prioritas->nama_prioritas}.";
 
                 Notification::create([
-                    'user_id'   => $tiket->user_id,
-                    'tiket_id'  => $tiket->tiket_id,
-                    'pesan'     => $pesan,
+                    'user_id'     => $tiket->user_id,
+                    'tiket_id'    => $tiket->tiket_id,
+                    'pesan'       => $pesan,
                     'status_baca' => 0,
                     'waktu_kirim' => now(),
                 ]);
@@ -366,6 +366,8 @@ class TiketController extends Controller
      */
     public function destroy($tiket_id)
     {
+        $route = Auth::user()->role === 'admin' ? 'admin.tiket.index' : 'tiket.index';
+
         try {
             $tiket = Tiket::where('tiket_id', $tiket_id)
                 ->where('user_id', Auth::id())
@@ -373,11 +375,13 @@ class TiketController extends Controller
 
             $tiket->delete();
 
-            return redirect()->route('tiket.index')->with('success', 'Tiket berhasil dihapus');
+            return redirect()->route($route)->with('success', 'Tiket berhasil dihapus');
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route('tiket.index')->with('error', 'Tiket tidak ditemukan');
+            return redirect()->route($route)->with('error', 'Tiket tidak ditemukan');
+
         } catch (\Exception $e) {
-            return redirect()->route('tiket.index')->with('error', 'Gagal menghapus tiket: ' . $e->getMessage());
+            return redirect()->route($route)->with('error', 'Gagal menghapus tiket: ' . $e->getMessage());
         }
     }
 
@@ -779,5 +783,192 @@ class TiketController extends Controller
             'message' => 'Export feature coming soon',
             'data'    => $tikets,
         ]);
+    }
+
+    public function showKomentarForm($tiket_id)
+    {
+        $tiket = Tiket::with(['user', 'status', 'komentars'])
+            ->where('tiket_id', $tiket_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Cek apakah tiket sudah selesai
+        if ($tiket->status->nama_status !== 'Selesai') {
+            return redirect()->route('tiket.show', $tiket_id)
+                ->with('error', 'Komentar hanya dapat diberikan pada tiket yang sudah selesai.');
+        }
+
+        // Cek apakah user sudah memberikan komentar
+        if ($tiket->hasUserComment(Auth::id())) {
+            return redirect()->route('tiket.show', $tiket_id)
+                ->with('info', 'Anda sudah memberikan komentar untuk tiket ini.');
+        }
+
+        return view('tiket.komentar', compact('tiket'));
+    }
+
+/**
+ * Simpan komentar user
+ */
+    public function storeKomentar(Request $request, $tiket_id)
+    {
+        try {
+            $tiket = Tiket::with(['status', 'assignedTo'])
+                ->where('tiket_id', $tiket_id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            // Validasi tiket harus selesai
+            if ($tiket->status->nama_status !== 'Selesai') {
+                return redirect()->back()
+                    ->with('error', 'Komentar hanya dapat diberikan pada tiket yang sudah selesai.');
+            }
+
+            // Validasi user belum memberikan komentar
+            if ($tiket->hasUserComment(Auth::id())) {
+                return redirect()->back()
+                    ->with('error', 'Anda sudah memberikan komentar untuk tiket ini.');
+            }
+
+            // Validasi input
+            $validated = $request->validate([
+                'komentar'      => 'required|string|min:10|max:1000',
+                'rating'        => 'required|integer|min:1|max:5',
+                'tipe_komentar' => 'required|in:feedback,evaluasi,complaint',
+            ], [
+                'komentar.required'      => 'Komentar wajib diisi',
+                'komentar.min'           => 'Komentar minimal 10 karakter',
+                'komentar.max'           => 'Komentar maksimal 1000 karakter',
+                'rating.required'        => 'Rating wajib dipilih',
+                'rating.min'             => 'Rating minimal 1',
+                'rating.max'             => 'Rating maksimal 5',
+                'tipe_komentar.required' => 'Tipe komentar wajib dipilih',
+            ]);
+
+            // Simpan komentar
+            $komentar = TiketKomentar::create([
+                'tiket_id'       => $tiket_id,
+                'user_id'        => Auth::id(),
+                'komentar'       => $validated['komentar'],
+                'rating'         => $validated['rating'],
+                'tipe_komentar'  => $validated['tipe_komentar'],
+                'waktu_komentar' => now(),
+            ]);
+
+            // 🔔 KIRIM NOTIFIKASI KE ADMIN
+            $admins     = User::where('role', 'admin')->get();
+            $ratingText = str_repeat('⭐', $validated['rating']);
+
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'user_id'  => $admin->user_id,
+                    'tiket_id' => $tiket->tiket_id,
+                    'pesan'    => "User {$tiket->user->name} memberikan {$validated['tipe_komentar']} untuk tiket #{$tiket->kode_tiket} dengan rating {$ratingText}",
+                    'waktu_kirim' => now(),
+                    'status_baca' => false,
+                ]);
+            }
+
+            // 🔔 KIRIM NOTIFIKASI KE TIM YANG DITUGASKAN
+            if ($tiket->assigned_to) {
+                Notification::create([
+                    'user_id'  => $tiket->assigned_to,
+                    'tiket_id' => $tiket->tiket_id,
+                    'pesan'    => "User {$tiket->user->name} memberikan {$validated['tipe_komentar']} dengan rating {$ratingText} untuk tiket #{$tiket->kode_tiket} yang Anda tangani",
+                    'waktu_kirim' => now(),
+                    'status_baca' => false,
+                ]);
+            }
+
+            return redirect()->route('tiket.show', $tiket_id)
+                ->with('success', 'Terima kasih! Komentar Anda telah berhasil disimpan dan akan menjadi evaluasi kami.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menyimpan komentar: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+/**
+ * Lihat semua komentar tiket (untuk admin)
+ */
+    public function adminViewKomentars($tiket_id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+
+        $tiket = Tiket::with(['user', 'komentars.user', 'status', 'kategori'])
+            ->findOrFail($tiket_id);
+
+        return view('admin.tiket.komentars', compact('tiket'));
+    }
+
+/**
+ * Dashboard evaluasi untuk admin (statistik komentar)
+ */
+    public function adminEvaluasiDashboard()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+
+        // Statistik rating
+        $ratingStats = TiketKomentar::selectRaw('rating, COUNT(*) as total')
+            ->groupBy('rating')
+            ->orderBy('rating', 'desc')
+            ->get();
+
+        // Rata-rata rating keseluruhan
+        $averageRating = TiketKomentar::avg('rating');
+
+        // Statistik per tipe komentar
+        $tipeStats = TiketKomentar::selectRaw('tipe_komentar, COUNT(*) as total')
+            ->groupBy('tipe_komentar')
+            ->get();
+
+        // Komentar terbaru
+        $recentKomentars = TiketKomentar::with(['user', 'tiket'])
+            ->orderByDesc('waktu_komentar')
+            ->limit(10)
+            ->get();
+
+        // Statistik per tim yang ditugaskan
+        $timStats = Tiket::with(['assignedTo', 'komentars'])
+            ->whereNotNull('assigned_to')
+            ->whereHas('komentars')
+            ->get()
+            ->groupBy('assigned_to')
+            ->map(function ($tikets) {
+                $avgRating     = $tikets->flatMap->komentars->avg('rating');
+                $totalKomentar = $tikets->flatMap->komentars->count();
+                return [
+                    'user'           => $tikets->first()->assignedTo,
+                    'avg_rating'     => round($avgRating, 2),
+                    'total_komentar' => $totalKomentar,
+                ];
+            });
+
+        // Komplain terbaru (prioritas tinggi)
+        $complaints = TiketKomentar::with(['user', 'tiket'])
+            ->where('tipe_komentar', 'complaint')
+            ->orWhere('rating', '<=', 2)
+            ->orderByDesc('waktu_komentar')
+            ->limit(5)
+            ->get();
+
+        return view('admin.evaluasi.dashboard', compact(
+            'ratingStats',
+            'averageRating',
+            'tipeStats',
+            'recentKomentars',
+            'timStats',
+            'complaints'
+        ));
     }
 }

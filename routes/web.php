@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
         Route::get('report/{id}/edit', [ReportController::class, 'edit'])->name('admin.report.edit');
         Route::put('report/{id}', [ReportController::class, 'update'])->name('admin.report.update');
         Route::delete('report/{id}', [ReportController::class, 'destroy'])->name('admin.report.destroy');
+
     });
 
     // USER ROUTES - TIKET
@@ -204,6 +205,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/notification-user', [\App\Http\Controllers\NotificationController::class, 'index'])
         ->name('notification-user.index');
 });
+
+// Routes untuk User - Komentar Tiket
+Route::middleware(['auth'])->group(function () {
+    Route::get('/tiket/{tiket_id}/komentar', [TiketController::class, 'showKomentarForm'])
+        ->name('tiket.komentar.form');
+
+    Route::post('/tiket/{tiket_id}/komentar', [TiketController::class, 'storeKomentar'])
+        ->name('tiket.komentar.store');
+});
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Route tiket admin yang sudah ada...
+    
+    // 🆕 Route Evaluasi & Komentar Admin
+    Route::get('/evaluasi/dashboard', [TiketController::class, 'adminEvaluasiDashboard'])
+        ->name('evaluasi.dashboard');
+    Route::get('/tiket/{tiket_id}/komentars', [TiketController::class, 'adminViewKomentars'])
+        ->name('tiket.komentars');
+});
+
 
 // Fallback route (optional)
 Route::fallback(function () {

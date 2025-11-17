@@ -14,9 +14,9 @@ class TiketStatusSeeder extends Seeder
         public function run(): void
         {
             DB::table('tiket_statuses')->insert([
-                ['status_id' => 1, 'nama_status' => 'Open'],
-                ['status_id' => 2, 'nama_status' => 'In Progress'],
-                ['status_id' => 3, 'nama_status' => 'Closed'],
+                ['status_id' => 1, 'nama_status' => 'Pending'],
+                ['status_id' => 2, 'nama_status' => 'Selesai'],
+                ['status_id' => 3, 'nama_status' => 'Ditolak'],
             ]);
         }
 }

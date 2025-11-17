@@ -38,6 +38,7 @@
                 </div>
             </div>
 
+            <!-- Card Detail -->
             <div class="card shadow-sm rounded-3 border-0 mb-4">
                 <div class="card-body">
                     <h4 class="fw-bold mb-3">{{ $tiket->judul }}</h4>
@@ -91,7 +92,8 @@
                     @if($tiket->lampiran)
                         <div class="mb-4">
                             <h6 class="fw-bold text-secondary">Lampiran</h6>
-                            <a href="{{ asset('storage/lampiran/' . $tiket->lampiran) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <a href="{{ asset('storage/lampiran/' . $tiket->lampiran) }}" target="_blank" 
+                                class="btn btn-outline-primary btn-sm">
                                 <i class="lni lni-download"></i> Unduh Lampiran
                             </a>
                         </div>
@@ -108,7 +110,9 @@
                                             {{ $log->status->nama_status }} 
                                             oleh {{ $log->user->name }}
                                         </span>
-                                        <small class="text-muted">{{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}</small>
+                                        <small class="text-muted">
+                                            {{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}
+                                        </small>
                                     </li>
                                 @endforeach
                             </ul>
@@ -124,12 +128,120 @@
                     </div>
                 </div>
             </div>
+
+            {{-- ========================= --}}
+            {{-- SECTION: TOMBOL KOMENTAR --}}
+            {{-- ========================= --}}
+
+            @if($tiket->status->nama_status === 'Selesai')
+                @if(!$tiket->hasUserComment(Auth::id()))
+                    <div class="card border-0 shadow-sm mt-4" 
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center text-white mb-3 mb-md-0">
+                                        <div class="me-3">
+                                            <i class="lni lni-checkmark-circle" style="font-size: 3rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="fw-bold mb-2">Tiket Anda Telah Selesai! 🎉</h4>
+                                            <p class="mb-0">Berikan komentar dan rating untuk membantu kami meningkatkan layanan.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <a href="{{ route('tiket.komentar.form', $tiket->tiket_id) }}" 
+                                        class="btn btn-light btn-lg px-4">
+                                        <i class="lni lni-comments me-2"></i> Berikan Komentar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="alert alert-success border-0 mt-4 d-flex align-items-center">
+                        <i class="lni lni-checkmark-circle fs-4 me-3"></i>
+                        <div>
+                            <strong>Terima Kasih!</strong> Anda sudah memberikan komentar untuk tiket ini.
+                        </div>
+                    </div>
+                @endif
+            @endif
+
+            {{-- ========================= --}}
+            {{-- SECTION: TAMPILKAN KOMENTAR --}}
+            {{-- ========================= --}}
+
+            @if($tiket->komentars && $tiket->komentars->count() > 0)
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="lni lni-comments text-primary"></i> Komentar Anda
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        @foreach($tiket->komentars->where('user_id', Auth::id()) as $komentar)
+                            <div class="border-start border-4 ps-4 py-3
+                                @if($komentar->tipe_komentar === 'feedback') border-primary bg-primary bg-opacity-10
+                                @elseif($komentar->tipe_komentar === 'evaluasi') border-success bg-success bg-opacity-10
+                                @else border-danger bg-danger bg-opacity-10
+                                @endif">
+                                
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <span class="badge 
+                                            @if($komentar->tipe_komentar === 'feedback') bg-primary
+                                            @elseif($komentar->tipe_komentar === 'evaluasi') bg-success
+                                            @else bg-danger
+                                            @endif mb-2">
+                                            @if($komentar->tipe_komentar === 'feedback')
+                                                <i class="lni lni-thumbs-up"></i> Feedback
+                                            @elseif($komentar->tipe_komentar === 'evaluasi')
+                                                <i class="lni lni-bar-chart"></i> Evaluasi
+                                            @else
+                                                <i class="lni lni-warning"></i> Keluhan
+                                            @endif
+                                        </span>
+                                        <p class="text-muted small mb-0">
+                                            <i class="lni lni-calendar"></i> 
+                                            {{ $komentar->waktu_komentar->format('d M Y, H:i') }}
+                                        </p>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <div class="mb-1" style="font-size: 1.5rem;">
+                                            {{ str_repeat('⭐', $komentar->rating) }}
+                                        </div>
+                                        <small class="text-muted">
+                                            @if($komentar->rating == 5) Sangat Puas
+                                            @elseif($komentar->rating == 4) Puas
+                                            @elseif($komentar->rating == 3) Cukup
+                                            @elseif($komentar->rating == 2) Tidak Puas
+                                            @else Sangat Tidak Puas
+                                            @endif
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <p class="mb-0 text-dark">{{ $komentar->komentar }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 
     <script src="{{ asset('user/js/bootstrap-5.0.0-beta1.min.js') }}"></script>
 </body>
 </html>
+
+
+{{-- ========================= --}}
+{{--  STYLING  --}}
+{{-- ========================= --}}
 
 <style>
     :root {
@@ -183,19 +295,4 @@
     .badge-high { background: #FFFAE6; color: #FF991F; }
     .badge-medium { background: #FFF7D6; color: #FF8B00; }
     .badge-low { background: #E3FCEF; color: #00875A; }
-    .btn-primary-custom {
-        background: var(--primary);
-        border: none;
-        padding: 12px 30px;
-        border-radius: 8px;
-        font-weight: 600;
-        color: white;
-        transition: all 0.3s;
-    }
-    .btn-primary-custom:hover {
-        background: var(--secondary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        color: white;
-    }
 </style>

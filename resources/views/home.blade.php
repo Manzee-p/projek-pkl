@@ -280,9 +280,9 @@
                     @if(Auth::user()->role == 'admin')
                       <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
                     @elseif(Auth::user()->role == 'tim_teknisi')
-                      <a href="{{ route('admin.teknisi.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                      <a href="{{ route('tim.tiket.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
                     @elseif(Auth::user()->role == 'tim_konten')
-                      <a href="{{ route('admin.konten.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                      <a href="{{ route('tim.tiket.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
                     @else
                       <a href="{{ route('report.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
                     @endif

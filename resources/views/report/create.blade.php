@@ -21,125 +21,185 @@
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
     
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
+
+<style>
+    body {
+        background: #f7f9fc;
+    }
+
+    /* HEADER BLUE */
+    .header-gradient {
+        background: linear-gradient(135deg, #1976ff, #5ab3ff);
+        padding: 50px 20px;
+        color: white;
+        text-align: center;
+        border-radius: 18px 18px 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-circle {
+        position: absolute;
+        top: -45px;
+        right: -45px;
+        width: 160px;
+        height: 160px;
+        background: rgba(255, 255, 255, 0.22);
+        border-radius: 50%;
+    }
+
+    .header-icon {
+        background: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 12px auto;
+        color: #1976ff;
+        font-size: 24px;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.15);
+    }
+
+    /* CARD */
+    .form-card {
+        border-radius: 18px;
+        overflow: hidden;
+        border: none;
+    }
+
+    /* FORM STYLE */
+    .form-control, .form-select {
+        border-radius: 10px !important;
+        padding: 12px !important;
+        border: 1px solid #ced4da;
+    }
+
+    textarea.form-control {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1976ff;
+        box-shadow: 0 0 0 0.2rem rgba(25, 118, 255, 0.25);
+    }
+</style>
+
 </head>
 <body>
-    {{-- Include Navbar --}}
+
     @include('layouts.components-frontend.navbar')
 
-    <div class="container py-5" style="min-height: calc(100vh - 200px);">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                {{-- Header --}}
-                <div class="mb-4">
-                    <a href="{{ route('report.index') }}" class="btn btn-sm btn-outline-secondary mb-3">
-                        <i class="lni lni-arrow-left"></i> Kembali
-                    </a>
-                    <h2 class="fw-bold mb-2">📝 Buat Laporan Baru</h2>
-                    <p class="text-muted">Laporkan masalah atau keluhan yang Anda alami</p>
+    <div class="container py-5" style="max-width: 900px;">
+
+        <div class="card shadow-lg form-card">
+
+            <!-- HEADER BIRU -->
+            <div class="header-gradient">
+                <div class="header-circle"></div>
+
+                <div class="header-icon">
+                    <i class="lni lni-pencil"></i>
                 </div>
 
-                {{-- Form Card --}}
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
+                <h2 class="fw-bold">Buat Laporan Baru</h2>
+                <p class="mb-0">Isi formulir di bawah untuk melaporkan masalah</p>
+            </div>
 
-                            {{-- Judul Laporan --}}
-                            <div class="mb-4">
-                                <label for="judul" class="form-label fw-semibold">
-                                    Judul Laporan <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" 
-                                       class="form-control @error('judul') is-invalid @enderror" 
-                                       id="judul" 
-                                       name="judul" 
-                                       value="{{ old('judul') }}"
-                                       placeholder="Contoh: Error saat login ke sistem"
-                                       required>
-                                @error('judul')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            <!-- FORM -->
+            <div class="card-body p-4">
 
-                            {{-- Kategori & Prioritas --}}
-                            <div class="row mb-4">
-                                <div class="row mb-4">
-                                <div class="col-md-6 mb-3">
-                                    <label>Kategori</label>
-                                    <select name="kategori_id" class="form-control" required>
-                                        <option value="">-- Pilih Kategori --</option>
-                                        @foreach ($kategoris as $kategori)
-                                            <option value="{{ $kategori->kategori_id }}">{{ $kategori->nama_kategori }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            </div>
+                <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
 
-                            {{-- Deskripsi --}}
-                            <div class="mb-4">
-                                <label for="deskripsi" class="form-label fw-semibold">
-                                    Deskripsi Lengkap <span class="text-danger">*</span>
-                                </label>
-                                <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
-                                          id="deskripsi" 
-                                          name="deskripsi" 
-                                          rows="6"
-                                          placeholder="Jelaskan masalah yang Anda alami secara detail..."
-                                          required>{{ old('deskripsi') }}</textarea>
-                                @error('deskripsi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">
-                                    <i class="lni lni-information"></i> 
-                                    Berikan detail sejelas mungkin agar tim kami bisa membantu dengan cepat
-                                </small>
-                            </div>
+                    <!-- Judul -->
+                    <div class="mb-4">
+                        <label for="judul" class="form-label fw-semibold">Judul Laporan <span class="text-danger">*</span></label>
+                        <input type="text" 
+                               class="form-control @error('judul') is-invalid @enderror" 
+                               id="judul" 
+                               name="judul" 
+                               value="{{ old('judul') }}"
+                               placeholder="Contoh: Error saat login ke sistem"
+                               required>
 
-                            {{-- Lampiran --}}
-                            <div class="mb-4">
-                                <label for="lampiran" class="form-label fw-semibold">
-                                    Lampiran (Opsional)
-                                </label>
-                                <input type="file" 
-                                       class="form-control @error('lampiran') is-invalid @enderror" 
-                                       id="lampiran" 
-                                       name="lampiran"
-                                       accept=".jpg,.jpeg,.png,.pdf">
-                                @error('lampiran')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">
-                                    Format: JPG, PNG, PDF (Max: 2MB)
-                                </small>
-                            </div>
-
-                            {{-- Preview Lampiran --}}
-                            <div id="preview-container" class="mb-4" style="display: none;">
-                                <div class="alert alert-info d-flex align-items-center">
-                                    <i class="lni lni-image me-2"></i>
-                                    <span id="preview-name"></span>
-                                </div>
-                            </div>
-
-                            {{-- Action Buttons --}}
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="lni lni-checkmark-circle"></i> Kirim Laporan
-                                </button>
-                                <a href="{{ route('report.index') }}" class="btn btn-outline-secondary">
-                                    Batal
-                                </a>
-                            </div>
-                        </form>
+                        @error('judul')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                </div>
+
+                    <!-- Kategori -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Kategori <span class="text-danger">*</span></label>
+                        <select name="kategori_id" class="form-control" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($kategoris as $kategori)
+                                <option value="{{ $kategori->kategori_id }}">{{ $kategori->nama_kategori }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Deskripsi Lengkap <span class="text-danger">*</span></label>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
+                                  name="deskripsi"
+                                  placeholder="Jelaskan masalah yang Anda alami secara detail..."
+                                  required>{{ old('deskripsi') }}</textarea>
+
+                        @error('deskripsi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <small class="text-muted">
+                            <i class="lni lni-information"></i> Berikan detail sejelas mungkin agar proses lebih cepat
+                        </small>
+                    </div>
+
+                    <!-- Lampiran -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Lampiran (Opsional)</label>
+                        <input type="file" 
+                               class="form-control @error('lampiran') is-invalid @enderror" 
+                               id="lampiran" 
+                               name="lampiran"
+                               accept=".jpg,.jpeg,.png,.pdf">
+
+                        @error('lampiran')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <small class="text-muted">Format: JPG, PNG, PDF (Maks 2MB)</small>
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="preview-container" class="mb-4" style="display: none;">
+                        <div class="alert alert-info d-flex align-items-center">
+                            <i class="lni lni-image me-2"></i>
+                            <span id="preview-name"></span>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ route('report.index') }}" class="btn btn-outline-secondary">
+                            Batal
+                        </a>
+
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="lni lni-checkmark-circle"></i> Kirim Laporan
+                        </button>
+                    </div>
+
+                </form>
+
             </div>
         </div>
+
     </div>
 
-    {{-- Include Footer --}}
     <footer class="bg-light py-4 mt-5 border-top">
         <div class="container">
             <div class="row">
@@ -156,42 +216,20 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+<script>
+document.getElementById('lampiran').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const previewContainer = document.getElementById('preview-container');
+    const previewName = document.getElementById('preview-name');
 
-    <script>
-    // Preview file lampiran
-    document.getElementById('lampiran').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const previewContainer = document.getElementById('preview-container');
-        const previewName = document.getElementById('preview-name');
-        
-        if (file) {
-            previewName.textContent = `File terpilih: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
-            previewContainer.style.display = 'block';
-        } else {
-            previewContainer.style.display = 'none';
-        }
-    });
-    </script>
+    if (file) {
+        previewName.textContent = `File terpilih: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+        previewContainer.style.display = 'block';
+    } else {
+        previewContainer.style.display = 'none';
+    }
+});
+</script>
 
-    <style>
-    .card {
-        border-radius: 12px;
-    }
-    .form-label {
-        color: #333;
-        margin-bottom: 8px;
-    }
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 12px;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #0052CC;
-        box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
-    }
-    </style>
 </body>
 </html>

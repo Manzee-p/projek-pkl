@@ -47,7 +47,12 @@
                     </ul>
                 </div>
             </li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('admin.evaluasi.dashboard') }}">Feedback</a></li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.evaluasi.dashboard') }}">
+                    <i class="mdi mdi-message-alert-outline menu-icon" style="color: #000 !important;"></i>
+                    <span class="menu-title" style="color: #000 !important;">Feedback</span>
+                </a>
+            </li>
         @endif
 
         {{-- ✅ Menu untuk TIM TEKNISI dan TIM KONTEN --}}

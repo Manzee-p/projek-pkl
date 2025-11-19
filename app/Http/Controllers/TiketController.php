@@ -21,6 +21,10 @@ class TiketController extends Controller
         $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event'])
             ->where('user_id', Auth::id());
 
+        // Hanya tampilkan tiket yang BELUM selesai dan BELUM ditolak
+$query->whereHas('status', function ($q) {
+    $q->whereNotIn('nama_status', ['Selesai', 'Ditolak']);
+});
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
@@ -690,11 +694,16 @@ class TiketController extends Controller
     /**
      * Menampilkan riwayat/history tiket user
      */
+    // ==== DI METHOD history() (Riwayat Tiket) ====
     public function history(Request $request)
     {
-        // Query semua tiket milik user yang login (termasuk yang sudah selesai/ditolak)
-        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo'])
-            ->where('user_id', Auth::id());
+    $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo'])
+        ->where('user_id', Auth::id());
+
+    // Tambahkan baris ini → hanya tiket yang SUDAH SELESAI / DITOLAK
+    $query->whereHas('status', function($q) {
+        $q->whereIn('nama_status', ['Selesai', 'Ditolak']);
+    });
 
         // Filter berdasarkan tanggal
         if ($request->filled('start_date')) {

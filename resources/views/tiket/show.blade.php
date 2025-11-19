@@ -1,219 +1,377 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Detail Tiket - {{ $tiket->judul }}</title>
+
+    <!-- Bootstrap & Icons -->
     <link rel="stylesheet" href="{{ asset('user/css/bootstrap-5.0.0-beta1.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('user/css/LineIcons.2.0.css') }}" />
+
+    <!-- Custom CSS (inline untuk kemudahan) -->
+    <style>
+        :root{
+            --primary:#1976ff; /* header blue */
+            --primary-2:#5ab3ff; /* secondary header */
+            --card-bg:#ffffff;
+            --muted:#6b7280;
+            --surface:#F4F5F7;
+        }
+
+        /* Page */
+        body{
+            background: var(--surface);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin:0;
+            -webkit-font-smoothing:antialiased;
+        }
+
+        /* Navbar */
+        .navbar-custom{
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .navbar-brand{
+            color: var(--primary) !important;
+            font-weight:700;
+            font-size:1.25rem;
+        }
+
+        /* Page header card */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: white;
+            padding: 36px 28px;
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(25,118,255,0.12);
+            margin-bottom: 26px;
+        }
+        .page-header .header-icon {
+            width:72px;
+            height:72px;
+            border-radius:14px;
+            background: white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--primary);
+            font-size:28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            margin-bottom:12px;
+        }
+        .page-header h1{
+            margin:0;
+            font-size:22px;
+            font-weight:700;
+        }
+        .page-header p{ margin:6px 0 0; opacity:0.95; }
+
+        /* Main container / card */
+        .container-main {
+            max-width:1020px;
+            margin: 18px auto 60px;
+            padding: 0 16px;
+        }
+
+        .card-detail {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+            overflow: hidden;
+            border: none;
+        }
+        .card-body {
+            padding: 22px;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* Badges */
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight:600;
+            text-transform:uppercase;
+            letter-spacing:0.4px;
+            display:inline-block;
+            margin-right:8px;
+        }
+        .badge-open{ background:#DEEBFF;color:#0052CC; }
+        .badge-progress{ background:#FFFAE6;color:#FF991F; }
+        .badge-resolved{ background:#E3FCEF;color:#00875A; }
+        .badge-closed{ background:#F4F5F7;color:#6B778C; }
+
+        .badge-prioritas{
+            padding:5px 10px;
+            border-radius:14px;
+            font-size:0.78rem;
+            font-weight:600;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+        }
+        .badge-critical{ background:#FFEBE6;color:#DE350B; }
+        .badge-high{ background:#FFFAE6;color:#FF991F; }
+        .badge-medium{ background:#FFF7D6;color:#FF8B00; }
+        .badge-low{ background:#E3FCEF;color:#00875A; }
+
+        /* description box */
+        .description-box{
+            background:#fbfcfe;
+            border-radius:10px;
+            padding:14px;
+            border:1px solid #eef2f7;
+            color:#111827;
+        }
+
+        /* info / attachment */
+        .btn-ghost {
+            border-radius:10px;
+            padding:6px 10px;
+        }
+
+        /* Completed CTA card */
+        .cta-complete {
+            border-radius:12px;
+            overflow:hidden;
+            color:white;
+        }
+        .cta-complete .card-body { padding:18px; }
+        .cta-complete .btn-light {
+            border-radius:10px;
+            font-weight:600;
+        }
+
+        /* Comments area */
+        .comments-card {
+            border-radius:12px;
+            overflow:visible;
+        }
+        .comment-box{
+            background:#fff;
+            border-left:6px solid var(--primary);
+            border-radius: 10px;
+            padding:18px;
+            position:relative;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .comment-box + .comment-box { margin-top:14px; }
+        .comment-box:hover{
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(16,24,40,0.08);
+        }
+        .comment-icon {
+            position:absolute;
+            left:-28px;
+            top:18px;
+            width:56px;
+            height:56px;
+            border-radius:50%;
+            background: #fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+            font-size:20px;
+            color:var(--primary);
+        }
+        .rating-stars { letter-spacing:2px; font-size:1.05rem; }
+        .small-muted { color:var(--muted); font-size:0.86rem; }
+
+        /* responsive tweaks */
+        @media (max-width:768px){
+            .page-header{ padding:28px 18px; }
+            .page-header h1{ font-size:20px; }
+            .container-main{ padding: 0 12px; }
+            .comment-icon{ left:-22px; top:14px; width:50px; height:50px; font-size:18px; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-custom navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('home') }}">
-                <i class="lni lni-ticket-alt"></i> Web Helpdesk
-            </a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('tiket.index') }}">
-                            <i class="lni lni-arrow-left"></i> Kembali
-                        </a>
-                    </li>
-                </ul>
+
+    <!-- NAVBAR -->
+        @include('layouts.components-frontend.navbar')
+
+
+    <!-- HEADER (blue + icon) -->
+    <div class="container-main">
+        <div class="page-header">
+            <div class="header-icon">
+                <i class="lni lni-ticket"></i>
             </div>
+            <h1>Detail Tiket</h1>
+            <p class="mb-0">Informasi lengkap tiket Anda</p>
         </div>
-    </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <div class="container">
-            <div class="page-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h1><i class="lni lni-ticket"></i> Detail Tiket</h1>
-                        <p class="text-muted mb-0">Informasi lengkap tiket Anda</p>
+        <!-- DETAIL CARD -->
+        <div class="card card-detail mb-4">
+            <div class="card-body">
+                <h4 class="fw-bold mb-2">{{ $tiket->judul }}</h4>
+
+                <div class="meta mb-3">
+                    <i class="lni lni-calendar"></i>
+                    Dibuat: {{ \Carbon\Carbon::parse($tiket->waktu_dibuat)->format('d M Y, H:i') }}
+                    <br>
+                    <i class="lni lni-user"></i> Oleh: {{ $tiket->user->name }}
+                </div>
+
+                <div class="mb-3">
+                    @php
+                        $statusName = $tiket->status->nama_status ?? 'Open';
+                        $statusClass = 'badge-open';
+                        if($statusName == 'In Progress') $statusClass = 'badge-progress';
+                        elseif($statusName == 'Resolved') $statusClass = 'badge-resolved';
+                        elseif($statusName == 'Closed') $statusClass = 'badge-closed';
+                    @endphp
+
+                    <span class="badge-status {{ $statusClass }}">{{ $statusName }}</span>
+
+                    @php
+                        $p = strtolower($tiket->prioritas->nama_prioritas ?? '');
+                        if(str_contains($p,'critical')) $pc = 'badge-critical';
+                        elseif(str_contains($p,'high')) $pc = 'badge-high';
+                        elseif(str_contains($p,'medium')) $pc = 'badge-medium';
+                        else $pc = 'badge-low';
+                    @endphp
+                    <span class="badge-prioritas {{ $pc }}">
+                        <i class="lni lni-flag"></i>
+                        {{ $tiket->prioritas->nama_prioritas ?? '-' }}
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary">Kategori</h6>
+                    <p>{{ $tiket->kategori->nama_kategori ?? '-' }}</p>
+
+                    <h6 class="fw-bold text-secondary">Event Terkait</h6>
+                    <p>{{ $tiket->event->nama_event ?? '-' }}</p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary">Deskripsi</h6>
+                    <div class="description-box">
+                        {!! nl2br(e($tiket->deskripsi)) !!}
                     </div>
                 </div>
-            </div>
 
-            <!-- Card Detail -->
-            <div class="card shadow-sm rounded-3 border-0 mb-4">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">{{ $tiket->judul }}</h4>
-
-                    <div class="mb-3 text-muted">
-                        <i class="lni lni-calendar"></i>
-                        Dibuat: {{ \Carbon\Carbon::parse($tiket->waktu_dibuat)->format('d M Y, H:i') }}
-                        <br>
-                        <i class="lni lni-user"></i>
-                        Oleh: {{ $tiket->user->name }}
-                    </div>
-
+                @if($tiket->lampiran)
                     <div class="mb-4">
-                        @php
-                            $statusClass = 'badge-open';
-                            if($tiket->status->nama_status == 'In Progress') $statusClass = 'badge-progress';
-                            elseif($tiket->status->nama_status == 'Resolved') $statusClass = 'badge-resolved';
-                            elseif($tiket->status->nama_status == 'Closed') $statusClass = 'badge-closed';
-                        @endphp
-                        <span class="badge-status {{ $statusClass }}">
-                            {{ $tiket->status->nama_status }}
-                        </span>
-
-                        @php
-                            $prioritasClass = 'badge-low';
-                            $prioritasName = strtolower($tiket->prioritas->nama_prioritas);
-                            if(str_contains($prioritasName, 'critical')) $prioritasClass = 'badge-critical';
-                            elseif(str_contains($prioritasName, 'high')) $prioritasClass = 'badge-high';
-                            elseif(str_contains($prioritasName, 'medium')) $prioritasClass = 'badge-medium';
-                        @endphp
-                        <span class="badge-prioritas {{ $prioritasClass }}">
-                            <i class="lni lni-flag"></i> {{ $tiket->prioritas->nama_prioritas }}
-                        </span>
-                    </div>
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-secondary">Kategori</h6>
-                        <p>{{ $tiket->kategori->nama_kategori }}</p>
-
-                        <h6 class="fw-bold text-secondary">Event Terkait</h6>
-                        <p>{{ $tiket->event->nama_event }}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-secondary">Deskripsi</h6>
-                        <div class="bg-light p-3 rounded">
-                            {!! nl2br(e($tiket->deskripsi)) !!}
-                        </div>
-                    </div>
-
-                    @if($tiket->lampiran)
-                        <div class="mb-4">
-                            <h6 class="fw-bold text-secondary">Lampiran</h6>
-                            <a href="{{ asset('storage/lampiran/' . $tiket->lampiran) }}" target="_blank" 
-                                class="btn btn-outline-primary btn-sm">
-                                <i class="lni lni-download"></i> Unduh Lampiran
-                            </a>
-                        </div>
-                    @endif
-
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-secondary">Riwayat Status</h6>
-                        @if($tiket->riwayat && $tiket->riwayat->count() > 0)
-                            <ul class="list-group">
-                                @foreach($tiket->riwayat as $log)
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <i class="lni lni-timer"></i> 
-                                            {{ $log->status->nama_status }} 
-                                            oleh {{ $log->user->name }}
-                                        </span>
-                                        <small class="text-muted">
-                                            {{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}
-                                        </small>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <p class="text-muted">Belum ada riwayat status.</p>
-                        @endif
-                    </div>
-
-                    <div class="text-end">
-                        <a href="{{ route('tiket.index') }}" class="btn btn-secondary">
-                            <i class="lni lni-arrow-left"></i> Kembali ke Daftar
+                        <h6 class="fw-bold text-secondary">Lampiran</h6>
+                        <a href="{{ asset('storage/lampiran/' . $tiket->lampiran) }}" target="_blank"
+                           class="btn btn-outline-primary btn-ghost btn-sm">
+                            <i class="lni lni-download"></i> Unduh Lampiran
                         </a>
-                    </div>
-                </div>
-            </div>
-
-            {{-- ========================= --}}
-            {{-- SECTION: TOMBOL KOMENTAR --}}
-            {{-- ========================= --}}
-
-            @if($tiket->status->nama_status === 'Selesai')
-                @if(!$tiket->hasUserComment(Auth::id()))
-                    <div class="card border-0 shadow-sm mt-4" 
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <div class="card-body p-4">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-center text-white mb-3 mb-md-0">
-                                        <div class="me-3">
-                                            <i class="lni lni-checkmark-circle" style="font-size: 3rem;"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="fw-bold mb-2">Tiket Anda Telah Selesai! 🎉</h4>
-                                            <p class="mb-0">Berikan komentar dan rating untuk membantu kami meningkatkan layanan.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <a href="{{ route('tiket.komentar.form', $tiket->tiket_id) }}" 
-                                        class="btn btn-light btn-lg px-4">
-                                        <i class="lni lni-comments me-2"></i> Berikan Komentar
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @else
-                    <div class="alert alert-success border-0 mt-4 d-flex align-items-center">
-                        <i class="lni lni-checkmark-circle fs-4 me-3"></i>
-                        <div>
-                            <strong>Terima Kasih!</strong> Anda sudah memberikan komentar untuk tiket ini.
-                        </div>
                     </div>
                 @endif
-            @endif
 
-            {{-- ========================= --}}
-            {{-- SECTION: TAMPILKAN KOMENTAR --}}
-            {{-- ========================= --}}
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary">Riwayat Status</h6>
+                    @if($tiket->riwayat && $tiket->riwayat->count() > 0)
+                        <ul class="list-group">
+                            @foreach($tiket->riwayat as $log)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="lni lni-timer"></i>
+                                        {{ $log->status->nama_status ?? '-' }} oleh {{ $log->user->name ?? '-' }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}
+                                    </small>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-muted">Belum ada riwayat status.</p>
+                    @endif
+                </div>
 
-            @if($tiket->komentars && $tiket->komentars->count() > 0)
-                <div class="card border-0 shadow-sm mt-4">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <h5 class="mb-0 fw-semibold">
-                            <i class="lni lni-comments text-primary"></i> Komentar Anda
-                        </h5>
+                <div class="text-end">
+                    <a href="{{ route('tiket.index') }}" class="btn btn-secondary">
+                        <i class="lni lni-arrow-left"></i> Kembali ke Daftar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA COMMENT WHEN FINISHED -->
+        @if($tiket->status->nama_status === 'Selesai')
+            @if(!$tiket->hasUserComment(Auth::id()))
+                <div class="card cta-complete mb-4" style="background: linear-gradient(135deg,#667eea,#764ba2);">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="lni lni-checkmark-circle" style="font-size:40px;margin-right:12px;"></i>
+                            <div>
+                                <h5 class="fw-bold mb-1">Tiket Anda Telah Selesai! 🎉</h5>
+                                <p class="mb-0 small">Berikan komentar dan rating untuk membantu kami meningkatkan layanan.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ route('tiket.komentar.form', $tiket->tiket_id) }}" class="btn btn-light btn-lg">
+                                <i class="lni lni-comments"></i> Berikan Komentar
+                            </a>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
-                        @foreach($tiket->komentars->where('user_id', Auth::id()) as $komentar)
-                            <div class="border-start border-4 ps-4 py-3
-                                @if($komentar->tipe_komentar === 'feedback') border-primary bg-primary bg-opacity-10
-                                @elseif($komentar->tipe_komentar === 'evaluasi') border-success bg-success bg-opacity-10
-                                @else border-danger bg-danger bg-opacity-10
-                                @endif">
-                                
-                                <div class="d-flex justify-content-between align-items-start mb-3">
+                </div>
+            @else
+                <div class="alert alert-success border-0 mb-4 d-flex align-items-center">
+                    <i class="lni lni-checkmark-circle fs-4 me-3"></i>
+                    <div><strong>Terima Kasih!</strong> Anda sudah memberikan komentar untuk tiket ini.</div>
+                </div>
+            @endif
+        @endif
+
+        <!-- COMMENTS -->
+        @php $userComments = $tiket->komentars->where('user_id', Auth::id()); @endphp
+        @if($userComments && $userComments->count() > 0)
+            <div class="card comments-card mb-5">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-semibold"><i class="lni lni-comments text-primary"></i> Komentar Anda</h5>
+                </div>
+
+                <div class="card-body">
+                    @foreach($userComments as $komentar)
+                        <div class="comment-box">
+                            <div class="comment-icon">
+                                @if($komentar->tipe_komentar === 'feedback')
+                                    <i class="lni lni-thumbs-up"></i>
+                                @elseif($komentar->tipe_komentar === 'evaluasi')
+                                    <i class="lni lni-bar-chart"></i>
+                                @else
+                                    <i class="lni lni-warning"></i>
+                                @endif
+                            </div>
+
+                            <div style="margin-left:44px;">
+                                <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <span class="badge 
+                                        <span class="badge rounded-pill px-3 py-2
                                             @if($komentar->tipe_komentar === 'feedback') bg-primary
                                             @elseif($komentar->tipe_komentar === 'evaluasi') bg-success
                                             @else bg-danger
-                                            @endif mb-2">
-                                            @if($komentar->tipe_komentar === 'feedback')
-                                                <i class="lni lni-thumbs-up"></i> Feedback
-                                            @elseif($komentar->tipe_komentar === 'evaluasi')
-                                                <i class="lni lni-bar-chart"></i> Evaluasi
-                                            @else
-                                                <i class="lni lni-warning"></i> Keluhan
+                                            @endif">
+                                            @if($komentar->tipe_komentar === 'feedback') Feedback
+                                            @elseif($komentar->tipe_komentar === 'evaluasi') Evaluasi
+                                            @else Keluhan
                                             @endif
                                         </span>
-                                        <p class="text-muted small mb-0">
-                                            <i class="lni lni-calendar"></i> 
+
+                                        <p class="small-muted mt-2 mb-1">
+                                            <i class="lni lni-calendar"></i>
                                             {{ $komentar->waktu_komentar->format('d M Y, H:i') }}
                                         </p>
                                     </div>
 
                                     <div class="text-end">
-                                        <div class="mb-1" style="font-size: 1.5rem;">
-                                            {{ str_repeat('⭐', $komentar->rating) }}
-                                        </div>
-                                        <small class="text-muted">
+                                        <div class="rating-stars mb-1">{{ str_repeat('⭐', $komentar->rating) }}</div>
+                                        <small class="small-muted fw-semibold">
                                             @if($komentar->rating == 5) Sangat Puas
                                             @elseif($komentar->rating == 4) Puas
                                             @elseif($komentar->rating == 3) Cukup
@@ -224,75 +382,17 @@
                                     </div>
                                 </div>
 
-                                <p class="mb-0 text-dark">{{ $komentar->komentar }}</p>
+                                <p class="mt-3 mb-0">{{ $komentar->komentar }}</p>
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
-            @endif
+            </div>
+        @endif
 
-        </div>
-    </div>
+    </div> <!-- .container-main -->
 
+    <!-- Bootstrap JS -->
     <script src="{{ asset('user/js/bootstrap-5.0.0-beta1.min.js') }}"></script>
 </body>
 </html>
-
-
-{{-- ========================= --}}
-{{--  STYLING  --}}
-{{-- ========================= --}}
-
-<style>
-    :root {
-        --primary: #0052CC;
-        --secondary: #172B4D;
-        --accent: #00B8D9;
-        --success: #00875A;
-        --warning: #FF991F;
-        --danger: #DE350B;
-    }
-    body {
-        background: #F4F5F7;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    }
-    .navbar-custom {
-        background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        padding: 1rem 0;
-    }
-    .navbar-brand {
-        font-weight: 700;
-        color: var(--primary) !important;
-        font-size: 1.5rem;
-    }
-    .page-header {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .badge-status {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .badge-open { background: #DEEBFF; color: #0052CC; }
-    .badge-progress { background: #FFFAE6; color: #FF991F; }
-    .badge-resolved { background: #E3FCEF; color: #00875A; }
-    .badge-closed { background: #F4F5F7; color: #6B778C; }
-    .badge-prioritas {
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .badge-critical { background: #FFEBE6; color: #DE350B; }
-    .badge-high { background: #FFFAE6; color: #FF991F; }
-    .badge-medium { background: #FFF7D6; color: #FF8B00; }
-    .badge-low { background: #E3FCEF; color: #00875A; }
-</style>

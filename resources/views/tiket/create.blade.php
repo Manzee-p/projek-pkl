@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="{{ asset('user/css/LineIcons.2.0.css') }}" />
 </head>
 <body>
+     {{-- Include Navbar --}}
+    @include('layouts.components-frontend.navbar')
     <div class="container">
         <div class="form-container">
-            <div class="form-header">
-                <div class="icon-wrapper">
+
+            <!-- HEADER BIRU YANG BENAR -->
+            <div class="form-header-blue">
+                <div class="icon-circle">
                     <i class="lni lni-ticket-alt"></i>
                 </div>
                 <h2>Buat Tiket Baru</h2>
@@ -19,7 +23,7 @@
             </div>
 
             @if ($errors->any())
-                <div class="alert alert-danger">
+                <div class="alert alert-danger mx-4">
                     <strong><i class="lni lni-warning"></i> Terjadi Kesalahan:</strong>
                     <ul class="mb-0 mt-2">
                         @foreach ($errors->all() as $error)
@@ -29,10 +33,11 @@
                 </div>
             @endif
 
-            <form action="{{ route('tiket.store') }}" method="POST">
+            <form action="{{ route('tiket.store') }}" method="POST" class="px-4 pb-4">
                 @csrf
 
                 <div class="row">
+
                     <!-- Event -->
                     <div class="col-md-6 mb-3">
                         <label for="event_id" class="form-label">
@@ -70,16 +75,9 @@
                         <label for="judul" class="form-label">
                             <i class="lni lni-text-format"></i> Judul Tiket <span class="required">*</span>
                         </label>
-                        <input 
-                            type="text" 
-                            name="judul" 
-                            id="judul" 
-                            class="form-control" 
+                        <input type="text" name="judul" id="judul" class="form-control"
                             placeholder="Contoh: Website tidak bisa diakses"
-                            value="{{ old('judul') }}"
-                            maxlength="255"
-                            required
-                        >
+                            value="{{ old('judul') }}" maxlength="255" required>
                         <small class="text-muted">Tulis judul yang jelas dan deskriptif</small>
                     </div>
 
@@ -88,28 +86,27 @@
                         <label for="deskripsi" class="form-label">
                             <i class="lni lni-pencil-alt"></i> Deskripsi Masalah
                         </label>
-                        <textarea 
-                            name="deskripsi" 
-                            id="deskripsi" 
-                            class="form-control" 
-                            rows="6" 
+                        <textarea name="deskripsi" id="deskripsi" class="form-control" rows="6"
                             placeholder="Jelaskan masalah Anda secara detail...&#10;&#10;Contoh:&#10;- Apa yang terjadi?&#10;- Kapan masalah muncul?&#10;- Apa yang sudah dicoba?"
                         >{{ old('deskripsi') }}</textarea>
                         <small class="text-muted">Semakin detail deskripsi, semakin cepat kami bisa membantu</small>
                     </div>
 
-                    <!-- Info Box -->
+                    <!-- Info box -->
                     <div class="col-12 mb-4">
                         <div class="info-box">
                             <i class="lni lni-information"></i>
                             <div>
                                 <strong>Catatan:</strong>
-                                <p class="mb-0">Status dan prioritas tiket akan ditentukan otomatis oleh sistem dan dapat disesuaikan oleh admin sesuai kebutuhan.</p>
+                                <p class="mb-0">
+                                    Status dan prioritas tiket akan ditentukan otomatis oleh sistem
+                                    dan dapat disesuaikan oleh admin sesuai kebutuhan.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tombol Aksi -->
+                    <!-- Tombol -->
                     <div class="col-12">
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('tiket.index') }}" class="btn btn-secondary">
@@ -122,6 +119,7 @@
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -130,207 +128,114 @@
 </html>
 
 <style>
-    :root {
-        --primary: #0052CC;
-        --secondary: #172B4D;
-        --accent: #00B8D9;
-        --success: #00875A;
-        --info: #0065FF;
-    }
-    
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 40px 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    }
-    
-    .form-container {
-        background: white;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        max-width: 800px;
-        margin: 0 auto;
-        animation: slideUp 0.5s ease;
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .form-header {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-    
-    .form-header h2 {
-        color: var(--secondary);
-        font-weight: 700;
-        margin-bottom: 10px;
-        font-size: 28px;
-    }
-    
-    .form-header p {
-        color: #6c757d;
-        font-size: 16px;
-    }
-    
-    .icon-wrapper {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        box-shadow: 0 8px 20px rgba(0, 82, 204, 0.3);
-    }
-    
-    .icon-wrapper i {
-        font-size: 35px;
-        color: white;
-    }
-    
-    .form-label {
-        font-weight: 600;
-        color: var(--secondary);
-        margin-bottom: 8px;
-        font-size: 14px;
-    }
-    
-    .form-label i {
-        color: var(--primary);
-        margin-right: 5px;
-    }
-    
-    .form-control, .form-select {
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
-        padding: 12px 16px;
-        transition: all 0.3s ease;
-        font-size: 14px;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
-        outline: none;
-    }
-    
-    .form-control::placeholder {
-        color: #adb5bd;
-    }
-    
-    textarea.form-control {
-        resize: vertical;
-        min-height: 150px;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary), var(--info));
-        border: none;
-        padding: 12px 40px;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 82, 204, 0.3);
-    }
-    
-    .btn-primary:hover {
-        background: linear-gradient(135deg, var(--info), var(--primary));
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 82, 204, 0.4);
-    }
-    
-    .btn-secondary {
-        padding: 12px 40px;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .required {
-        color: #dc3545;
-        font-weight: bold;
-    }
-    
-    .alert {
-        border-radius: 12px;
-        border: none;
-        padding: 16px 20px;
-    }
-    
-    .alert-danger {
-        background: #fff5f5;
-        color: #dc3545;
-    }
-    
-    small.text-muted {
-        font-size: 12px;
-        display: block;
-        margin-top: 5px;
-    }
-    
-    .info-box {
-        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-        border-left: 4px solid var(--info);
-        padding: 16px 20px;
-        border-radius: 10px;
-        display: flex;
-        gap: 15px;
-        align-items: flex-start;
-    }
-    
-    .info-box i {
-        font-size: 24px;
-        color: var(--info);
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-    
-    .info-box strong {
-        color: var(--secondary);
-        display: block;
-        margin-bottom: 5px;
-    }
-    
-    .info-box p {
-        color: #6c757d;
-        font-size: 13px;
-        line-height: 1.6;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-        .form-container {
-            padding: 30px 20px;
-        }
-        
-        .form-header h2 {
-            font-size: 24px;
-        }
-        
-        .btn-primary, .btn-secondary {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        
-        .d-flex.justify-content-between {
-            flex-direction: column-reverse;
-        }
-    }
+    background: #f5f7fa;
+    font-family: "Inter", sans-serif;
+}
+
+/* Container card */
+.form-container {
+    max-width: 820px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 0;
+}
+
+/* HEADER BIRU */
+.form-header-blue {
+    background: linear-gradient(135deg, #1e88e5, #42a5f5);
+    height: 150px;
+    position: relative;
+    border-radius: 0 0 40px 0;
+    padding-top: 25px;
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.icon-circle {
+    width: 70px;
+    height: 70px;
+    background: #fff;
+    color: #1e88e5;
+    margin: 0 auto;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.form-header-blue h2 {
+    font-weight: 700;
+    margin-top: 15px;
+    font-size: 24px;
+}
+
+/* Label */
+.form-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* Input */
+.form-control,
+.form-select {
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #42a5f5;
+    box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.25);
+}
+
+/* Info box */
+.info-box {
+    display: flex;
+    gap: 12px;
+    background: #e3f2fd;
+    border-left: 5px solid #1e88e5;
+    padding: 12px 15px;
+    border-radius: 10px;
+    color: #0d47a1;
+}
+
+.info-box i {
+    font-size: 24px;
+}
+
+/* Tombol */
+.btn-primary {
+    background: #1e88e5;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #1565c0;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
 </style>

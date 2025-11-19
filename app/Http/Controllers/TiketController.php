@@ -2,8 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
-use App\Models\TiketKomentar;
 use App\Models\Tiket;
+use App\Models\TiketKomentar;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -204,7 +204,7 @@ class TiketController extends Controller
 
     /**
      * Menampilkan detail tiket
-     */ 
+     */
     public function show($id)
     {
         $tiket = Tiket::with(['user', 'event', 'kategori', 'prioritas', 'status', 'assignedTo', 'komentars'])
@@ -364,25 +364,23 @@ class TiketController extends Controller
     /**
      * Menghapus tiket
      */
-    public function destroy($tiket_id)
+    public function destroy($id)
     {
-        $route = Auth::user()->role === 'admin' ? 'admin.tiket.index' : 'tiket.index';
+        $tiket = Tiket::findOrFail($id);
 
-        try {
-            $tiket = Tiket::where('tiket_id', $tiket_id)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-
-            $tiket->delete();
-
-            return redirect()->route($route)->with('success', 'Tiket berhasil dihapus');
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route($route)->with('error', 'Tiket tidak ditemukan');
-
-        } catch (\Exception $e) {
-            return redirect()->route($route)->with('error', 'Gagal menghapus tiket: ' . $e->getMessage());
+        // Hapus lampiran
+        if ($tiket->lampiran && Storage::exists($tiket->lampiran)) {
+            Storage::delete($tiket->lampiran);
         }
+
+        // Hapus komentar tiket
+        $tiket->komentars()->delete();
+
+        // Hapus tiket
+        $tiket->delete();
+
+        return redirect()->route('admin.tiket.index')
+            ->with('success', 'Tiket berhasil dihapus.');
     }
 
     /**

@@ -71,25 +71,44 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'judul'        => 'required|string|max:255',
-            'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
-            'deskripsi'    => 'required|string',
-            'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'assigned_to'  => 'nullable|exists:users,user_id',
-        ]);
+        $user = auth()->user();
 
+        // Tentukan aturan validasi berdasarkan role
+        $rules = [
+            'judul'       => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,kategori_id',
+            'deskripsi'   => 'required|string',
+            'lampiran'    => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'assigned_to' => 'nullable|exists:users,user_id',
+        ];
+
+        // Hanya admin/teknisi/konten yang wajib mengisi prioritas
+        if (in_array($user->role, ['admin', 'tim_teknisi', 'tim_konten'])) {
+            $rules['prioritas_id'] = 'required|exists:priorities,prioritas_id';
+        } else {
+            $rules['prioritas_id'] = 'nullable|exists:priorities,prioritas_id';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Upload file lampiran jika ada
         if ($request->hasFile('lampiran')) {
             $validated['lampiran'] = $request->file('lampiran')->store('reports', 'public');
         }
 
-        $validated['user_id'] = $request->user()->user_id;
-        $validated['status']  = 'pending'; // default
+        $validated['user_id'] = $user->user_id;
+        $validated['status']  = 'pending';
+
+        // Set prioritas default untuk user biasa jika tidak diisi
+        if (! isset($validated['prioritas_id'])) {
+                                            // Ambil ID prioritas "Medium" atau "Normal" sebagai default
+                                            // Sesuaikan dengan ID yang ada di database Anda
+            $validated['prioritas_id'] = 2; // Misalnya ID 2 = Medium/Normal
+        }
 
         Report::create($validated);
 
-        $user = auth()->user();
+        // Tentukan route redirect berdasarkan role
         if ($user->role === 'admin') {
             $route = 'admin.report.index';
         } elseif ($user->role === 'tim_teknisi') {
@@ -236,7 +255,6 @@ class ReportController extends Controller
         $validated = $request->validate([
             'judul'        => 'required|string|max:255',
             'kategori_id'  => 'required|exists:kategoris,kategori_id',
-            'prioritas_id' => 'required|exists:priorities,prioritas_id',
             'deskripsi'    => 'required|string',
             'lampiran'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);

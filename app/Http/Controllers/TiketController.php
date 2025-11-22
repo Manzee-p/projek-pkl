@@ -61,7 +61,7 @@ $query->whereHas('status', function ($q) {
                 ->whereHas('status', fn($q) => $q->where('nama_status', 'Ditolak'))
                 ->count(),
             'diproses' => Tiket::where('user_id', Auth::id())
-                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Baru', 'Sedang Diproses']))
+                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Diproses']))
                 ->count(),
         ];
 

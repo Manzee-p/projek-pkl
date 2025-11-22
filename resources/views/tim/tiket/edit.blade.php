@@ -1,294 +1,681 @@
 @extends('layouts.admin.master')
+@section('pageTitle', 'Edit Tiket')
 
 @section('content')
+
 <style>
-    :root{
-        --primary-1: #667eea;
-        --primary-2: #764ba2;
-        --glass-bg: rgba(255,255,255,0.72);
-        --muted: #6b7280;
+    .edit-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
     }
 
-    .page-hero {
-        background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+    .edit-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
         color: white;
-        border-radius: 20px;
-        padding: 36px 28px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 18px 40px rgba(102, 126, 234, 0.12);
-        margin-bottom: 28px;
     }
 
-    /* decorative circle/image (uses uploaded image path below) */
-    .hero-deco {
+    .edit-header::before {
+        content: '';
         position: absolute;
-        right: -20px;
-        top: -30px;
-        width: 320px;
-        height: 320px;
-        opacity: 0.12;
-        background-size: cover;
-        background-position: center;
-        filter: blur(6px);
-        transform: rotate(10deg);
+        top: -50%;
+        right: -5%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
     }
 
-    .hero-title {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin: 0 0 6px 0;
-        letter-spacing: -0.3px;
+    .header-content {
+        position: relative;
+        z-index: 1;
     }
 
-    .hero-sub {
+    .header-content h4 {
         margin: 0;
-        opacity: 0.95;
-        color: rgba(255,255,255,0.95);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-content p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .edit-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .info-section {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: #4338ca;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-row {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px dashed rgba(102, 126, 234, 0.1);
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 700;
+        color: #059669;
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .info-value {
+        color: #374151;
+        font-size: 0.95rem;
         font-weight: 500;
     }
 
-    .main-card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.98));
-        border-radius: 20px;
-        padding: 24px;
-        box-shadow: 0 10px 30px rgba(32, 38, 52, 0.06);
+    .form-label {
+        font-weight: 700;
+        color: #4338ca;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .row-gap {
-        gap: 20px;
+    .form-label .required {
+        color: #dc2626;
+        font-size: 1.1rem;
     }
 
-    .info-panel {
-        background: linear-gradient(180deg, #f8f9ff, #ffffff);
-        border-radius: 14px;
-        padding: 18px;
-        border: 1px solid rgba(102,126,234,0.06);
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e0e7ff;
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
     }
 
-    .label-title { font-weight: 700; color: #374151; font-size: 0.9rem; }
-    .muted { color: var(--muted); font-size: 0.9rem; }
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+    }
+
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: white;
+        border: 2px dashed #e0e7ff;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .file-upload-label:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+
+    .file-upload-input {
+        display: none;
+    }
+
+    .file-name-display {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #f0fdf4;
+        color: #166534;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .current-file {
+        margin-top: 0.5rem;
+        padding: 0.7rem 1rem;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .current-file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3730a3;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .current-file-preview {
+        max-width: 200px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        margin-top: 0.5rem;
+    }
+
+    .btn-view-file {
+        background: white;
+        border: none;
+        color: #667eea;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-view-file:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-1px);
+    }
 
     .badge-modern {
-        display: inline-flex; align-items:center; gap:8px;
-        padding: 8px 12px; border-radius: 999px; font-weight:700;
-        font-size: 0.85rem; box-shadow: 0 6px 18px rgba(16,24,40,0.04);
-    }
-    .badge-cat { background: linear-gradient(90deg,#dcfce7,#d1fae5); color:#065f46; }
-    .badge-prio-high { background: linear-gradient(90deg,#fee2e2,#fecaca); color:#991b1b; }
-    .badge-prio-mid { background: linear-gradient(90deg,#fff4e6,#feeccf); color:#92400e; }
-    .badge-prio-low { background: linear-gradient(90deg,#dbeafe,#bfdbfe); color:#1e3a8a; }
-
-    .form-control, .form-select, textarea.form-control {
-        border-radius: 12px;
-        border: 1px solid rgba(15,23,42,0.06);
-        padding: 12px 14px;
-        background: white;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-    }
-
-    .form-control:focus, .form-select:focus, textarea.form-control:focus{
-        outline: none;
-        box-shadow: 0 6px 20px rgba(102,126,234,0.12);
-        border-color: var(--primary-1);
-    }
-
-    .btn-cta {
-        background: linear-gradient(135deg,var(--primary-1),var(--primary-2));
-        color: #fff;
-        border-radius: 12px;
-        padding: 10px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
         font-weight: 700;
-        box-shadow: 0 10px 30px rgba(118,75,162,0.18);
+        font-size: 0.8rem;
+    }
+
+    .badge-cat {
+        background: linear-gradient(90deg, #dcfce7, #d1fae5);
+        color: #065f46;
+    }
+
+    .badge-prio-high {
+        background: linear-gradient(90deg, #fee2e2, #fecaca);
+        color: #991b1b;
+    }
+
+    .badge-prio-mid {
+        background: linear-gradient(90deg, #fff4e6, #feeccf);
+        color: #92400e;
+    }
+
+    .badge-prio-low {
+        background: linear-gradient(90deg, #dbeafe, #bfdbfe);
+        color: #1e3a8a;
+    }
+
+    .badge-status {
+        background: linear-gradient(90deg, #eef2ff, #eef4ff);
+        color: #4338ca;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #fca5a5;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #991b1b;
+    }
+
+    .alert-danger ul {
+        margin: 0.5rem 0 0 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert-danger li {
+        margin: 0.3rem 0;
+    }
+
+    .alert-title {
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 2px solid #6ee7b7;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        color: #065f46;
+        font-weight: 600;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 2px solid #93c5fd;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-top: 1rem;
+        color: #1e3a8a;
+        font-size: 0.85rem;
+    }
+
+    .alert-info strong {
+        font-weight: 700;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         border: none;
-    }
-
-    .btn-ghost {
-        background: white;
-        border-radius: 12px;
-        padding: 10px 18px;
-        color: #374151;
-        border: 1px solid rgba(15,23,42,0.06);
-        font-weight: 700;
-    }
-
-    .small-muted { font-size: 0.85rem; color: var(--muted); }
-
-    .file-preview {
-        max-width: 160px;
+        color: white;
+        padding: 0.8rem 2rem;
         border-radius: 10px;
-        margin-top: 8px;
-        box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
     }
 
-    @media (max-width: 992px) {
-        .hero-deco { display: none; }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        border: none;
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+        color: white;
+    }
+
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e3a8a;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .edit-body {
+            padding: 1rem;
+        }
+
+        .form-section, .info-section {
+            padding: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-save, .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
-<div class="container-fluid px-3">
-
-    {{-- hero/header --}}
-    <div class="page-hero">
-        <div class="hero-deco" style="background-image: url('/mnt/data/6d551fd3-cc28-4cdf-b89f-4d534169e15a.png');"></div>
-
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h1 class="hero-title"><i class="mdi mdi-ticket-outline"></i> Edit Tiket</h1>
-                <p class="hero-sub">Perbarui status, tambahkan catatan, dan selesaikan tiket dengan cepat.</p>
-            </div>
-
-            <div class="text-end">
-                <a href="{{ route('tim.tiket.index') }}" class="btn btn-ghost">
-                    <i class="mdi mdi-arrow-left"></i> Kembali ke Daftar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- main card --}}
-    <div class="main-card">
-
-        {{-- alerts --}}
-        @if ($errors->any())
-            <div class="alert alert-danger rounded-pill">
-                <strong>Terdapat kesalahan:</strong>
-                <ul class="mb-0 mt-2">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if(session('success'))
-            <div class="alert alert-success rounded-pill">{{ session('success') }}</div>
-        @endif
-
-        {{-- content two-column --}}
-        <form action="{{ route('tim.tiket.update', $tiket->tiket_id) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-
-            <div class="row row-gap">
-                {{-- left info --}}
-                <div class="col-lg-5">
-                    <div class="info-panel">
-                        <h5 class="mb-3"><i class="mdi mdi-information-outline"></i> Informasi Tiket</h5>
-
-                        <p class="mb-2"><span class="label-title">Kode Tiket</span><br>
-                            <strong class="muted">{{ $tiket->kode_tiket }}</strong></p>
-
-                        <p class="mb-2"><span class="label-title">Judul</span><br>
-                            <strong>{{ $tiket->judul }}</strong></p>
-
-                        <p class="mb-2"><span class="label-title">Deskripsi</span><br>
-                            <span class="muted">{{ $tiket->deskripsi ?? '-' }}</span></p>
-
-                        <p class="mb-2"><span class="label-title">Event</span><br>
-                            <span class="muted">{{ optional($tiket->event)->nama_event ?? '-' }}</span></p>
-
-                        <p class="mb-2"><span class="label-title">Kategori</span><br>
-                            <span class="badge-modern badge-cat">{{ $tiket->kategori->nama_kategori }}</span>
-                        </p>
-
-                        <p class="mb-2"><span class="label-title">Prioritas</span><br>
-                            @php $p = strtolower($tiket->prioritas->nama_prioritas ?? 'low'); @endphp
-                            @if(str_contains($p, 'high') || str_contains($p,'tinggi'))
-                                <span class="badge-modern badge-prio-high">{{ $tiket->prioritas->nama_prioritas }}</span>
-                            @elseif(str_contains($p,'med') || str_contains($p,'sedang'))
-                                <span class="badge-modern badge-prio-mid">{{ $tiket->prioritas->nama_prioritas }}</span>
-                            @else
-                                <span class="badge-modern badge-prio-low">{{ $tiket->prioritas->nama_prioritas }}</span>
-                            @endif
-                        </p>
-
-                        <p class="mb-2"><span class="label-title">Dibuat Oleh</span><br>
-                            <span class="muted">{{ $tiket->user->name }}</span></p>
-
-                        <p class="mb-0"><span class="label-title">Waktu Dibuat</span><br>
-                            <span class="muted">{{ $tiket->waktu_dibuat->format('d M Y H:i') }}</span></p>
-
-                        <hr>
-
-                        <label class="label-title">Lampiran Saat Ini</label>
-                        @if($tiket->lampiran)
-                            @php
-                                $ext = pathinfo($tiket->lampiran, PATHINFO_EXTENSION);
-                            @endphp
-
-                            @if(in_array(strtolower($ext), ['png','jpg','jpeg','gif']))
-                                <img src="{{ asset('storage/'.$tiket->lampiran) }}" alt="lampiran" class="file-preview">
-                            @else
-                                <div class="small-muted">File: <a href="{{ asset('storage/'.$tiket->lampiran) }}" target="_blank">{{ basename($tiket->lampiran) }}</a></div>
-                            @endif
-                        @else
-                            <div class="small-muted">Tidak ada lampiran</div>
-                        @endif
-
-                        <div class="alert alert-info mt-3 mb-0">
-                            <strong>Catatan:</strong> Hanya status dan catatan yang dapat diubah oleh tim.
-                        </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 mt-3">
+            <div class="card edit-card">
+                <div class="edit-header">
+                    <div class="header-content">
+                        <h4><i class="mdi mdi-ticket-outline"></i> Edit Tiket</h4>
+                        <p>Perbarui status dan detail tiket: <strong>{{ $tiket->judul }}</strong></p>
                     </div>
                 </div>
 
-                {{-- right form --}}
-                <div class="col-lg-7">
-                    <div class="p-3" style="background: linear-gradient(180deg, rgba(246,247,255,0.6), rgba(255,255,255,0.7)); border-radius:12px; border:1px solid rgba(102,126,234,0.04)">
-                        <h5 class="mb-3"><i class="mdi mdi-wrench"></i> Update Status & Progress</h5>
+                <div class="edit-body">
+                    {{-- ALERT ERRORS --}}
+                    @if($errors->any())
+                        <div class="alert-danger">
+                            <div class="alert-title">
+                                <i class="mdi mdi-alert-circle"></i>
+                                Terdapat Kesalahan!
+                            </div>
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-                        {{-- current status --}}
-                        <div class="mb-3">
-                            <label class="label-title d-block">Status Saat Ini</label>
-                            <div style="display:inline-block">
-                                <span class="badge-modern" style="background: linear-gradient(90deg,#eef2ff,#eef4ff); color:#4338ca;">
-                                    <i class="mdi mdi-information-outline"></i>&nbsp; {{ $tiket->status->nama_status }}
-                                </span>
+                    {{-- ALERT SUCCESS --}}
+                    @if(session('success'))
+                        <div class="alert-success">
+                            <i class="mdi mdi-check-circle"></i>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <div class="row">
+                        {{-- LEFT SIDE: INFORMASI TIKET --}}
+                        <div class="col-lg-5 mb-3">
+                            <div class="info-section">
+                                <div class="section-title">
+                                    <i class="mdi mdi-information-outline"></i>
+                                    Informasi Tiket
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-barcode"></i>
+                                        Kode Tiket
+                                    </div>
+                                    <div class="info-value">{{ $tiket->kode_tiket }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-format-title"></i>
+                                        Judul
+                                    </div>
+                                    <div class="info-value">{{ $tiket->judul }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-text-box-outline"></i>
+                                        Deskripsi
+                                    </div>
+                                    <div class="info-value">{{ $tiket->deskripsi ?? '-' }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-calendar-star"></i>
+                                        Event
+                                    </div>
+                                    <div class="info-value">{{ optional($tiket->event)->nama_event ?? '-' }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-tag"></i>
+                                        Kategori
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge-modern badge-cat">
+                                            {{ $tiket->kategori->nama_kategori }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-flag"></i>
+                                        Prioritas
+                                    </div>
+                                    <div class="info-value">
+                                        @php $p = strtolower($tiket->prioritas->nama_prioritas ?? 'low'); @endphp
+                                        @if(str_contains($p, 'high') || str_contains($p,'tinggi'))
+                                            <span class="badge-modern badge-prio-high">{{ $tiket->prioritas->nama_prioritas }}</span>
+                                        @elseif(str_contains($p,'med') || str_contains($p,'sedang'))
+                                            <span class="badge-modern badge-prio-mid">{{ $tiket->prioritas->nama_prioritas }}</span>
+                                        @else
+                                            <span class="badge-modern badge-prio-low">{{ $tiket->prioritas->nama_prioritas }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-account"></i>
+                                        Dibuat Oleh
+                                    </div>
+                                    <div class="info-value">{{ $tiket->user->name }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-clock-outline"></i>
+                                        Waktu Dibuat
+                                    </div>
+                                    <div class="info-value">{{ $tiket->waktu_dibuat->format('d M Y H:i') }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-information"></i>
+                                        Status Saat Ini
+                                    </div>
+                                    <div class="info-value">
+                                        <span class="badge-modern badge-status">
+                                            {{ $tiket->status->nama_status }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">
+                                        <i class="mdi mdi-paperclip"></i>
+                                        Lampiran Saat Ini
+                                    </div>
+                                    <div class="info-value">
+                                        @if($tiket->lampiran)
+                                            @php
+                                                $ext = pathinfo($tiket->lampiran, PATHINFO_EXTENSION);
+                                            @endphp
+
+                                            @if(in_array(strtolower($ext), ['png','jpg','jpeg','gif']))
+                                                <img src="{{ asset('storage/'.$tiket->lampiran) }}" 
+                                                     alt="lampiran" 
+                                                     class="current-file-preview">
+                                            @else
+                                                <div class="current-file mt-2">
+                                                    <div class="current-file-info">
+                                                        <i class="mdi mdi-file-check"></i>
+                                                        {{ basename($tiket->lampiran) }}
+                                                    </div>
+                                                    <a href="{{ asset('storage/'.$tiket->lampiran) }}" 
+                                                       target="_blank" 
+                                                       class="btn-view-file">
+                                                        <i class="mdi mdi-eye"></i>
+                                                        Lihat
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        @else
+                                            <span style="color: #6b7280; font-size: 0.85rem;">Tidak ada lampiran</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="alert-info">
+                                    <strong>📌 Catatan:</strong> Hanya status dan catatan yang dapat diubah oleh tim.
+                                </div>
                             </div>
                         </div>
 
-                        {{-- status baru --}}
-                        <div class="mb-3">
-                            <label class="label-title">Status Baru <span class="text-danger">*</span></label>
-                            <select name="status_id" class="form-select" required>
-                                <option value="">-- Pilih Status --</option>
-                                @foreach($statuses as $status)
-                                    <option value="{{ $status->status_id }}" {{ $tiket->status_id == $status->status_id ? 'selected' : '' }}>
-                                        {{ $status->nama_status }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        {{-- RIGHT SIDE: FORM EDIT --}}
+                        <div class="col-lg-7">
+                            <form action="{{ route('tim.tiket.update', $tiket->tiket_id) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                @method('PUT')
 
-                        {{-- catatan --}}
-                        <div class="mb-3">
-                            <label class="label-title">Catatan / Progress</label>
-                            <textarea name="catatan" class="form-control" rows="6" maxlength="1000" placeholder="- Contoh: Sedang melakukan pengecekan...">{{ old('catatan') }}</textarea>
-                            <div class="small-muted mt-1">Maks 1000 karakter — akan terlihat oleh pembuat tiket dan admin.</div>
-                        </div>
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <i class="mdi mdi-wrench"></i>
+                                        Update Status & Progress
+                                    </div>
 
-                        {{-- lampiran baru --}}
-                        <div class="mb-3">
-                            <label class="label-title">Unggah Lampiran Baru (opsional)</label>
-                            <input type="file" name="lampiran" class="form-control">
-                            <div class="small-muted mt-1">Format: jpg, png, pdf (max 2MB). Mengunggah akan mengganti lampiran lama.</div>
-                        </div>
+                                    {{-- STATUS BARU --}}
+                                    <div class="mb-4">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-information"></i>
+                                            Status Baru
+                                            <span class="required">*</span>
+                                        </label>
+                                        <select name="status_id" class="form-select" required>
+                                            <option value="">-- Pilih Status --</option>
+                                            @foreach($statuses as $status)
+                                                <option value="{{ $status->status_id }}" 
+                                                        {{ $tiket->status_id == $status->status_id ? 'selected' : '' }}>
+                                                    {{ $status->nama_status }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                        {{-- actions --}}
-                        <div class="d-flex gap-3 mt-4">
-                            <button type="submit" class="btn-cta">
-                                <i class="mdi mdi-content-save"></i> Simpan Perubahan
-                            </button>
+                                    {{-- CATATAN / PROGRESS --}}
+                                    <div class="mb-4">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-text-box-outline"></i>
+                                            Catatan / Progress Penanganan
+                                        </label>
+                                        <textarea name="catatan" 
+                                                  class="form-control" 
+                                                  rows="6" 
+                                                  maxlength="1000"
+                                                  placeholder="Contoh: Sedang melakukan pengecekan sistem... Masalah ditemukan pada modul X...">{{ old('catatan') }}</textarea>
+                                        <div class="info-badge">
+                                            <i class="mdi mdi-information-outline"></i>
+                                            Maks 1000 karakter — akan terlihat oleh pembuat tiket dan admin
+                                        </div>
+                                    </div>
 
-                            <a href="{{ route('tim.tiket.show', $tiket->tiket_id) }}" class="btn-ghost">
-                                <i class="mdi mdi-close"></i> Batal
-                            </a>
+                                    {{-- LAMPIRAN BARU --}}
+                                    <div class="mb-4">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-cloud-upload"></i>
+                                            Upload Lampiran Baru (Opsional)
+                                        </label>
+                                        
+                                        <div class="file-upload-wrapper">
+                                            <label for="lampiran" class="file-upload-label">
+                                                <i class="mdi mdi-cloud-upload mdi-24px"></i>
+                                                <span>Klik untuk upload file</span>
+                                            </label>
+                                            <input type="file" 
+                                                   id="lampiran" 
+                                                   name="lampiran" 
+                                                   class="file-upload-input"
+                                                   accept="image/*,.pdf"
+                                                   onchange="displayFileName(this)">
+                                            <div id="fileName" class="file-name-display" style="display: none;">
+                                                <i class="mdi mdi-file-check"></i>
+                                                <span id="fileNameText"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-badge">
+                                            <i class="mdi mdi-alert-circle-outline"></i>
+                                            Format: jpg, png, pdf (max 2MB). Upload baru akan mengganti lampiran lama
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- ACTION BUTTONS --}}
+                                <div class="action-buttons">
+                                    <button type="submit" class="btn-save">
+                                        <i class="mdi mdi-content-save"></i>
+                                        Simpan Perubahan
+                                    </button>
+                                    <a href="{{ route('tim.tiket.show', $tiket->tiket_id) }}" class="btn-cancel">
+                                        <i class="mdi mdi-close"></i>
+                                        Batal
+                                    </a>
+                                </div>
+                            </form>
                         </div>
-                    </div> {{-- right panel --}}
+                    </div>
                 </div>
-            </div> {{-- row --}}
-        </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    </div> {{-- main card --}}
-</div> {{-- container --}}
+<script>
+    function displayFileName(input) {
+        const fileNameDisplay = document.getElementById('fileName');
+        const fileNameText = document.getElementById('fileNameText');
+        
+        if (input.files && input.files[0]) {
+            fileNameText.textContent = input.files[0].name;
+            fileNameDisplay.style.display = 'flex';
+        } else {
+            fileNameDisplay.style.display = 'none';
+        }
+    }
+</script>
+
 @endsection

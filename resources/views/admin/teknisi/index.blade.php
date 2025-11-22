@@ -501,7 +501,7 @@
                                         <th>Judul</th>
                                         <th>Kategori</th>
                                         <th>Prioritas</th>
-                                        <th style="width: 300px;">Deskripsi</th>
+                                        <th style="">Deskripsi</th>
                                         <th>Status</th>
                                         <th>Tanggal</th>
                                         <th style="width: 150px;">Aksi</th>

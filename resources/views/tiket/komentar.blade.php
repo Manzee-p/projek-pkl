@@ -26,15 +26,47 @@
     <style>
         .rating-star {
             cursor: pointer;
-            font-size: 3rem;
-            color: #ddd;
-            transition: all 0.2s ease;
+            font-size: 3.5rem;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .rating-star:hover,
+        .rating-star:hover {
+            transform: scale(1.2);
+            color: #0052CC;
+        }
+
         .rating-star.active {
-            color: #ffc107;
+            color: #0052CC;
+            filter: drop-shadow(0 0 10px rgba(0, 82, 204, 0.8));
             transform: scale(1.1);
+            animation: starPulse 0.3s ease;
+        }
+
+        @keyframes starPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.3);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes cardPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(0, 82, 204, 0.3);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .card {
@@ -68,6 +100,17 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 12px;
             color: white;
+        }
+
+        #ratingText {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #0052CC;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -150,19 +193,19 @@
                                 </label>
                                 <p class="text-muted small mb-3">Seberapa puas Anda dengan penyelesaian tiket ini?</p>
                                 
-                                <div class="d-flex justify-content-center gap-2 mb-2" id="ratingStars">
+                                <div class="d-flex justify-content-center gap-2 mb-3" id="ratingStars">
                                     @for($i = 1; $i <= 5; $i++)
-                                        <span class="rating-star" data-rating="{{ $i }}">⭐</span>
+                                        <i class="lni lni-star-filled rating-star" data-rating="{{ $i }}"></i>
                                     @endfor
                                 </div>
                                 <input type="hidden" name="rating" id="ratingInput" value="{{ old('rating') }}" required>
                                 
                                 <div class="text-center">
-                                    <small class="text-muted" id="ratingText">Klik bintang untuk memberikan rating</small>
+                                    <div id="ratingText" class="text-muted">Klik bintang untuk memberikan rating</div>
                                 </div>
 
                                 @error('rating')
-                                    <div class="text-danger small mt-2">{{ $message }}</div>
+                                    <div class="text-danger small mt-2 text-center">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -308,18 +351,15 @@
             const stars = document.querySelectorAll('.rating-star');
             const ratingInput = document.getElementById('ratingInput');
             const ratingText = document.getElementById('ratingText');
-            const ratingTexts = [
-                '',
-                'Sangat Tidak Puas',
-                'Tidak Puas',
-                'Cukup',
-                'Puas',
-                'Sangat Puas'
-            ];
+            const ratingTexts = {
+                0: 'Klik bintang untuk memberikan rating',
+            };
 
             // Set initial state if old value exists
             if (ratingInput.value) {
-                updateStars(parseInt(ratingInput.value));
+                const rating = parseInt(ratingInput.value);
+                updateStars(rating);
+                ratingText.textContent = ratingTexts[rating];
             }
 
             stars.forEach(star => {
@@ -328,37 +368,95 @@
                     ratingInput.value = rating;
                     updateStars(rating);
                     ratingText.textContent = ratingTexts[rating];
+                    ratingText.style.color = '#0052CC';
+                    
+                    // Auto select tipe komentar based on rating
+                    autoSelectTipeKomentar(rating);
                 });
 
                 star.addEventListener('mouseenter', function() {
                     const rating = parseInt(this.dataset.rating);
                     highlightStars(rating);
+                    
+                    // Only show preview if rating already selected
+                    if (ratingInput.value) {
+                        ratingText.textContent = ratingTexts[rating];
+                    }
                 });
             });
 
             document.getElementById('ratingStars').addEventListener('mouseleave', function() {
                 const currentRating = parseInt(ratingInput.value) || 0;
                 updateStars(currentRating);
+                
+                // Restore original text or reset
+                if (currentRating > 0) {
+                    ratingText.textContent = ratingTexts[currentRating];
+                    ratingText.style.color = '#0052CC';
+                } else {
+                    ratingText.textContent = ratingTexts[0];
+                    ratingText.style.color = '#6c757d';
+                }
             });
 
             function updateStars(rating) {
                 stars.forEach((star, index) => {
+                    star.classList.remove('active');
                     if (index < rating) {
                         star.classList.add('active');
-                    } else {
-                        star.classList.remove('active');
                     }
                 });
             }
 
             function highlightStars(rating) {
                 stars.forEach((star, index) => {
+                    star.classList.remove('active');
                     if (index < rating) {
-                        star.style.color = '#ffc107';
-                    } else {
-                        star.style.color = '#ddd';
+                        star.classList.add('active');
                     }
                 });
+            }
+
+            function resetStars() {
+                stars.forEach(star => {
+                    star.classList.remove('active');
+                });
+            }
+
+            function autoSelectTipeKomentar(rating) {
+                let tipeValue = '';
+                
+                // Rating 1-2: Keluhan (complaint)
+                if (rating >= 1 && rating <= 2) {
+                    tipeValue = 'complaint';
+                }
+                // Rating 3-4: Evaluasi
+                else if (rating >= 3 && rating <= 4) {
+                    tipeValue = 'evaluasi';
+                }
+                // Rating 5: Feedback Positif
+                else if (rating === 5) {
+                    tipeValue = 'feedback';
+                }
+
+                // Select the radio button
+                const radioButton = document.getElementById(`tipe_${tipeValue}`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                    
+                    // Update card visual
+                    tipeCards.forEach(c => c.classList.remove('selected'));
+                    const selectedCard = document.querySelector(`[data-tipe="${tipeValue}"]`);
+                    if (selectedCard) {
+                        selectedCard.classList.add('selected');
+                        
+                        // Add animation effect
+                        selectedCard.style.animation = 'cardPulse 0.5s ease';
+                        setTimeout(() => {
+                            selectedCard.style.animation = '';
+                        }, 500);
+                    }
+                }
             }
 
             // Tipe Komentar Handler

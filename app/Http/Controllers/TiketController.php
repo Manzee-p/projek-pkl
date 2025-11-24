@@ -7,6 +7,7 @@ use App\Models\TiketKomentar;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class TiketController extends Controller

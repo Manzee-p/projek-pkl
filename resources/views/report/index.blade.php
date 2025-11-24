@@ -122,9 +122,11 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                            <i class="lni lni-list-details text-primary fs-3"></i>
-                        </div>
+                       <div class="flex-shrink-0">
+                                <div class="bg-opacity-10 rounded-3 p-3">
+                                    <i class="lni lni-files fs-3 text-primary"></i>
+                                </div>
+                            </div>
                         <div class="ms-3">
                             <p class="stats-label">Total Laporan</p>
                             <div class="stats-value">{{ $reports->count() }}</div>
@@ -139,8 +141,8 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                            <i class="lni lni-check text-success fs-3"></i>
+                        <div class="bg-opacity-10 rounded-3 p-3">
+                            <i class="lni lni-checkmark-circle text-success" style="font-size: 28px;"></i>
                         </div>
                         <div class="ms-3">
                             <p class="stats-label">Selesai</p>
@@ -156,8 +158,8 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 rounded-3 p-3">
-                            <i class="lni lni-loader text-warning fs-3"></i>
+                        <div class="bg-opacity-10 rounded-3 p-3">
+                            <i class="lni lni-timer text-warning" style="font-size: 28px;"></i>
                         </div>
                         <div class="ms-3">
                             <p class="stats-label">Proses</p>
@@ -173,8 +175,8 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="bg-danger bg-opacity-10 rounded-3 p-3">
-                            <i class="lni lni-alert-triangle text-danger fs-3"></i>
+                        <div class="bg-opacity-10 rounded-3 p-3">
+                            <i class="lni lni-cross-circle text-danger" style="font-size: 28px;"></i>
                         </div>
                         <div class="ms-3">
                             <p class="stats-label">Urgent</p>
@@ -298,9 +300,6 @@
                                         <div class="d-flex gap-1 justify-content-center">
                                             <a href="{{ route('report.show', $report->id) }}" class="btn btn-sm btn-info" title="Lihat">
                                                 <i class="lni lni-eye"></i>
-                                            </a>
-                                            <a href="{{ route('report.edit', $report->id) }}" class="btn btn-sm btn-warning" title="Edit">
-                                                <i class="lni lni-edit"></i>
                                             </a>
                                             <form action="{{ route('report.destroy', $report->id) }}" method="POST" class="d-inline">
                                                 @csrf @method('DELETE')

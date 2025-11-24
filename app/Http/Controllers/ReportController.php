@@ -15,28 +15,71 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        $user  = $request->user();
-        $query = Report::query();
+        $user = $request->user();
+        
+        // Eager load relasi untuk menghindari N+1 query
+        $query = Report::with(['kategori', 'prioritas', 'user', 'assignedUser']);
 
+        // Filter berdasarkan role
         if ($user->role === 'admin') {
             // Admin melihat semua laporan
-            $reports = $query->latest()->paginate(10);
-            $view    = 'admin.report.index';
+            $view = 'admin.report.index';
         } elseif ($user->role === 'tim_teknisi') {
             // Tim teknisi melihat laporan yang ditugaskan ke mereka
-            $reports = $query->where('assigned_to', $user->user_id)->latest()->paginate(10);
-            $view    = 'admin.teknisi.index';
+            $query->where('assigned_to', $user->user_id);
+            $view = 'admin.teknisi.index';
         } elseif ($user->role === 'tim_konten') {
             // Tim konten melihat laporan yang ditugaskan ke mereka
-            $reports = $query->where('assigned_to', $user->user_id)->latest()->paginate(10);
-            $view    = 'admin.konten.index';
+            $query->where('assigned_to', $user->user_id);
+            $view = 'admin.konten.index';
         } else {
             // User biasa hanya melihat laporan miliknya
-            $reports = $query->where('user_id', $user->user_id)->latest()->paginate(10);
-            $view    = 'report.index';
+            $query->where('user_id', $user->user_id);
+            $view = 'report.index';
         }
 
-        return view($view, compact('reports'));
+        // Filter berdasarkan kategori jika ada request
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        // Filter berdasarkan status jika ada request
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search berdasarkan judul atau deskripsi
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('deskripsi', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Ambil data dengan sorting terbaru
+        $reports = $query->latest()->get();
+
+        // Ambil semua kategori untuk filter dropdown
+        $kategori = Kategori::all();
+
+        $statuses  = ['pending', 'diproses', 'selesai', 'ditolak'];
+
+        // Statistik riwayat
+        $stats = [
+            'total'    => Report::where('user_id', $user->user_id)->count(),
+            'selesai'  => Report::where('user_id', $user->user_id)
+                ->where('status', 'selesai')
+                ->count(),
+            'ditolak'  => Report::where('user_id', $user->user_id)
+                ->where('status', 'ditolak')
+                ->count(),
+            'diproses' => Report::where('user_id', $user->user_id)
+                ->whereIn('status', ['pending', 'diproses'])
+                ->count(),
+        ];
+
+        return view($view, compact('reports', 'kategori', 'statuses'));
+
     }
 
     /**

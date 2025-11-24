@@ -231,12 +231,11 @@ class ReportController extends Controller
     private function updateAsTeam(Request $request, Report $report)
     {
         $validated = $request->validate([
-            'deskripsi' => 'required|string',
+            'deskripsi' => 'string',
             'lampiran'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'status'    => 'required|in:diproses,selesai', // teknisi hanya 2 pilihan
         ]);
-
-        $report->deskripsi = $validated['deskripsi'];
+        
         $report->status    = $validated['status']; // update status
 
         if ($request->hasFile('lampiran')) {

@@ -114,7 +114,7 @@
                             </div>
                             <div class="flex-grow-1 ms-3">
                                 <p class="text-muted mb-1 small">Proses</p>
-                                <h3 class="fw-bold mb-0">{{ $reports->where('status', 'proses')->count() }}</h3>
+                                <h3 class="fw-bold mb-0">{{ $reports->where('status', 'Diproses')->count() }}</h3>
                             </div>
                         </div>
                     </div>

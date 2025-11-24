@@ -1,30 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Tiket - Helpdesk</title>
+@extends('layouts.components-frontend.master')
+@section('pageTitle', 'Daftar Tiket Saya')
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-    
-    <!-- LineIcons CDN -->
-    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-    
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
-</head>
-<body>
-    {{-- Include Navbar --}}
-    @include('layouts.components-frontend.navbar')
+@section('content')
 
     <div class="container py-5" style="min-height: calc(100vh - 200px);">
         <div class="row justify-content-center">
@@ -185,29 +162,4 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-
-    <style>
-    .card {
-        border-radius: 12px;
-    }
-    .form-label {
-        color: #333;
-        margin-bottom: 8px;
-    }
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 12px;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #0052CC;
-        box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
-    }
-    .alert {
-        border-radius: 10px;
-    }
-    </style>
-</body>
-</html>
+@endsection

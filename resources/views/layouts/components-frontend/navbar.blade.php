@@ -3,9 +3,13 @@
 
     <!-- LEFT: Toggle -->
     <div class="d-flex align-items-center">
-        <button onclick="toggleSidebar()" class="btn btn-outline-primary me-3">
-    <i class="lni lni-menu"></i>
-</button>
+    <button onclick="toggleSidebar()" class="btn btn-outline-primary me-3">
+       <i class="lni lni-menu"></i>
+    </button>
+    <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+                <img src="{{ asset('user/img/logo/logoo.jpeg') }}" alt="Logo" height="50" class="me-2 rounded" />
+                <h5 class="mb-0 fw-bold text-primary"></h5>
+            </a>
 
     </div>
 

@@ -59,9 +59,8 @@ class ReportController extends Controller
         // Ambil data dengan sorting terbaru
         $reports = $query->latest()->get();
 
-        // Ambil semua kategori untuk filter dropdown
-        $kategori = Kategori::all();
-
+        // Data untuk dropdown filter
+        $kategoris = Kategori::all();
         $statuses  = ['pending', 'diproses', 'selesai', 'ditolak'];
 
         // Statistik riwayat
@@ -78,7 +77,13 @@ class ReportController extends Controller
                 ->count(),
         ];
 
-        return view($view, compact('reports', 'kategori', 'statuses'));
+        $kategoriStats = Report::where('user_id', $user->user_id)
+            ->selectRaw('kategori_id, count(*) as total')
+            ->groupBy('kategori_id')
+            ->with('kategori')
+            ->get();
+
+        return view($view, compact('reports', 'kategoris', 'statuses', 'stats', 'kategoriStats'));
 
     }
 

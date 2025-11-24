@@ -193,10 +193,16 @@
         <div class="card-body p-4">
             <form action="{{ route('report.index') }}" method="GET">
                 <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Kategori</label>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold small">Kategori</label>
                         <select name="kategori_id" class="form-select">
                             <option value="">Semua Kategori</option>
+                            @foreach ($kategoris as $kategori)
+                                <option value="{{ $kategori->kategori_id }}"
+                                    {{ request('kategori_id') == $kategori->kategori_id ? 'selected' : '' }}>
+                                    {{ $kategori->nama_kategori }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
@@ -226,6 +232,7 @@
                                 <th class="py-3 fw-semibold text-uppercase small">Kategori</th>
                                 <th class="py-3 fw-semibold text-uppercase small">Status</th>
                                 <th class="py-3 fw-semibold text-uppercase small">Tanggal</th>
+                                <th class="py-3 fw-semibold text-uppercase small">Ditangani Oleh</th>
                                 <th class="py-3 fw-semibold text-uppercase small text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -270,6 +277,23 @@
                                         </small>
                                     </td>
 
+                                    <td class="py-3">
+                                        @if ($report->assignedUser)
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                                        style="width: 32px; height: 32px; font-size: 14px;">
+                                                        {{ strtoupper(substr($report->assignedUser->name, 0, 1)) }}
+                                                    </div>
+                                                </div>
+                                                <small
+                                                    class="fw-semibold">{{ Str::limit($report->assignedUser->name, 15) }}</small>
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+
                                     <td onclick="event.stopPropagation();" class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
                                             <a href="{{ route('report.show', $report->id) }}" class="btn btn-sm btn-info" title="Lihat">
@@ -295,9 +319,6 @@
 
                 {{-- EMPTY STATE --}}
                 <div class="text-center py-5">
-                    <svg width="120" height="120" stroke-width="1" class="text-muted opacity-50 mb-4">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    </svg>
 
                     <h5 class="text-muted mb-2">Belum Ada Laporan</h5>
                     <p class="text-muted mb-4">Anda belum memiliki laporan. Buat laporan pertama Anda.</p>

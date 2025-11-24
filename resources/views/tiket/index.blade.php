@@ -1,34 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.components-frontend.master')
+@section('pageTitle', 'Daftar Tiket Saya')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Tiket - Helpdesk</title>
+@section('content')
+<div class="container tiket-container px-4 py-4">
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-
-    <!-- LineIcons CDN -->
-    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
-</head>
-
-<body>
-    {{-- Include Navbar --}}
-    @include('layouts.components-frontend.navbar')
-
-    <div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 200px);">
         {{-- Header Section --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -270,7 +245,7 @@
             </div>
         </div>
     </div>
-
+</div>
     {{-- Include Footer --}}
     <footer class="bg-light py-4 mt-5 border-top">
         <div class="container">
@@ -286,107 +261,15 @@
             </div>
         </div>
     </footer>
+@push('styles')
+<style>
+    /* Perlebar container di halaman ini saja */
+    .tiket-container {
+    max-width: 1900px !important;
+}
 
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+</style>
+@endpush
 
-    <style>
-        .card {
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .table thead th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            font-size: 11px;
-            color: #6c757d;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9ff;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            font-weight: 500;
-            font-size: 12px;
-            letter-spacing: 0.3px;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 6px;
-        }
-
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #0052CC;
-            box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
-        }
-
-        /* Animation */
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            animation: slideDown 0.3s ease;
-        }
-
-        .pagination .page-link {
-            border-radius: 6px;
-            margin: 0 2px;
-            border: 1px solid #dee2e6;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #0052CC;
-            border-color: #0052CC;
-        }
-    </style>
-
-    <script>
-        // Initialize Bootstrap tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-</body>
-
-</html>
+    
+  @endsection

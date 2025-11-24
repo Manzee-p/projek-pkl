@@ -135,7 +135,7 @@
 
 /* Container card */
 .form-container {
-    max-width: 820px;
+    max-width: 1200px;
     margin: 40px auto;
     background: #fff;
     border-radius: 18px;

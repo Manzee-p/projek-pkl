@@ -92,7 +92,7 @@
 
     @include('layouts.components-frontend.navbar')
 
-    <div class="container py-5" style="max-width: 900px;">
+    <div class="container py-5" style="max-width: 1200px;">
 
         <div class="card shadow-lg form-card">
 
@@ -184,8 +184,8 @@
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('report.index') }}" class="btn btn-outline-secondary">
-                            Batal
+                        <a href="{{ route('report.index') }}" class="btn btn-secondary">
+                                <i class="lni lni-arrow-left"></i> Kembali
                         </a>
 
                         <button type="submit" class="btn btn-primary px-4">
@@ -199,22 +199,6 @@
         </div>
 
     </div>
-
-    <footer class="bg-light py-4 mt-5 border-top">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0 text-muted">2021 © Mazer</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0 text-muted">
-                        Crafted with <span class="text-danger">❤️</span> by 
-                        <a href="http://ahmadsaugi.com" class="text-decoration-none">A. Saugi</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
 <script>
 document.getElementById('lampiran').addEventListener('change', function(e) {

@@ -50,7 +50,8 @@
 
     <!-- ========================= hero-section-wrapper-5 start ========================= -->
     <section id="home" class="hero-section-wrapper-5">
-        @include('layouts.components-frontend.navbar')
+         @include('layouts.components-frontend.navbar')
+        @include('layouts.components-frontend.sidebar')
 
         <div class="hero-section hero-style-5 img-bg" style="background-image: url('{{ asset('user/img/hero/hero-5/hero-bg.svg') }}')">
             <div class="container">
@@ -73,7 +74,7 @@
                     </div>
                 </div>
             </div>
-        </rowd>
+</div>
     </section>
 
     <!-- ========================= feature style-5 start ========================= -->
@@ -218,70 +219,6 @@
                 <div class="col-xl- 7 col-lg-6">
                     <div class="about-image text-lg-right wow fadeInUp" data-wow-delay=".5s">
                         <img src="{{ asset('user/img/about/about-4/about-img.svg') }}" alt="Workflow Helpdesk">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================= pricing style-4 start ========================= -->
-    <section id="pricing" class="pricing-section pricing-style-4 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-xl-5 col-lg-6">
-                    <div class=".section-title mb-60">
-                        <h3 class="mb-15 wow fadeInUp" data-wow-delay=".2;">Pilih Paket Helpdesk</h3>
-                        <p class="wow fadeInUp" data-wow-delay=".4s">
-                            Skalabel dari 10 agent hingga enterprise unlimited.
-                        </p>
-                    </div>
-                </div>
-                <div class="col-xl-7 col-lg-6">
-                    <div class="pricing-active-wrapper wow fadeInUp" data-wow-delay=".4s">
-                        <div class="pricing-active">
-                            <div class="single-pricing-wrapper">
-                                <div class="single-pricing">
-                                    <h6>Starter</h6>
-                                    <h4>10 Agent</h4>
-                                    <h3>Rp 899K<span>/bln</span></h3>
-                                    <ul>
-                                        <li>500 tiket/bulan</li>
-                                        <li>SLA Basic</li>
-                                        <li>Email + Web</li>
-                                        <li>Knowledge Base</li>
-                                    </ul>
-                                    <a href="#0" class="button radius-30">Mulai</a>
-                                </div>
-                            </div>
-                            <div class="single-pricing-wrapper">
-                                <div class="single-pricing">
-                                    <h6>Professional</h6>
-                                    <h4>50 Agent</h4>
-                                    <h3>Rp 2.999K<span>/bln</span></h3>
-                                    <ul>
-                                        <li>5.000 tiket/bulan</li>
-                                        <li>SLA Custom</li>
-                                        <li>Chat & WhatsApp</li>
-                                        <li>API Integration</li>
-                                    </ul>
-                                    <a href="#0" class="button radius-30">Mulai</a>
-                                </div>
-                            </div>
-                            <div class="single-pricing-wrapper">
-                                <div class="single-pricing">
-                                    <h6>Enterprise</h6>
-                                    <h4>Unlimited</h4>
-                                    <h3>Custom</h3>
-                                    <ul>
-                                        <li>Tiket tak terbatas</li>
-                                        <li>SLA 24/7</li>
-                                        <li>SSO & On-premise</li>
-                                        <li>Dedicated Success Manager</li>
-                                    </ul>
-                                    <a href="#0" class="button radius-30">Hubungi Sales</a>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

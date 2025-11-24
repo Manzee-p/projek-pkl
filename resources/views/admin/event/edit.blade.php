@@ -104,6 +104,7 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
     }
 
     .form-control-edit:focus {
@@ -118,9 +119,14 @@
         background: white;
     }
 
+    .form-control-edit::placeholder {
+        color: #000000;
+        opacity: 1;
+    }
+
     .form-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.3rem;
         display: block;
     }
@@ -199,7 +205,7 @@
     }
 
     .date-info-text {
-        color: #1e3a8a;
+        color: #000000;
         font-size: 0.85rem;
         font-weight: 600;
     }

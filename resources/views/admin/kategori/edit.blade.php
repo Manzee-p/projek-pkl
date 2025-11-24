@@ -105,6 +105,13 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
+        width: 100%;
+    }
+
+    .form-control-edit::placeholder {
+        color: #000000;
+        opacity: 1;
     }
 
     .form-control-edit:focus {
@@ -122,11 +129,13 @@
     textarea.form-control-edit {
         resize: vertical;
         min-height: 120px;
+        font-family: inherit;
+        line-height: 1.5;
     }
 
     .form-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.5rem;
         display: flex;
         align-items: center;
@@ -139,8 +148,8 @@
     }
 
     .optional-mark {
-        color: #9ca3af;
-        font-size: 0.75rem;
+        color: #6b7280;
+        font-size: 0.8rem;
         font-weight: 500;
         margin-left: 0.3rem;
     }
@@ -172,6 +181,10 @@
         font-weight: 600;
         font-size: 1rem;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-cancel:hover {
@@ -179,6 +192,7 @@
         color: #667eea;
         background: #f8f9ff;
         transform: translateY(-2px);
+        text-decoration: none;
     }
 
     .action-buttons {
@@ -238,11 +252,12 @@
         .action-buttons button,
         .action-buttons a {
             width: 100%;
+            justify-content: center;
         }
     }
 </style>
 
-<div class="col-lg-10 mt-3  grid-margin stretch-card">
+<div class="col-lg-10 mt-3 grid-margin stretch-card">
     <div class="card edit-card">
         <div class="edit-header">
             <h4>Edit Kategori</h4>

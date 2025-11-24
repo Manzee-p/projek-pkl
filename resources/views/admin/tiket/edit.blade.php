@@ -120,6 +120,7 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
     }
 
     .form-control-edit:focus {
@@ -136,7 +137,7 @@
 
     .form-control-edit:disabled {
         background: #f3f4f6;
-        color: #6b7280;
+        color: #000000;
         cursor: not-allowed;
         opacity: 0.7;
     }
@@ -148,6 +149,11 @@
         background-position: right 1rem center;
         background-size: 16px 12px;
         padding-right: 2.5rem;
+        color: #000000;
+    }
+
+    select.form-control-edit option {
+        color: #000000;
     }
 
     textarea.form-control-edit {
@@ -287,7 +293,7 @@
 
     .form-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.3rem;
         display: block;
     }
@@ -299,12 +305,13 @@
 
     optgroup {
         font-weight: 700;
-        color: #4b5563;
+        color: #000000;
     }
 
     optgroup option {
         font-weight: 400;
         padding-left: 1rem;
+        color: #000000;
     }
 
     @keyframes highlight {

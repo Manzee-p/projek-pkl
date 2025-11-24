@@ -104,6 +104,7 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
     }
 
     .form-control-edit:focus {
@@ -118,9 +119,14 @@
         background: white;
     }
 
+    .form-control-edit::placeholder {
+        color: #000000;
+        opacity: 1;
+    }
+
     .form-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.5rem;
         display: flex;
         align-items: center;

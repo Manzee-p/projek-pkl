@@ -56,6 +56,12 @@
         border-radius: 10px;
         padding: 0.8rem;
         border: 1px solid #e5e7eb;
+        color: #000000;
+    }
+
+    .form-modern .form-control::placeholder {
+        color: #000000;
+        opacity: 1;
     }
 
     .form-modern label {

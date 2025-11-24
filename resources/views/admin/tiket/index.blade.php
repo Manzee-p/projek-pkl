@@ -283,9 +283,10 @@
     }
 
     .unassigned-text {
-        color: #9ca3af;
+        color: #000000;
         font-style: italic;
         font-size: 0.85rem;
+        font-weight: 500;
     }
 
     /* Action Buttons */
@@ -358,23 +359,24 @@
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
-        color: #9ca3af;
+        color: #000000;
     }
 
     .empty-state-icon {
         font-size: 4rem;
         margin-bottom: 1rem;
         opacity: 0.5;
+        color: #6b7280;
     }
 
     .empty-state h5 {
-        color: #6b7280;
+        color: #000000;
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
 
     .empty-state p {
-        color: #9ca3af;
+        color: #4b5563;
         font-size: 0.95rem;
     }
 

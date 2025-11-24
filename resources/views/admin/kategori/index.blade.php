@@ -134,7 +134,7 @@
     .modern-table tbody td {
         padding: 1.2rem 1.5rem;
         vertical-align: middle;
-        color: #4b5563;
+        color: #000000;
         border: none;
     }
 
@@ -143,20 +143,19 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        color: #166534;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
         border-radius: 10px;
         font-weight: 600;
         font-size: 0.9rem;
     }
 
     .deskripsi-text {
-        color: #6b7280;
+        color: #000000;
         font-size: 0.9rem;
-        max-width: 300px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        line-height: 1.5;
+        word-wrap: break-word;
+        white-space: normal;
     }
 
     .number-badge {
@@ -221,23 +220,24 @@
     .empty-state {
         text-align: center;
         padding: 3rem 2rem;
-        color: #9ca3af;
+        color: #000000;
     }
 
     .empty-state i {
         font-size: 4rem;
+        color: #6b7280;
         margin-bottom: 1rem;
         opacity: 0.5;
     }
 
     .empty-state h5 {
-        color: #6b7280;
+        color: #000000;
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
 
     .empty-state p {
-        color: #9ca3af;
+        color: #4b5563;
         font-size: 0.9rem;
     }
 

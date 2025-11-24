@@ -37,7 +37,7 @@
         left: -5%;
         width: 150px;
         height: 150px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(8, 8, 8, 0.08);
         border-radius: 50%;
     }
 
@@ -83,6 +83,7 @@
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
     }
 
     .form-control-modern:focus {
@@ -167,11 +168,26 @@
         background-position: right 1rem center;
         background-size: 16px 12px;
         padding-right: 2.5rem;
+        color: #000000;
+    }
+
+    select.form-control-modern option {
+        color: #000000;
     }
 
     textarea.form-control-modern {
         resize: vertical;
         min-height: 120px;
+    }
+
+    .form-control-modern::placeholder {
+        color: #000000;
+        opacity: 1;
+    }
+
+    textarea.form-control-modern::placeholder {
+        color: #000000;
+        opacity: 1;
     }
 
     .action-buttons {
@@ -199,13 +215,39 @@
 
     .input-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.3rem;
         display: block;
     }
 
     .form-group-modern:hover .form-label-modern {
         color: #667eea;
+    }
+
+    .info-label {
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        display: block;
+    }
+
+    .info-value {
+        color: #6b7280;
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        display: block;
+    }
+
+    /* Style untuk teks deskripsi kecil di tabel */
+    table .text-muted,
+    table small,
+    .table .text-muted,
+    .table small {
+        color: #000000 !important;
     }
 </style>
 

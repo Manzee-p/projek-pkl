@@ -3,14 +3,14 @@
 @section('content')
 
 <style>
-    .edit-card {
+    .create-card {
         border: none;
         border-radius: 20px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         overflow: hidden;
     }
 
-    .edit-header {
+    .create-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2.5rem 2rem;
         color: white;
@@ -18,7 +18,7 @@
         overflow: hidden;
     }
 
-    .edit-header::before {
+    .create-header::before {
         content: '';
         position: absolute;
         top: -50%;
@@ -29,7 +29,7 @@
         border-radius: 50%;
     }
 
-    .edit-header h4 {
+    .create-header h4 {
         margin: 0;
         font-size: 1.8rem;
         font-weight: 700;
@@ -37,7 +37,7 @@
         z-index: 1;
     }
 
-    .edit-header p {
+    .create-header p {
         margin: 0.5rem 0 0 0;
         opacity: 0.9;
         font-size: 0.95rem;
@@ -45,7 +45,7 @@
         z-index: 1;
     }
 
-    .edit-body {
+    .create-body {
         padding: 2.5rem;
     }
 
@@ -65,7 +65,7 @@
         border-left: 4px solid #ef4444;
     }
 
-    .form-section-edit {
+    .form-section-create {
         background: #f8f9ff;
         border-radius: 16px;
         padding: 1.5rem;
@@ -83,7 +83,7 @@
         gap: 0.5rem;
     }
 
-    .form-label-edit {
+    .form-label-create {
         font-weight: 600;
         color: #4b5563;
         margin-bottom: 0.5rem;
@@ -98,35 +98,44 @@
         font-size: 1.1rem;
     }
 
-    .form-control-edit {
+    .form-control-create {
         border: 2px solid #e5e7eb;
         border-radius: 12px;
         padding: 0.75rem 1rem;
         font-size: 0.95rem;
         transition: all 0.3s ease;
         background: #f9fafb;
+        color: #000000;
+        width: 100%;
     }
 
-    .form-control-edit:focus {
+    .form-control-create:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         background: white;
         outline: none;
     }
 
-    .form-control-edit:hover {
+    .form-control-create:hover {
         border-color: #cbd5e1;
         background: white;
     }
 
-    textarea.form-control-edit {
+    .form-control-create::placeholder {
+        color: #000000;
+        opacity: 1;
+    }
+
+    textarea.form-control-create {
         resize: vertical;
-        min-height: 120px;
+        min-height: 105px;
+        font-family: inherit;
+        line-height: 1.5;
     }
 
     .form-hint {
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: #000000;
         margin-top: 0.5rem;
         display: flex;
         align-items: center;
@@ -139,13 +148,13 @@
     }
 
     .optional-mark {
-        color: #9ca3af;
-        font-size: 0.75rem;
+        color: #6b7280;
+        font-size: 0.8rem;
         font-weight: 500;
-        margin-left: 0.3rem;
+        margin-left: 0.25rem;
     }
 
-    .btn-update {
+    .btn-save {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
         color: white;
@@ -157,7 +166,7 @@
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
 
-    .btn-update:hover {
+    .btn-save:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         color: white;
@@ -172,6 +181,10 @@
         font-weight: 600;
         font-size: 1rem;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-cancel:hover {
@@ -179,6 +192,7 @@
         color: #667eea;
         background: #f8f9ff;
         transform: translateY(-2px);
+        text-decoration: none;
     }
 
     .action-buttons {
@@ -190,29 +204,30 @@
     }
 
     @media (max-width: 768px) {
-        .edit-body {
+        .create-body {
             padding: 1.5rem;
         }
-
+        
         .action-buttons {
             flex-direction: column;
         }
-
+        
         .action-buttons button,
         .action-buttons a {
             width: 100%;
+            justify-content: center;
         }
     }
 </style>
 
 <div class="col-lg-10 mt-3 grid-margin stretch-card">
-    <div class="card edit-card">
-        <div class="edit-header">
+    <div class="card create-card">
+        <div class="create-header">
             <h4>Buat Kategori</h4>
             <p>Tambahkan kategori baru ke dalam sistem</p>
         </div>
 
-        <div class="edit-body">
+        <div class="create-body">
             @if ($errors->any())
                 <div class="alert-modern alert-danger-modern">
                     <i class="mdi mdi-alert-circle" style="font-size: 1.5rem;"></i>
@@ -230,19 +245,19 @@
             <form action="{{ route('kategori.store') }}" method="POST">
                 @csrf
 
-                <div class="form-section-edit">
+                <div class="form-section-create">
                     <div class="section-title">
                         <i class="mdi mdi-folder"></i>
                         Informasi Kategori
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label-edit">
+                        <label class="form-label-create">
                             <i class="mdi mdi-tag label-icon"></i>
                             Nama Kategori<span class="required-mark">*</span>
                         </label>
                         <input type="text" 
-                               class="form-control form-control-edit" 
+                               class="form-control form-control-create" 
                                id="nama_kategori" 
                                name="nama_kategori" 
                                value="{{ old('nama_kategori') }}" 
@@ -255,11 +270,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label-edit">
+                        <label class="form-label-create">
                             <i class="mdi mdi-text label-icon"></i>
                             Deskripsi<span class="optional-mark">(Opsional)</span>
                         </label>
-                        <textarea class="form-control form-control-edit" 
+                        <textarea class="form-control form-control-create" 
                                   id="deskripsi" 
                                   name="deskripsi" 
                                   placeholder="Jelaskan detail kategori ini..."
@@ -272,7 +287,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button type="submit" class="btn btn-update">
+                    <button type="submit" class="btn btn-save">
                         <i class="mdi mdi-content-save"></i> Simpan Kategori
                     </button>
                     <a href="{{ route('kategori.index') }}" class="btn btn-cancel">

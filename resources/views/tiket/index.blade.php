@@ -1,34 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.components-frontend.master')
+@section('pageTitle', 'Daftar Tiket Saya')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Tiket - Helpdesk</title>
+@section('content')
+<div class="container tiket-container px-4 py-4">
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-
-    <!-- LineIcons CDN -->
-    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
-</head>
-
-<body>
-    {{-- Include Navbar --}}
-    @include('layouts.components-frontend.navbar')
-
-    <div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 200px);">
         {{-- Header Section --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -163,80 +138,6 @@
             </div>
         @endif
 
-        {{-- Filter Section --}}
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <form method="GET" action="{{ route('tiket.history') }}">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">
-                                <i class="lni lni-search-alt text-primary"></i> Cari Tiket
-                            </label>
-                            <input type="text" name="search" class="form-control"
-                                placeholder="Judul atau kode tiket..." value="{{ request('search') }}">
-                        </div>
-
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold small">
-                                <i class="lni lni-calendar text-primary"></i> Dari Tanggal
-                            </label>
-                            <input type="date" name="start_date" class="form-control"
-                                value="{{ request('start_date') }}">
-                        </div>
-
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold small">
-                                <i class="lni lni-calendar text-primary"></i> Sampai Tanggal
-                            </label>
-                            <input type="date" name="end_date" class="form-control"
-                                value="{{ request('end_date') }}">
-                        </div>
-
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold small">Status</label>
-                            <select name="status_id" class="form-select">
-                                <option value="">Semua Status</option>
-                                @foreach ($statuses as $status)
-                                    <option value="{{ $status->status_id }}"
-                                        {{ request('status_id') == $status->status_id ? 'selected' : '' }}>
-                                        {{ $status->nama_status }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold small">Kategori</label>
-                            <select name="kategori_id" class="form-select">
-                                <option value="">Semua Kategori</option>
-                                @foreach ($kategoris as $kategori)
-                                    <option value="{{ $kategori->kategori_id }}"
-                                        {{ request('kategori_id') == $kategori->kategori_id ? 'selected' : '' }}>
-                                        {{ $kategori->nama_kategori }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-1">
-                            <label class="form-label fw-semibold small d-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="lni lni-funnel"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    @if (request()->hasAny(['search', 'start_date', 'end_date', 'status_id', 'kategori_id']))
-                        <div class="mt-3">
-                            <a href="{{ route('tiket.history') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="lni lni-close"></i> Reset Filter
-                            </a>
-                        </div>
-                    @endif
-                </form>
-            </div>
-        </div>
-
         {{-- Tabel Riwayat Tiket --}}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
@@ -359,7 +260,7 @@
             </div>
         </div>
     </div>
-
+</div>
     {{-- Include Footer --}}
     <footer class="bg-light py-4 mt-5 border-top">
         <div class="container">
@@ -375,107 +276,15 @@
             </div>
         </div>
     </footer>
+@push('styles')
+<style>
+    /* Perlebar container di halaman ini saja */
+    .tiket-container {
+    max-width: 1900px !important;
+}
 
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+</style>
+@endpush
 
-    <style>
-        .card {
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .table thead th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            font-size: 11px;
-            color: #6c757d;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9ff;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            font-weight: 500;
-            font-size: 12px;
-            letter-spacing: 0.3px;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 6px;
-        }
-
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #0052CC;
-            box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
-        }
-
-        /* Animation */
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            animation: slideDown 0.3s ease;
-        }
-
-        .pagination .page-link {
-            border-radius: 6px;
-            margin: 0 2px;
-            border: 1px solid #dee2e6;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #0052CC;
-            border-color: #0052CC;
-        }
-    </style>
-
-    <script>
-        // Initialize Bootstrap tooltips
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-</body>
-
-</html>
+    
+  @endsection

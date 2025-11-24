@@ -311,7 +311,7 @@
                                 #{{ $report->id }}
                               </a>
                             @elseif(Auth::user()->role == 'tim_konten')
-                              <a href="{{ route('admin.konten.show', $report->id) }}">
+                              <a href="{{ route('tim.tiket.show', $report->id) }}">
                                 #{{ $report->id }}
                               </a>
                             @else

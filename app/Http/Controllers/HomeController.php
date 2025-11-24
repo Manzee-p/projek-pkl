@@ -31,10 +31,10 @@ class HomeController extends Controller
     private function getAdminStats()
     {
         return [
-            // Tiket Stats
+            // Tiket Stats - DIPERBAIKI ✅
             'total_tiket'     => Tiket::count(),
-            'tiket_baru'      => Tiket::whereHas('status', fn($q) => $q->where('nama_status', 'Baru'))->count(),
-            'tiket_proses'    => Tiket::whereHas('status', fn($q) => $q->where('nama_status', 'Sedang Diproses'))->count(),
+            'tiket_baru'      => Tiket::whereHas('status', fn($q) => $q->where('nama_status', 'Pending'))->count(),                                   // ✅ Ganti "Baru" jadi "Pending"
+            'tiket_proses'    => Tiket::whereHas('status', fn($q) => $q->whereIn('nama_status', ['Ditugaskan ke tim terkait', 'Diproses']))->count(), // ✅ Gabung 2 status
             'tiket_selesai'   => Tiket::whereHas('status', fn($q) => $q->where('nama_status', 'Selesai'))->count(),
 
             // Laporan Stats
@@ -60,13 +60,13 @@ class HomeController extends Controller
     private function getTimStats($user)
     {
         return [
-            // Tiket yang ditugaskan
+            // Tiket yang ditugaskan - DIPERBAIKI ✅
             'total_tiket'     => Tiket::where('assigned_to', $user->user_id)->count(),
             'tiket_baru'      => Tiket::where('assigned_to', $user->user_id)
-                ->whereHas('status', fn($q) => $q->where('nama_status', 'Baru'))
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Pending'))
                 ->count(),
             'tiket_proses'    => Tiket::where('assigned_to', $user->user_id)
-                ->whereHas('status', fn($q) => $q->where('nama_status', 'Sedang Diproses'))
+                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Ditugaskan ke tim terkait', 'Diproses']))
                 ->count(),
             'tiket_selesai'   => Tiket::where('assigned_to', $user->user_id)
                 ->whereHas('status', fn($q) => $q->where('nama_status', 'Selesai'))
@@ -102,13 +102,13 @@ class HomeController extends Controller
     private function getUserStats($user)
     {
         return [
-            // Tiket milik user
+            // Tiket milik user - DIPERBAIKI ✅
             'total_tiket'     => Tiket::where('user_id', $user->user_id)->count(),
             'tiket_baru'      => Tiket::where('user_id', $user->user_id)
-                ->whereHas('status', fn($q) => $q->where('nama_status', 'Baru'))
+                ->whereHas('status', fn($q) => $q->where('nama_status', 'Pending'))
                 ->count(),
             'tiket_proses'    => Tiket::where('user_id', $user->user_id)
-                ->whereHas('status', fn($q) => $q->where('nama_status', 'Sedang Diproses'))
+                ->whereHas('status', fn($q) => $q->whereIn('nama_status', ['Ditugaskan ke tim terkait', 'Diproses']))
                 ->count(),
             'tiket_selesai'   => Tiket::where('user_id', $user->user_id)
                 ->whereHas('status', fn($q) => $q->where('nama_status', 'Selesai'))
@@ -140,14 +140,13 @@ class HomeController extends Controller
         ];
     }
 
-    // Chart Data untuk Admin
+    // Chart Data tidak perlu diubah...
     private function getAdminChartData()
     {
         $months      = [];
         $tiketData   = [];
         $laporanData = [];
 
-        // Data 6 bulan terakhir
         for ($i = 5; $i >= 0; $i--) {
             $date     = Carbon::now()->subMonths($i);
             $months[] = $date->format('M Y');
@@ -168,7 +167,6 @@ class HomeController extends Controller
         ];
     }
 
-    // Chart Data untuk Tim
     private function getTimChartData($user)
     {
         $months      = [];
@@ -197,7 +195,6 @@ class HomeController extends Controller
         ];
     }
 
-    // Chart Data untuk User
     private function getUserChartData($user)
     {
         $months      = [];

@@ -13,13 +13,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        $notifications = Notification::where(function ($query) use ($user) {
-                // User biasa hanya melihat notifikasi mereka sendiri
-                $query->where('user_id', $user->user_id);
-                
-                // Admin juga bisa melihat notifikasi mereka sendiri
-                // Tidak ada kolom 'role' di tabel, jadi cukup berdasarkan user_id
-            })
+        $notifications = Notification::where('user_id', $user->user_id)
             ->with('tiket')
             ->orderBy('waktu_kirim', 'desc')
             ->paginate(10);
@@ -38,7 +32,7 @@ class NotificationController extends Controller
         $user = Auth::user();
 
         $notifications = Notification::where('user_id', $user->user_id)
-            ->where('status_baca', false) // Hanya yang belum dibaca
+            ->where('status_baca', false)
             ->with('tiket')
             ->orderBy('waktu_kirim', 'desc')
             ->limit(5)
@@ -54,7 +48,35 @@ class NotificationController extends Controller
         ]);
     }
 
-    // Tandai satu notifikasi dibaca
+    // Tandai notifikasi dibaca DAN redirect ke detail tiket
+    public function read($id)
+    {
+        $user = Auth::user();
+        
+        $notification = Notification::where('notif_id', $id)
+            ->where('user_id', $user->user_id)
+            ->with('tiket')
+            ->firstOrFail();
+
+        // Tandai sebagai dibaca
+        $notification->update(['status_baca' => true]);
+
+        // Redirect ke detail tiket jika ada
+        if ($notification->tiket_id && $notification->tiket) {
+            // Sesuaikan route dengan route detail tiket Anda
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.tickets.show', $notification->tiket_id);
+            } else {
+                return redirect()->route('tickets.show', $notification->tiket_id);
+            }
+        }
+
+        // Jika tidak ada tiket terkait, kembali ke halaman notifikasi
+        return redirect()->route('notifications.index')
+            ->with('info', 'Tiket terkait tidak ditemukan');
+    }
+
+    // Tandai satu notifikasi dibaca (untuk AJAX)
     public function markAsRead($id)
     {
         $user = Auth::user();
@@ -77,7 +99,13 @@ class NotificationController extends Controller
             ->where('status_baca', false)
             ->update(['status_baca' => true]);
 
-        return response()->json(['success' => true]);
+        // Jika request dari AJAX
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        // Jika request biasa (redirect)
+        return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
     }
 
     // Hapus notifikasi

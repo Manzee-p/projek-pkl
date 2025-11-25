@@ -293,8 +293,8 @@
                 </div>
 
                 <div class="text-end">
-                    <a href="{{ route('tiket.index') }}" class="btn btn-secondary">
-                        <i class="lni lni-arrow-left"></i> Kembali ke Daftar
+                    <a href="{{ route('notifications.index') }}" class="btn btn-secondary">
+                        <i class="lni lni-arrow-left"></i> Kembali
                     </a>
                 </div>
             </div>

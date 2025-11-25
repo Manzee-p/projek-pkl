@@ -204,6 +204,8 @@ Route::middleware('auth')->group(function () {
     // NOTIFICATION ROUTE (USER)
     Route::get('/notification-user', [\App\Http\Controllers\NotificationController::class, 'index'])
         ->name('notification-user.index');
+        Route::post('/notification-user/mark-all-as-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])
+        ->name('notification-user.markAllAsRead');
 });
 
 // Routes untuk User - Komentar Tiket

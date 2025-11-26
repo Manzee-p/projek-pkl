@@ -61,9 +61,13 @@ class NotificationController extends Controller
         // Tandai sebagai dibaca
         $notification->update(['status_baca' => true]);
 
+        // Return JSON jika AJAX request
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         // Redirect ke detail tiket jika ada
         if ($notification->tiket_id && $notification->tiket) {
-            // Sesuaikan route dengan route detail tiket Anda
             if ($user->role === 'admin') {
                 return redirect()->route('admin.tickets.show', $notification->tiket_id);
             } else {
@@ -90,8 +94,8 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // Tandai semua dibaca
-    public function markAllAsRead()
+    // Tandai semua dibaca - FIXED untuk support AJAX
+    public function markAllAsRead(Request $request)
     {
         $user = Auth::user();
 
@@ -99,12 +103,15 @@ class NotificationController extends Controller
             ->where('status_baca', false)
             ->update(['status_baca' => true]);
 
-        // Jika request dari AJAX
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
+        // Jika AJAX request, return JSON
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua notifikasi telah ditandai sebagai dibaca'
+            ]);
         }
 
-        // Jika request biasa (redirect)
+        // Jika request biasa, redirect
         return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
     }
 

@@ -27,7 +27,7 @@ class Notification extends Model
 
     public function tiket()
     {
-        return $this->belongsTo(Tiket::class, 'tiket_id');
+        return $this->belongsTo(Tiket::class, 'tiket_id', 'tiket_id');
     }
 
     // Scope untuk notifikasi yang belum dibaca

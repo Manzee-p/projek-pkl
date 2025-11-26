@@ -202,10 +202,22 @@ Route::middleware('auth')->group(function () {
     });
 
     // NOTIFICATION ROUTE (USER)
-    Route::get('/notification-user', [\App\Http\Controllers\NotificationController::class, 'index'])
-        ->name('notification-user.index');
-        Route::post('/notification-user/mark-all-as-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])
-        ->name('notification-user.markAllAsRead');
+    Route::middleware(['auth'])->group(function () {
+        // Halaman utama notifikasi
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        
+        // Get unread notifications (untuk dropdown navbar)
+        Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
+        
+        // Tandai semua notifikasi sebagai dibaca - HARUS SEBELUM {id}
+        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+        
+        // Tandai satu notifikasi sebagai dibaca
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+        
+        // Hapus notifikasi
+        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    });
 });
 
 // Routes untuk User - Komentar Tiket

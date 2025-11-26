@@ -179,7 +179,7 @@
         .notification-card-wrapper {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
+            overflow: visible; /* Changed from hidden to visible */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
@@ -325,6 +325,8 @@
 
         .notif-actions {
             flex-shrink: 0;
+            position: relative; /* Added */
+            z-index: 100; /* Added */
         }
 
         .dropdown-toggle-custom {
@@ -350,6 +352,8 @@
             border: none;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             padding: 0.5rem;
+            z-index: 1050 !important; /* Increased z-index */
+            position: absolute !important; /* Force absolute positioning */
         }
 
         .dropdown-item {
@@ -445,6 +449,31 @@
                 width: 48px;
                 height: 48px;
                 font-size: 1.25rem;
+            }
+
+            /* FIXED: Dropdown positioning for mobile */
+            .notification-card-wrapper {
+                overflow: visible !important;
+            }
+
+            .dropdown-menu {
+                z-index: 9999 !important;
+                position: fixed !important;
+                right: 1rem !important;
+                left: auto !important;
+                min-width: 200px;
+            }
+
+            .notif-actions {
+                margin-left: auto;
+                padding-left: 10px;
+                position: relative;
+                z-index: 100;
+            }
+
+            /* Ensure dropdown doesn't get cut off */
+            .d-flex.gap-3 {
+                overflow: visible !important;
             }
         }
     </style>
@@ -542,7 +571,7 @@
 
                             <!-- Actions -->
                             <div class="notif-actions dropdown" onclick="event.stopPropagation();">
-                                <button class="dropdown-toggle-custom" type="button" data-bs-toggle="dropdown">
+                                <button class="dropdown-toggle-custom" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="lni lni-cog"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -597,13 +626,13 @@
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 
     <script>
-    // Mark all as read
+    // Mark all as read - FIXED
     document.getElementById('markAllReadBtn')?.addEventListener('click', function() {
         const btn = this;
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memproses...';
         
-        fetch('{{ route("notifications.readAll") }}', {
+        fetch('{{ route("notifications.markAllRead") }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -611,15 +640,22 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if(data.success) {
                 location.reload();
+            } else {
+                throw new Error(data.message || 'Terjadi kesalahan');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
+            alert('Terjadi kesalahan: ' + error.message);
             btn.disabled = false;
             btn.innerHTML = '<i class="lni lni-checkmark-circle"></i> Tandai Semua Dibaca';
         });
@@ -636,6 +672,10 @@
                 }
             })
             .then(() => {
+                window.location.href = `/tiket/${tiketId}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 window.location.href = `/tiket/${tiketId}`;
             });
         }
@@ -658,6 +698,9 @@
             if(data.success) {
                 location.reload();
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
     </script>

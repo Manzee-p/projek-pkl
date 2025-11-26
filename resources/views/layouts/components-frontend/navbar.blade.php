@@ -308,7 +308,7 @@ function loadNotifications() {
                     return `
                         <a href="#" 
                             class="notification-item ${isUnread ? 'unread' : ''}"
-                            onclick="handleNotificationClick(event, ${notif.notif_id})">
+                            onclick="handleNotificationClick(event, ${notif.notif_id}, ${notif.tiket_id || 'null'})">
                             <div class="d-flex gap-3 align-items-start">
                                 <div class="notification-icon ${isUnread ? '' : 'read'}">
                                     <i class="lni lni-envelope"></i>
@@ -319,7 +319,7 @@ function loadNotifications() {
                                     </p>
                                     <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
                                         <small class="text-muted d-flex align-items-center" style="font-size: 12px;">
-                                            <i class="lni lni-calendar me-1"></i> ${waktu}
+                                            <i class="lni lni-calendar me-1"></i> ${formatWaktu(waktu)}
                                         </small>
                                         ${notif.tiket ? `
                                             <span class="badge" style="background: #dbeafe; color: #1e40af; font-size: 11px; padding: 3px 8px;">
@@ -347,42 +347,40 @@ function loadNotifications() {
         });
 }
 
-function readNotif(id) {
-    fetch(`/notifications/${id}/read`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(res => res.json())
-    .then(() => {
-        loadNotifications(); // refresh notif list
-        window.location.reload(); // kalau mau reload halaman
-    });
-}
-
 function markAllAsRead() {
     const btn = document.getElementById('mark-all-read');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Loading...';
     btn.style.pointerEvents = 'none';
     
-    fetch('{{ route("notification-user.markAllAsRead") }}', {
-        method: 'GET',
+    // FIXED: Gunakan route yang benar dengan method POST
+    fetch('{{ route("notifications.markAllRead") }}', {
+        method: 'POST',
         headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             loadNotifications();
+            
             // Tutup dropdown setelah berhasil
-            const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('notificationDropdown'));
+            const dropdownElement = document.getElementById('notificationDropdown');
+            const dropdown = bootstrap.Dropdown.getInstance(dropdownElement);
             if (dropdown) {
                 setTimeout(() => dropdown.hide(), 500);
             }
+            
+            // Optional: Tampilkan toast notification
+            showToast('Semua notifikasi telah ditandai sebagai dibaca');
         }
     })
     .catch(error => {
@@ -395,8 +393,8 @@ function markAllAsRead() {
     });
 }
 
-function handleNotificationClick(event, notifId) {
-    event.preventDefault(); // Prevent default link behavior
+function handleNotificationClick(event, notifId, tiketId) {
+    event.preventDefault();
     
     // Kirim POST request untuk mark as read
     fetch(`/notifications/${notifId}/read`, {
@@ -410,22 +408,72 @@ function handleNotificationClick(event, notifId) {
     .then(data => {
         if (data.success) {
             // Redirect ke tiket jika ada
-            if (data.redirect_url) {
-                window.location.href = data.redirect_url;
+            if (tiketId) {
+                window.location.href = `/tiket/${tiketId}`;
             } else {
-                loadNotifications(); // Refresh notification list
+                loadNotifications();
             }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        loadNotifications(); // Still refresh on error
+        // Tetap redirect meskipun ada error
+        if (tiketId) {
+            window.location.href = `/tiket/${tiketId}`;
+        } else {
+            loadNotifications();
+        }
     });
+}
+
+function formatWaktu(waktu) {
+    // Format waktu relatif (e.g., "2 jam yang lalu")
+    if (typeof waktu === 'string' && waktu.includes('ago')) {
+        return waktu;
+    }
+    
+    try {
+        const date = new Date(waktu);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000); // dalam detik
+        
+        if (diff < 60) return 'Baru saja';
+        if (diff < 3600) return Math.floor(diff / 60) + ' menit yang lalu';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' jam yang lalu';
+        if (diff < 604800) return Math.floor(diff / 86400) + ' hari yang lalu';
+        
+        return date.toLocaleDateString('id-ID', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    } catch (e) {
+        return waktu;
+    }
 }
 
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function showToast(message) {
+    // Simple toast notification (optional)
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed bottom-0 end-0 p-3';
+    toast.style.zIndex = '11000';
+    toast.innerHTML = `
+        <div class="toast show" role="alert">
+            <div class="toast-body bg-success text-white rounded">
+                <i class="lni lni-checkmark-circle me-2"></i>${message}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 </script>

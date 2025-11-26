@@ -38,8 +38,7 @@
                 </span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg notification-dropdown" 
-                aria-labelledby="notificationDropdown" 
-                style="width: 400px; max-height: 550px;">
+                aria-labelledby="notificationDropdown">
                 <li class="dropdown-header d-flex justify-content-between align-items-center border-bottom p-3 bg-gradient">
                     <span class="fw-bold text-dark">
                         <i class="lni lni-bell me-1"></i> Notifikasi
@@ -57,7 +56,7 @@
                     </div>
                 </div>
                 <li class="dropdown-footer text-center p-2 border-top bg-light">
-                    <a href="{{ route('notifications.index') }}" class="text-primary small text-decoration-none fw-semibold">
+                    <a href="{{ route('notifications.index') }}" class="notification-item" style="cursor:pointer;">
                         <i class="lni lni-eye"></i> Lihat Semua Notifikasi
                     </a>
                 </li>
@@ -132,77 +131,83 @@
 
     /* Notification Dropdown Styles */
     .notification-dropdown {
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 0;
-        border: none;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+        width: 400px !important;
+        max-width: 95vw !important;
+        right: 0 !important;
+        left: auto !important;
+        transform: translateX(0) !important;
+        margin-top: 0.5rem !important;
+    }
+
+    /* Perbaikan positioning untuk mobile */
+    @media (max-width: 576px) {
+        .notification-dropdown {
+            width: 320px !important;
+            right: -10px !important;
+        }
     }
 
     .notification-dropdown .dropdown-header {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-        border-radius: 14px 14px 0 0;
+        background: #ffffff;
+        border-radius: 12px 12px 0 0;
+        padding: 16px 20px;
     }
 
     .notification-item {
-        padding: 14px 18px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
         transition: all 0.2s ease;
         cursor: pointer;
         display: block;
         text-decoration: none;
         position: relative;
+        background: #ffffff;
     }
 
     .notification-item:hover {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-        transform: translateX(2px);
+        background: #f9fafb;
     }
 
     .notification-item.unread {
-        background: linear-gradient(135deg, #e7f3ff 0%, #dce7ff 100%);
-        border-left: 3px solid #667eea;
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
     }
 
     .notification-item.unread:hover {
-        background: linear-gradient(135deg, #dce7ff 0%, #d0ddff 100%);
+        background: #dbeafe;
     }
 
     .notification-dot {
-        width: 10px;
-        height: 10px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
         border-radius: 50%;
         flex-shrink: 0;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-        animation: pulse-dot 2s infinite;
-    }
-
-    @keyframes pulse-dot {
-        0%, 100% { 
-            transform: scale(1); 
-            opacity: 1;
-        }
-        50% { 
-            transform: scale(1.1); 
-            opacity: 0.8;
-        }
+        position: absolute;
+        right: 20px;
+        top: 24px;
     }
 
     .notification-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
+        width: 48px;
+        height: 48px;
+        background: #3b82f6;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 18px;
+        font-size: 20px;
+        flex-shrink: 0;
     }
 
     .notification-icon.read {
-        background: #e7f3ff;
-        color: #667eea;
+        background: #e5e7eb;
+        color: #6b7280;
     }
 
     #notif-badge {
@@ -301,24 +306,24 @@ function loadNotifications() {
                     const isUnread = !notif.status_baca;
                     
                     return `
-                        <a href="/notifications/${notif.notif_id}/read" 
-                           class="notification-item ${isUnread ? 'unread' : ''}"
-                           onclick="handleNotificationClick(event, ${notif.notif_id})">
+                        <a href="#" 
+                            class="notification-item ${isUnread ? 'unread' : ''}"
+                            onclick="handleNotificationClick(event, ${notif.notif_id})">
                             <div class="d-flex gap-3 align-items-start">
                                 <div class="notification-icon ${isUnread ? '' : 'read'}">
-                                    <i class="lni lni-${isUnread ? 'envelope' : 'envelope-open'}"></i>
+                                    <i class="lni lni-envelope"></i>
                                 </div>
                                 <div class="flex-grow-1" style="min-width: 0;">
-                                    <p class="mb-1 text-dark fw-semibold" style="font-size: 14px; line-height: 1.4;">
+                                    <p class="mb-1 text-dark fw-medium" style="font-size: 13px; line-height: 1.5;">
                                         ${escapeHtml(notif.pesan)}
                                     </p>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                                        <small class="text-muted d-flex align-items-center">
-                                            <i class="lni lni-timer me-1"></i> ${waktu}
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mt-2">
+                                        <small class="text-muted d-flex align-items-center" style="font-size: 12px;">
+                                            <i class="lni lni-calendar me-1"></i> ${waktu}
                                         </small>
                                         ${notif.tiket ? `
-                                            <span class="badge bg-light text-primary" style="font-size: 10px;">
-                                                <i class="lni lni-tag"></i> #${notif.tiket.kode_tiket}
+                                            <span class="badge" style="background: #dbeafe; color: #1e40af; font-size: 11px; padding: 3px 8px;">
+                                                <i class="lni lni-ticket"></i> ${notif.tiket.kode_tiket}
                                             </span>
                                         ` : ''}
                                     </div>
@@ -340,6 +345,20 @@ function loadNotifications() {
                 </div>
             `;
         });
+}
+
+function readNotif(id) {
+    fetch(`/notifications/${id}/read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(res => res.json())
+    .then(() => {
+        loadNotifications(); // refresh notif list
+        window.location.reload(); // kalau mau reload halaman
+    });
 }
 
 function markAllAsRead() {
@@ -377,8 +396,31 @@ function markAllAsRead() {
 }
 
 function handleNotificationClick(event, notifId) {
-    // Biarkan link bekerja normal (redirect ke route notifications.read)
-    // Route akan otomatis menandai sebagai dibaca dan redirect ke tiket
+    event.preventDefault(); // Prevent default link behavior
+    
+    // Kirim POST request untuk mark as read
+    fetch(`/notifications/${notifId}/read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect ke tiket jika ada
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else {
+                loadNotifications(); // Refresh notification list
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        loadNotifications(); // Still refresh on error
+    });
 }
 
 function escapeHtml(text) {

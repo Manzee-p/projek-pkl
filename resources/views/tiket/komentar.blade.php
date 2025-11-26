@@ -3,6 +3,109 @@
 
 @section('content')
 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
+
+    <!-- LineIcons CDN -->
+    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
+
+    <style>
+        .rating-star {
+            cursor: pointer;
+            font-size: 3.5rem;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .rating-star:hover {
+            transform: scale(1.2);
+            color: #0052CC;
+        }
+
+        .rating-star.active {
+            color: #0052CC;
+            filter: drop-shadow(0 0 10px rgba(0, 82, 204, 0.8));
+            transform: scale(1.1);
+            animation: starPulse 0.3s ease;
+        }
+
+        @keyframes starPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.3);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes cardPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(0, 82, 204, 0.3);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tipe-komentar-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+        }
+
+        .tipe-komentar-card:hover {
+            border-color: #0052CC;
+            background-color: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .tipe-komentar-card.selected {
+            border-color: #0052CC;
+            background-color: #e7f3ff;
+        }
+
+        .form-control:focus {
+            border-color: #0052CC;
+            box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        #ratingText {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #0052CC;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    {{-- Include Navbar --}}
+    @include('layouts.components-frontend.navbar')
+
     <div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 200px);">
         {{-- Breadcrumb --}}
         <nav aria-label="breadcrumb" class="mb-4">
@@ -400,4 +503,5 @@
             });
         });
     </script>
-@endsection
+
+  @endsection

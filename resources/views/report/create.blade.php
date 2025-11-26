@@ -1,26 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Laporan Baru - Helpdesk</title>
+@extends('layouts.components-frontend.master')
+@section('pageTitle', 'Buat Laporan Baru')
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-    
-    <!-- LineIcons CDN -->
-    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-    
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
+@section('content')
 
 <style>
     body {
@@ -67,6 +48,7 @@
         border-radius: 18px;
         overflow: hidden;
         border: none;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     }
 
     /* FORM STYLE */
@@ -74,6 +56,7 @@
         border-radius: 10px !important;
         padding: 12px !important;
         border: 1px solid #ced4da;
+        transition: all 0.3s ease;
     }
 
     textarea.form-control {
@@ -85,120 +68,415 @@
         border-color: #1976ff;
         box-shadow: 0 0 0 0.2rem rgba(25, 118, 255, 0.25);
     }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .form-label i {
+        margin-right: 5px;
+        color: #1976ff;
+    }
+
+    .required {
+        color: #dc3545;
+    }
+
+    .text-muted {
+        font-size: 0.875rem;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* INFO BOX */
+    .info-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-left: 4px solid #1976ff;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        align-items: start;
+    }
+
+    .info-box i {
+        font-size: 24px;
+        color: #1976ff;
+        margin-top: 2px;
+    }
+
+    .info-box strong {
+        color: #1565c0;
+    }
+
+    .info-box p {
+        color: #424242;
+        line-height: 1.6;
+    }
+
+    /* PREVIEW BOX */
+    .preview-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 4px solid #4caf50;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .preview-box i {
+        font-size: 24px;
+        color: #2e7d32;
+    }
+
+    .preview-box span {
+        color: #1b5e20;
+        font-weight: 600;
+    }
+
+    /* BUTTONS */
+    .btn {
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1976ff, #5ab3ff);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(25, 118, 255, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    /* ALERT */
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        color: #c62828;
+        border-left: 4px solid #d32f2f;
+    }
+
+    .alert-danger strong {
+        color: #b71c1c;
+    }
+
+    .alert-danger ul {
+        margin-left: 20px;
+    }
+
+    /* SIDEBAR CARD */
+    .sidebar-card {
+        border-radius: 18px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .sidebar-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-body {
+        padding: 20px;
+    }
+
+    .help-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: start;
+        transition: all 0.3s ease;
+    }
+
+    .help-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .help-item i {
+        font-size: 24px;
+        color: #667eea;
+        margin-top: 2px;
+    }
+
+    .help-item strong {
+        color: #333;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .help-item p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .container {
+        max-width: 1400px;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    @media (max-width: 991px) {
+        .sidebar-card {
+            margin-top: 2rem;
+        }
+    }
 </style>
 
-</head>
-<body>
+<div class="container">
+    <div class="row">
+        <!-- MAIN FORM (LEFT) -->
+        <div class="col-lg-8">
+            <div class="card shadow-lg form-card">
 
-    @include('layouts.components-frontend.navbar')
+                <!-- HEADER BIRU -->
+                <div class="header-gradient">
+                    <div class="header-circle"></div>
 
-    <div class="container py-5" style="max-width: 1200px;">
+                    <div class="header-icon">
+                        <i class="lni lni-pencil"></i>
+                    </div>
 
-        <div class="card shadow-lg form-card">
-
-            <!-- HEADER BIRU -->
-            <div class="header-gradient">
-                <div class="header-circle"></div>
-
-                <div class="header-icon">
-                    <i class="lni lni-pencil"></i>
+                    <h2 class="fw-bold mb-2">Buat Laporan Baru</h2>
+                    <p class="mb-0">Isi formulir di bawah untuk melaporkan masalah</p>
                 </div>
 
-                <h2 class="fw-bold">Buat Laporan Baru</h2>
-                <p class="mb-0">Isi formulir di bawah untuk melaporkan masalah</p>
-            </div>
+                <!-- FORM BODY -->
+                <div class="card-body p-4">
 
-            <!-- FORM -->
-            <div class="card-body p-4">
-
-                <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    <!-- Judul -->
-                    <div class="mb-4">
-                        <label for="judul" class="form-label fw-semibold">Judul Laporan <span class="text-danger">*</span></label>
-                        <input type="text" 
-                               class="form-control @error('judul') is-invalid @enderror" 
-                               id="judul" 
-                               name="judul" 
-                               value="{{ old('judul') }}"
-                               placeholder="Contoh: Error saat login ke sistem"
-                               required>
-
-                        @error('judul')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <!-- Kategori -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Kategori <span class="text-danger">*</span></label>
-                        <select name="kategori_id" class="form-control" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach ($kategoris as $kategori)
-                                <option value="{{ $kategori->kategori_id }}">{{ $kategori->nama_kategori }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Deskripsi -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Deskripsi Lengkap <span class="text-danger">*</span></label>
-                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
-                                  name="deskripsi"
-                                  placeholder="Jelaskan masalah yang Anda alami secara detail..."
-                                  required>{{ old('deskripsi') }}</textarea>
-
-                        @error('deskripsi')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-
-                        <small class="text-muted">
-                            <i class="lni lni-information"></i> Berikan detail sejelas mungkin agar proses lebih cepat
-                        </small>
-                    </div>
-
-                    <!-- Lampiran -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Lampiran (Opsional)</label>
-                        <input type="file" 
-                               class="form-control @error('lampiran') is-invalid @enderror" 
-                               id="lampiran" 
-                               name="lampiran"
-                               accept=".jpg,.jpeg,.png,.pdf">
-
-                        @error('lampiran')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-
-                        <small class="text-muted">Format: JPG, PNG, PDF (Maks 2MB)</small>
-                    </div>
-
-                    <!-- Preview -->
-                    <div id="preview-container" class="mb-4" style="display: none;">
-                        <div class="alert alert-info d-flex align-items-center">
-                            <i class="lni lni-image me-2"></i>
-                            <span id="preview-name"></span>
+                    @if ($errors->any())
+                        <div class="alert alert-danger mb-4">
+                            <strong><i class="lni lni-warning"></i> Terjadi Kesalahan:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
-                    </div>
+                    @endif
 
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ route('report.index') }}" class="btn btn-secondary">
+                    <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+
+                        <!-- Judul -->
+                        <div class="mb-4">
+                            <label for="judul" class="form-label">
+                                <i class="lni lni-text-format"></i> Judul Laporan <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control @error('judul') is-invalid @enderror" 
+                                   id="judul" 
+                                   name="judul" 
+                                   value="{{ old('judul') }}"
+                                   placeholder="Contoh: Error saat login ke sistem"
+                                   required>
+
+                            @error('judul')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Tulis judul yang jelas dan deskriptif</small>
+                        </div>
+
+                        <!-- Kategori -->
+                        <div class="mb-4">
+                            <label for="kategori_id" class="form-label">
+                                <i class="lni lni-tag"></i> Kategori <span class="required">*</span>
+                            </label>
+                            <select name="kategori_id" id="kategori_id" class="form-select @error('kategori_id') is-invalid @enderror" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                @foreach ($kategoris as $kategori)
+                                    <option value="{{ $kategori->kategori_id }}" {{ old('kategori_id') == $kategori->kategori_id ? 'selected' : '' }}>
+                                        {{ $kategori->nama_kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('kategori_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Pilih kategori yang sesuai dengan masalah Anda</small>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div class="mb-4">
+                            <label for="deskripsi" class="form-label">
+                                <i class="lni lni-pencil-alt"></i> Deskripsi Lengkap <span class="required">*</span>
+                            </label>
+                            <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
+                                      id="deskripsi"
+                                      name="deskripsi"
+                                      rows="6"
+                                      placeholder="Jelaskan masalah yang Anda alami secara detail...&#10;&#10;Contoh:&#10;- Apa yang terjadi?&#10;- Kapan masalah muncul?&#10;- Apa yang sudah dicoba?"
+                                      required>{{ old('deskripsi') }}</textarea>
+
+                            @error('deskripsi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <small class="text-muted">
+                                <i class="lni lni-information"></i> Berikan detail sejelas mungkin agar proses lebih cepat
+                            </small>
+                        </div>
+
+                        <!-- Lampiran -->
+                        <div class="mb-4">
+                            <label for="lampiran" class="form-label">
+                                <i class="lni lni-files"></i> Lampiran (Opsional)
+                            </label>
+                            <input type="file" 
+                                   class="form-control @error('lampiran') is-invalid @enderror" 
+                                   id="lampiran" 
+                                   name="lampiran"
+                                   accept=".jpg,.jpeg,.png,.pdf">
+
+                            @error('lampiran')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <small class="text-muted">Format: JPG, PNG, PDF (Maks 2MB)</small>
+                        </div>
+
+                        <!-- Preview -->
+                        <div id="preview-container" class="mb-4" style="display: none;">
+                            <div class="preview-box">
+                                <i class="lni lni-checkmark-circle"></i>
+                                <span id="preview-name"></span>
+                            </div>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="mb-4">
+                            <div class="info-box">
+                                <i class="lni lni-information"></i>
+                                <div>
+                                    <strong>Catatan:</strong>
+                                    <p class="mb-0">
+                                        Laporan Anda akan segera diproses oleh tim kami. 
+                                        Anda akan menerima notifikasi untuk setiap update status laporan.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ route('report.index') }}" class="btn btn-secondary">
                                 <i class="lni lni-arrow-left"></i> Kembali
-                        </a>
+                            </a>
 
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="lni lni-checkmark-circle"></i> Kirim Laporan
-                        </button>
-                    </div>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="lni lni-checkmark-circle"></i> Kirim Laporan
+                            </button>
+                        </div>
 
-                </form>
+                    </form>
 
+                </div>
             </div>
         </div>
 
+        <!-- SIDEBAR (RIGHT) -->
+        <div class="col-lg-4">
+            <!-- Help Card -->
+            <div class="card sidebar-card mb-3">
+                <div class="sidebar-header">
+                    <i class="lni lni-help"></i>
+                    <span>Panduan Pelaporan</span>
+                </div>
+                <div class="sidebar-body">
+                    <div class="help-item">
+                        <i class="lni lni-pencil"></i>
+                        <div>
+                            <strong>Judul yang Jelas</strong>
+                            <p>Gunakan judul yang spesifik dan mudah dipahami</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="lni lni-text-format"></i>
+                        <div>
+                            <strong>Deskripsi Detail</strong>
+                            <p>Jelaskan masalah secara rinci untuk mempercepat penanganan</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="lni lni-image"></i>
+                        <div>
+                            <strong>Lampirkan Bukti</strong>
+                            <p>Screenshot atau dokumen pendukung sangat membantu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="card sidebar-card">
+                <div class="sidebar-header">
+                    <i class="lni lni-bulb"></i>
+                    <span>Tips Berguna</span>
+                </div>
+                <div class="sidebar-body">
+                    <div class="help-item">
+                        <i class="lni lni-timer"></i>
+                        <div>
+                            <strong>Respon Cepat</strong>
+                            <p>Tim kami akan merespon dalam 1x24 jam</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="lni lni-envelope"></i>
+                        <div>
+                            <strong>Notifikasi Email</strong>
+                            <p>Anda akan mendapat update via email</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="lni lni-comments-alt"></i>
+                        <div>
+                            <strong>Komunikasi</strong>
+                            <p>Anda bisa memberikan komentar tambahan kapan saja</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
 <script>
 document.getElementById('lampiran').addEventListener('change', function(e) {
@@ -215,5 +493,4 @@ document.getElementById('lampiran').addEventListener('change', function(e) {
 });
 </script>
 
-</body>
-</html>
+@endsection

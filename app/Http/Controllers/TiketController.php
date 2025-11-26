@@ -7,8 +7,8 @@ use App\Models\TiketKomentar;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TiketController extends Controller
 {
@@ -23,9 +23,9 @@ class TiketController extends Controller
             ->where('user_id', Auth::id());
 
         // Hanya tampilkan tiket yang BELUM selesai dan BELUM ditolak
-$query->whereHas('status', function ($q) {
-    $q->whereNotIn('nama_status', ['Selesai', 'Ditolak']);
-});
+        $query->whereHas('status', function ($q) {
+            $q->whereNotIn('nama_status', ['Selesai', 'Ditolak']);
+        });
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
@@ -39,13 +39,15 @@ $query->whereHas('status', function ($q) {
         }
 
         $query->orderByRaw("
-        CASE
-            WHEN prioritas_id = 1 THEN 1
-            WHEN prioritas_id = 2 THEN 2
-            WHEN prioritas_id = 3 THEN 3
-            ELSE 4
-        END
-    ")->orderByDesc('waktu_dibuat');
+    CASE
+        WHEN prioritas_id = 1 THEN 1
+        WHEN prioritas_id = 2 THEN 2
+        WHEN prioritas_id = 3 THEN 3
+        ELSE 4
+    END
+")
+            ->latest()                     // ini yang utama: updated_at terbaru di atas
+            ->orderByDesc('waktu_dibuat'); // fallback
 
         $tikets = $query->get();
 
@@ -77,7 +79,11 @@ $query->whereHas('status', function ($q) {
 
     public function adminIndex()
     {
-        $tikets = Tiket::with(['status', 'kategori', 'event', 'prioritas', 'user', 'assignedTo'])->get();
+        $tikets = Tiket::with(['status', 'kategori', 'event', 'prioritas', 'user', 'assignedTo'])
+            ->latest()
+            ->orderByDesc('tiket_id') // tiket yang baru diupdate muncul paling atas
+            ->get();
+
         return view('admin.tiket.index', compact('tikets'));
     }
 
@@ -479,26 +485,18 @@ $query->whereHas('status', function ($q) {
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
         }
-
         if ($request->filled('kategori_id')) {
             $query->where('kategori_id', $request->kategori_id);
         }
-
         if ($request->filled('prioritas_id')) {
             $query->where('prioritas_id', $request->prioritas_id);
         }
 
-        // Sorting: Prioritas → Waktu terbaru
-        $query->orderByRaw("
-            CASE
-                WHEN prioritas_id = 1 THEN 1
-                WHEN prioritas_id = 2 THEN 2
-                WHEN prioritas_id = 3 THEN 3
-                ELSE 4
-            END
-        ")->orderByDesc('waktu_dibuat');
+                                               // Sorting: Data terbaru di atas
+        $query->orderBy('waktu_dibuat', 'desc'); // atau gunakan 'waktu_dibuat' jika itu nama kolomnya
 
-        $tikets = $query->get();
+                                        // Gunakan paginate untuk hasil yang lebih baik
+        $tikets = $query->paginate(15); // atau ->get() jika tidak mau pagination
 
         // Data untuk dropdown filter
         $statuses  = \App\Models\TiketStatus::all();
@@ -698,13 +696,13 @@ $query->whereHas('status', function ($q) {
     // ==== DI METHOD history() (Riwayat Tiket) ====
     public function history(Request $request)
     {
-    $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo'])
-        ->where('user_id', Auth::id());
+        $query = Tiket::with(['user', 'kategori', 'prioritas', 'status', 'event', 'assignedTo'])
+            ->where('user_id', Auth::id());
 
-    // Tambahkan baris ini → hanya tiket yang SUDAH SELESAI / DITOLAK
-    $query->whereHas('status', function($q) {
-        $q->whereIn('nama_status', ['Selesai', 'Ditolak']);
-    });
+        // Tambahkan baris ini → hanya tiket yang SUDAH SELESAI / DITOLAK
+        $query->whereHas('status', function ($q) {
+            $q->whereIn('nama_status', ['Selesai', 'Ditolak']);
+        });
 
         // Filter berdasarkan tanggal
         if ($request->filled('start_date')) {
@@ -740,7 +738,7 @@ $query->whereHas('status', function ($q) {
         }
 
         // Sorting: terbaru dulu
-        $query->orderByDesc('waktu_dibuat');
+        $query->orderBy('waktu_dibuat', 'desc');
 
         // Pagination
         $tikets = $query->paginate(15);

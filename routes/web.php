@@ -56,12 +56,18 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // 🔔 NOTIFIKASI ROUTES (Untuk Semua User)
-    Route::prefix('notifications')->name('notifications.')->group(function () {
+    // 🔔 NOTIFIKASI ROUTES (Untuk Semua User) - FINAL FIX
+    Route::prefix('notifications')->name('notifications.')->middleware('auth')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
         Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        
+        // Route utama
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllRead');
+        
+        // Alias untuk kompatibilitas (jika ada view lain yang masih pakai readAll)
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('readAll');
+        
+        Route::post('/{id}/read', [NotificationController::class, 'read'])->name('read');
         Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
 
@@ -199,24 +205,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/tiket/{id}/edit', [TiketController::class, 'timEdit'])->name('tiket.edit');
         Route::put('/tiket/{id}', [TiketController::class, 'timUpdate'])->name('tiket.update');
         Route::put('/tiket/{id}/update-status', [TiketController::class, 'timUpdateStatus'])->name('tiket.update-status');
-    });
-
-    // NOTIFICATION ROUTE (USER)
-    Route::middleware(['auth'])->group(function () {
-        // Halaman utama notifikasi
-        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-        
-        // Get unread notifications (untuk dropdown navbar)
-        Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
-        
-        // Tandai semua notifikasi sebagai dibaca - HARUS SEBELUM {id}
-        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-        
-        // Tandai satu notifikasi sebagai dibaca
-        Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
-        
-        // Hapus notifikasi
-        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     });
 });
 

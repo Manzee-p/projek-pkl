@@ -632,6 +632,7 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memproses...';
         
+        // FIXED: Gunakan route name yang benar
         fetch('{{ route("notifications.markAllRead") }}', {
             method: 'POST',
             headers: {
@@ -664,6 +665,7 @@
     // Handle notification click
     function handleNotificationClick(notifId, tiketId) {
         if (tiketId) {
+            // FIXED: Gunakan route helper yang benar
             fetch(`/notifications/${notifId}/read`, {
                 method: 'POST',
                 headers: {

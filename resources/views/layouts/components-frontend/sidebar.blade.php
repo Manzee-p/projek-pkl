@@ -79,21 +79,6 @@
                 <i class="lni lni-home"></i> <span>Home</span>
             </a>
 
-            <a href="#feature">
-                <i class="lni lni-layers"></i> <span>Feature</span>
-            </a>
-
-            <a href="/#about">
-                <i class="lni lni-information"></i> <span>About</span>
-            </a>
-
-            <a href="#pricing">
-                <i class="lni lni-coin"></i> <span>Pricing</span>
-            </a>
-
-            <a href="#contact">
-                <i class="lni lni-phone"></i> <span>Contact</span>
-            </a>
 
             @auth
                 <hr>

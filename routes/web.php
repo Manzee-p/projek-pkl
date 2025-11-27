@@ -67,7 +67,10 @@ Route::middleware('auth')->group(function () {
         // Alias untuk kompatibilitas (jika ada view lain yang masih pakai readAll)
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('readAll');
         
+        // FIXED: Tambah GET route untuk handle redirect dari onclick
+        Route::get('/{id}/read', [NotificationController::class, 'read'])->name('read.get');
         Route::post('/{id}/read', [NotificationController::class, 'read'])->name('read');
+        
         Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
 

@@ -1,6 +1,9 @@
 @extends('layouts.admin.master')
 @section('content')
 
+{{-- Load SweetAlert2 CDN --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @if(session('success'))
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -70,15 +73,15 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="table-responsive pt-2" style="overflow-x: auto;">
+                    <div class="table-responsive pt-2">
                         @if($notifications->count() > 0)
-                        <table class="table table-bordered align-middle text-nowrap">
+                        <table class="table table-bordered align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th width="50" class="text-center">#</th>
                                     <th>Pesan</th>
                                     <th width="180">Waktu</th>
-                                    <th width="100" class="text-center">Aksi</th>
+                                    <th width="120" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -109,43 +112,33 @@
                                         </small><br>
                                         <small class="text-muted">{{ $notification->waktu_kirim->format('d/m/Y H:i') }}</small>
                                     </td>
-                                    <td class="text-center" onclick="event.stopPropagation();">
-                                        <div class="dropdown">
-                                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
-                                                    id="dropdownMenu{{ $notification->notif_id }}" 
-                                                    data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                Aksi
+                                    <td class="text-center align-middle" onclick="event.stopPropagation();">
+                                        <div class="btn-group" role="group">
+                                            @if($notification->tiket_id)
+                                            <button type="button" 
+                                                    class="btn btn-info btn-sm view-tiket" 
+                                                    data-notif-id="{{ $notification->notif_id }}"
+                                                    data-tiket-id="{{ $notification->tiket_id }}"
+                                                    title="Lihat Tiket">
+                                                <i class="mdi mdi-eye"></i>
                                             </button>
-                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu{{ $notification->notif_id }}">
-                                                @if($notification->tiket_id)
-                                                <li>
-                                                    <a class="dropdown-item view-tiket" 
-                                                       href="#" 
-                                                       data-notif-id="{{ $notification->notif_id }}"
-                                                       data-tiket-id="{{ $notification->tiket_id }}">
-                                                        <i class="mdi mdi-eye-outline me-2"></i> Lihat Tiket
-                                                    </a>
-                                                </li>
-                                                @endif
-                                                @if(!$notification->status_baca)
-                                                <li>
-                                                    <a class="dropdown-item mark-read-single" 
-                                                       href="#" 
-                                                       data-notif-id="{{ $notification->notif_id }}">
-                                                        <i class="mdi mdi-check me-2"></i> Tandai Dibaca
-                                                    </a>
-                                                </li>
-                                                @endif
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger delete-notif" 
-                                                       href="#"
-                                                       data-notif-id="{{ $notification->notif_id }}">
-                                                        <i class="mdi mdi-delete-outline me-2"></i> Hapus
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                            @endif
+                                            
+                                            @if(!$notification->status_baca)
+                                            <button type="button" 
+                                                    class="btn btn-success btn-sm mark-read-single" 
+                                                    data-notif-id="{{ $notification->notif_id }}"
+                                                    title="Tandai Dibaca">
+                                                <i class="mdi mdi-check"></i>
+                                            </button>
+                                            @endif
+                                            
+                                            <button type="button" 
+                                                    class="btn btn-danger btn-sm delete-notif" 
+                                                    data-notif-id="{{ $notification->notif_id }}"
+                                                    title="Hapus">
+                                                <i class="mdi mdi-delete"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -170,10 +163,28 @@
     </div>
 </div>
 
-<!-- JavaScript dengan Vanilla JS (No jQuery Dependency) -->
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Notification page loaded');
+    console.log('✅ Notification page loaded');
+
+    // CSRF Token
+    const csrfToken = '{{ csrf_token() }}';
+    
+    // User role untuk routing yang tepat
+    const userRole = '{{ auth()->user()->role }}';
+    console.log('👤 User role:', userRole);
+
+    // Helper function untuk get redirect URL berdasarkan role
+    function getTiketUrl(tiketId) {
+        if (userRole === 'admin') {
+            return `/admin/tiket/${tiketId}`;
+        } else if (userRole === 'tim_teknisi' || userRole === 'tim_konten') {
+            return `/tim/tiket/${tiketId}`;
+        } else {
+            return `/tiket/${tiketId}`;
+        }
+    }
 
     // 1. TANDAI SEMUA SEBAGAI DIBACA
     const markAllBtn = document.getElementById('mark-all-read-btn');
@@ -183,35 +194,43 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = this;
             const originalHtml = btn.innerHTML;
             
-            // Disable button
             btn.disabled = true;
             btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Memproses...';
             
             fetch('{{ route("notifications.markAllRead") }}', {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network error');
                 return response.json();
             })
             .then(data => {
-                console.log('Mark all read response:', data);
+                console.log('✅ Mark all read:', data);
                 if (data.success) {
-                    location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Semua notifikasi telah ditandai sebagai dibaca',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
                 } else {
-                    throw new Error(data.message || 'Failed to mark all as read');
+                    throw new Error(data.message || 'Gagal');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan: ' + error.message);
+                console.error('❌ Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: error.message,
+                    confirmButtonText: 'OK'
+                });
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
             });
@@ -222,137 +241,209 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationRows = document.querySelectorAll('.notification-row');
     notificationRows.forEach(row => {
         row.addEventListener('click', function(e) {
-            // Jangan trigger jika klik di dropdown atau button
-            if (e.target.closest('.dropdown, .dropdown-menu, .dropdown-toggle, button, a')) {
+            // Jangan trigger jika klik button
+            if (e.target.closest('button, .btn-group')) {
                 return;
             }
 
             const notifId = this.dataset.notifId;
             const tiketId = this.dataset.tiketId;
 
-            console.log('Row clicked:', { notifId, tiketId });
+            console.log('📱 Row clicked:', { notifId, tiketId });
 
             if (tiketId) {
                 // Tandai sebagai dibaca, lalu redirect
                 fetch(`/notifications/${notifId}/read`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json'
                     }
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Mark as read response:', data);
-                    window.location.href = `/admin/tiket/${tiketId}`;
+                    console.log('✅ Marked as read:', data);
+                    window.location.href = getTiketUrl(tiketId);
                 })
                 .catch(error => {
-                    console.error('Error marking as read:', error);
-                    // Tetap redirect meski gagal mark as read
-                    window.location.href = `/admin/tiket/${tiketId}`;
+                    console.error('❌ Error:', error);
+                    // Tetap redirect meski gagal
+                    window.location.href = getTiketUrl(tiketId);
                 });
             }
         });
     });
 
-    // 3. LIHAT TIKET (dari dropdown)
-    const viewTiketLinks = document.querySelectorAll('.view-tiket');
-    viewTiketLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+    // 3. LIHAT TIKET (dari button)
+    const viewTiketBtns = document.querySelectorAll('.view-tiket');
+    viewTiketBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const notifId = this.dataset.notifId;
             const tiketId = this.dataset.tiketId;
 
-            console.log('View tiket clicked:', { notifId, tiketId });
+            console.log('👁️ View tiket:', { notifId, tiketId });
+
+            // Show loading
+            this.disabled = true;
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i>';
 
             // Tandai sebagai dibaca, lalu redirect
             fetch(`/notifications/${notifId}/read`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Mark as read response:', data);
-                window.location.href = `/admin/tiket/${tiketId}`;
+                console.log('✅ Marked as read:', data);
+                window.location.href = getTiketUrl(tiketId);
             })
             .catch(error => {
-                console.error('Error:', error);
-                window.location.href = `/admin/tiket/${tiketId}`;
+                console.error('❌ Error:', error);
+                window.location.href = getTiketUrl(tiketId);
             });
         });
     });
 
     // 4. TANDAI SATU SEBAGAI DIBACA
-    const markReadLinks = document.querySelectorAll('.mark-read-single');
-    markReadLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+    const markReadBtns = document.querySelectorAll('.mark-read-single');
+    markReadBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const notifId = this.dataset.notifId;
-            console.log('Mark single as read:', notifId);
+            console.log('✓ Mark single as read:', notifId);
+
+            // Show loading
+            this.disabled = true;
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i>';
 
             fetch(`/notifications/${notifId}/read`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Response:', data);
+                console.log('✅ Response:', data);
                 if (data.success) {
-                    location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Notifikasi telah ditandai sebagai dibaca',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Gagal menandai sebagai dibaca');
+                console.error('❌ Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: 'Gagal menandai sebagai dibaca',
+                    confirmButtonText: 'OK'
+                });
+                this.disabled = false;
+                this.innerHTML = originalHtml;
             });
         });
     });
 
     // 5. HAPUS NOTIFIKASI
-    const deleteLinks = document.querySelectorAll('.delete-notif');
-    deleteLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+    const deleteBtns = document.querySelectorAll('.delete-notif');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            if (!confirm('Hapus notifikasi ini?')) {
-                return;
-            }
-
             const notifId = this.dataset.notifId;
-            console.log('Delete notification:', notifId);
+            const btnElement = this;
 
-            fetch(`/notifications/${notifId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
+            console.log('🗑️ Delete notification:', notifId);
+
+            Swal.fire({
+                title: 'Hapus Notifikasi?',
+                text: 'Tindakan ini tidak dapat dibatalkan',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading
+                    btnElement.disabled = true;
+                    const originalHtml = btnElement.innerHTML;
+                    btnElement.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i>';
+
+                    fetch(`/notifications/${notifId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('✅ Delete response:', data);
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Terhapus!',
+                                text: 'Notifikasi berhasil dihapus',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => location.reload());
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Gagal menghapus notifikasi',
+                            confirmButtonText: 'OK'
+                        });
+                        btnElement.disabled = false;
+                        btnElement.innerHTML = originalHtml;
+                    });
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Delete response:', data);
-                if (data.success) {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Gagal menghapus notifikasi');
             });
         });
     });
+
+    console.log('🎉 All event listeners attached successfully');
 });
 </script>
+
+<style>
+.notification-row:hover {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.table-info {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.btn-group {
+    box-shadow: none !important;
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+</style>
 
 @endsection

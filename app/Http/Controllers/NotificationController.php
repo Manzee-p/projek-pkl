@@ -21,10 +21,12 @@ class NotificationController extends Controller
             ->orderBy('waktu_kirim', 'desc')
             ->paginate(10);
 
-        // Pisahkan view berdasarkan role
-        if ($user->role === 'admin') {
+        // Pisahkan view berdasarkan role - FIXED
+        if (in_array($user->role, ['admin', 'tim_teknisi', 'tim_konten'])) {
+            // Untuk admin dan tim (teknisi/konten) gunakan view admin
             return view('admin.notifications.index', compact('notifications', 'user'));
         } else {
+            // Untuk user biasa
             return view('notifications.index', compact('notifications', 'user'));
         }
     }
@@ -78,12 +80,17 @@ class NotificationController extends Controller
                 ]);
             }
 
-            // Redirect ke detail tiket jika ada
+            // Redirect ke detail tiket jika ada - FIXED untuk semua role
             if ($notification->tiket_id && $notification->tiket) {
                 // Cek role untuk redirect ke route yang tepat
                 if ($user->role === 'admin') {
+                    // Admin menggunakan route admin
                     return redirect()->route('admin.tiket.show', $notification->tiket_id);
+                } elseif (in_array($user->role, ['tim_teknisi', 'tim_konten'])) {
+                    // Tim menggunakan route tim
+                    return redirect()->route('tim.tiket.show', $notification->tiket_id);
                 } else {
+                    // User biasa
                     return redirect()->route('tiket.show', $notification->tiket_id);
                 }
             }

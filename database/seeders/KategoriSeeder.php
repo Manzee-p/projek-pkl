@@ -11,7 +11,7 @@ class KategoriSeeder extends Seeder
     {
         $data = [
             [
-                'nama_kategori' => 'Teknologi Informasi',
+                'nama_kategori' => 'Teknis',
                 'deskripsi' => 'Permasalahan terkait perangkat lunak, perangkat keras, dan jaringan.'
             ],
             [

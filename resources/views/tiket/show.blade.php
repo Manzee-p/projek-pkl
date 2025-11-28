@@ -112,7 +112,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <div class="bg-opacity-10 rounded-circle p-3">
                                     <i class="ti ti-tag text-primary fs-5"></i>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                <div class="bg-opacity-10 rounded-circle p-3">
                                     <i class="ti ti-calendar-event text-info fs-5"></i>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <div class=" bg-opacity-10 rounded-circle p-3">
                                     <i class="ti ti-clock text-success fs-5"></i>
                                 </div>
                             </div>

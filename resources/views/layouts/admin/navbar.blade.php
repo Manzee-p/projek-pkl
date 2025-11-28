@@ -2,7 +2,7 @@
     <div class="navbar-brand-wrapper d-flex justify-content-center">
         <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
             <a class="navbar-brand brand-logo" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/logo.svg') }}" alt="logo" />
+                <img src="{{ asset('user/img/logo/logoo.jpeg') }}" alt="logo" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}">
                 <img src="{{ asset('assets/images/logo-mini.svg') }}" alt="logo" />

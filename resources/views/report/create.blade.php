@@ -441,39 +441,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Tips Card -->
-            <div class="card sidebar-card">
-                <div class="sidebar-header">
-                    <i class="lni lni-bulb"></i>
-                    <span>Tips Berguna</span>
-                </div>
-                <div class="sidebar-body">
-                    <div class="help-item">
-                        <i class="lni lni-timer"></i>
-                        <div>
-                            <strong>Respon Cepat</strong>
-                            <p>Tim kami akan merespon dalam 1x24 jam</p>
-                        </div>
-                    </div>
-
-                    <div class="help-item">
-                        <i class="lni lni-envelope"></i>
-                        <div>
-                            <strong>Notifikasi Email</strong>
-                            <p>Anda akan mendapat update via email</p>
-                        </div>
-                    </div>
-
-                    <div class="help-item">
-                        <i class="lni lni-comments-alt"></i>
-                        <div>
-                            <strong>Komunikasi</strong>
-                            <p>Anda bisa memberikan komentar tambahan kapan saja</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{{ asset('user/css/tiny-slider.css') }}" />
     <link rel="stylesheet" href="{{ asset('user/css/animate.css') }}" />
     <link rel="stylesheet" href="{{ asset('user/css/lindy-uikit.css') }}" />
+    {{-- Di file master layout, bagian head --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <style>
         :root{--primary:#0052CC;--secondary:#172B4D;--accent:#00B8D9;}

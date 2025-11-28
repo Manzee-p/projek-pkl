@@ -2,23 +2,37 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\TiketStatus;
 use Illuminate\Support\Facades\DB;
 
 class TiketStatusSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-        public function run(): void
-        {
-            DB::table('tiket_statuses')->insert([
-                ['status_id' => 1, 'nama_status' => 'Pending'],
-                ['status_id' => 2, 'nama_status' => 'Ditugaskan ke tim terkait'],
-                ['status_id' => 3, 'nama_status' => 'Diproses'],
-                ['status_id' => 4, 'nama_status' => 'Selesai'],
-                ['status_id' => 5, 'nama_status' => 'Ditolak'],
-            ]);
+    public function run(): void
+    {
+        // Daftar status yang ingin ada
+        $statuses = [
+            'Pending',
+            'Ditugaskan ke tim terkait',
+            'Diproses',
+            'Selesai',
+            'Ditolak',
+        ];
+
+        foreach ($statuses as $nama) {
+            // Cek dulu, kalau belum ada baru insert
+            $exists = TiketStatus::where('nama_status', $nama)->exists();
+
+            if (!$exists) {
+                TiketStatus::create(['nama_status' => $nama]);
+            }
         }
+
+        // PERBAIKI SEQUENCE supaya tidak bentrok lagi (ini yang bikin error!)
+        // Hanya dijalankan di PostgreSQL
+        if (DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            $maxId = TiketStatus::max('status_id') ?? 0;
+            DB::statement("SELECT setval('tiket_statuses_status_id_seq', " . ($maxId + 1) . ")");
+        }
+    }
 }

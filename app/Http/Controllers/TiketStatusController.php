@@ -10,7 +10,7 @@ class TiketStatusController extends Controller
 
 public function index()
 {
-    $statuses = TiketStatus::all();
+    $statuses = TiketStatus::orderBy('status_id', 'desc')->get();
     return view('admin.status.index', compact('statuses'));
 }
 

@@ -157,7 +157,7 @@
 </style>
 @endpush
 
-<div class="container-fluid px-4 pt-3">
+<div class="container-fluid px-4">
 
     {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">

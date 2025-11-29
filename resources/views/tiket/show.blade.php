@@ -5,7 +5,7 @@
 
     @include('layouts.components-frontend.navbar')
 
-    <div class="container py-5" style="min-height: calc(100vh - 200px);">
+    <div class="container" style="min-height: calc(100vh - 200px);">
         {{-- Breadcrumb --}}
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb bg-transparent p-0">

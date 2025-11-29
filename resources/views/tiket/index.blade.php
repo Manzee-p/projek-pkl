@@ -2,7 +2,7 @@
 @section('pageTitle', 'Daftar Tiket Saya')
 
 @section('content')
-<div class="container tiket-container px-4 py-4">
+<div class="container tiket-container px-4">
 
         {{-- Header Section --}}
         <div class="d-flex justify-content-between align-items-center mb-4">

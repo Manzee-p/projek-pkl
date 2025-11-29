@@ -393,9 +393,8 @@
     }
 </style>
 
-<div class="container-fluid">
     <div class="row">
-        <div class="col-lg-12 mt-3">
+        <div class="col-lg-12 ml-2 mt-3">
             <div class="card index-card">
                 <div class="index-header">
                     <div class="header-title">
@@ -594,7 +593,6 @@
             </div>
         </div>
     </div>
-</div>
 
 {{-- PREVIEW GAMBAR --}}
 <script>
